@@ -12,7 +12,7 @@ namespace ChessIT.GeracaoOS.View
     {
         Form Form;
 
-        bool Loaded;
+        //bool Loaded;
 
         List<int> m_Notas = new List<int>();
 

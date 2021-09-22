@@ -2,7 +2,7 @@
 using System.IO;
 using System.Xml;
 using SAPbouiCOM;
-using System.IO;
+//using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
@@ -120,9 +120,9 @@ namespace ChessIT.GeracaoOS.Controller
 
                     xml = xml.Replace("uid=\"FrmGeraOS\"", string.Format("uid=\"{0}\"", formUID));
 
-#if DEBUG
-                    xml = xml.Replace("from dummy", "");
-#endif
+//#if DEBUG
+//                    xml = xml.Replace("from dummy", "");
+//#endif
 
                     Application.LoadBatchActions(ref xml);
                 }
@@ -675,6 +675,24 @@ namespace ChessIT.GeracaoOS.Controller
             result = string.Format("Frm{0}-{1}", count, new Random().Next(999));
 
             return result;
+        }
+
+        public static void LimparObjeto(Object obj)
+        {
+            try
+            {
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(obj);
+
+            }
+            catch { }
+            try
+            {
+                obj = null;
+            }
+            catch { }
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+
         }
     }
 }

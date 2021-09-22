@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ChessIT.GeracaoOS.Controller;
+using ChessIT.GeracaoOS.Helper;
 using SAPbouiCOM;
+
 
 namespace ChessIT.GeracaoOS.View
 {
@@ -24,6 +28,8 @@ namespace ChessIT.GeracaoOS.View
             Form.EnableMenu("1285", false);
             Form.EnableMenu("1286", false);
 
+
+
             Controller.MainController.Application.ItemEvent += HandleItemEvent;
         }
 
@@ -42,7 +48,79 @@ namespace ChessIT.GeracaoOS.View
                             {
                                 if (pVal.BeforeAction)
                                 {
-                                    if (pVal.ItemUID == "fldCtr")
+                                    if (pVal.ItemUID == "fldPes")
+                                    {
+                                        Form.PaneLevel = 3;
+
+                                        Form.Freeze(true);
+                                        try
+                                        {
+                                            Form.Items.Item("8").Left = Form.Items.Item("20").Left;
+                                            Form.Items.Item("etNrCtr").Left = Form.Items.Item("cbDiaCol").Left;
+                                            Form.Items.Item("11").Left = Form.Items.Item("20").Left;
+                                            Form.Items.Item("cbModCtr").Left = Form.Items.Item("cbDiaCol").Left;
+                                            Form.Items.Item("26").Top = 59;
+                                            Form.Items.Item("etNrPlaca").Top = 59;
+                                            Form.Items.Item("26").Visible = true;
+                                            Form.Items.Item("etNrPlaca").Visible = true;
+
+
+                                            Form.Items.Item("18").Visible = true;
+                                            Form.Items.Item("etNrRota").Visible = true;
+                                            Form.Items.Item("20").Visible = true;
+                                            Form.Items.Item("cbDiaCol").Visible = true;
+
+                                            Form.Items.Item("btPesqPes").Visible = true;
+
+                                            Form.Items.Item("etClienteN").Visible = true;
+                                            Form.Items.Item("etCliente").Visible = true;
+                                            Form.Items.Item("2").Visible = true;
+
+
+                                            string query = @"
+                                                    select 
+	                                                    'N' as ""#""
+                                                        , T0.""DocEntry"" as ""Nº Interno""
+                                                        , T0.""DocNum"" AS ""Nº OS""
+                                                        , T0.""CardCode""
+                                                        , T0.""CardName"" ""Cliente""
+                                                        , T0.""U_NPlaca"" ""Placa""
+                                                        , T0.""U_VolumeM3"" ""m3""
+                                                        , T0.""U_Tara"" ""Tara""
+                                                        , T0.""U_PesoBruto"" ""Peso Bruto""
+                                                        , T0.""U_PesoLiq"" ""Peso Liq.""
+                                                    from
+                                                        ORDR T0
+                                                        left join ""@VEICULOS"" ON ""@VEICULOS"".""U_Placa"" = T0.""U_NPlaca""
+                                                        left join OCRD TRANSP ON TRANSP.""CardCode"" = T0.""U_CodTransp""
+                                                        left join OUSR ON T0.""UserSign"" = OUSR.""USERID""
+                                                    where
+                                                        T0.""CANCELED"" = 'N'
+                                                        and T0.""DocStatus"" = 'O'
+                                                        and T0.""U_Status"" = 'P'
+                                                        and T0.""U_Situacao"" = 33
+                                            ";
+
+                                            Form.DataSources.DataTables.Item("dtPes").ExecuteQuery(query);
+
+                                            //Form.DataSources.UserDataSources.Add("chkTdPes", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 1);
+                                            //((CheckBox)Form.Items.Item("ckSelTPes").Specific).DataBind.SetBound(true, "", "chkTdPes");
+
+                                            ((CheckBox)Form.Items.Item("ckSelTPes").Specific).ValOff = "N";
+                                            ((CheckBox)Form.Items.Item("ckSelTPes").Specific).ValOn = "Y";
+
+                                            ConfiguraGridPes();
+                                            ((ComboBox)Form.Items.Item("cbAgrOS").Specific).Select("0");
+                                            ((ComboBox)Form.Items.Item("cbPeriodOS").Specific).Select("0");
+                                            //((ComboBox)Form.Items.Item("cbRespFat").Specific).Select("0");
+
+                                        }
+                                        finally
+                                        {
+                                            Form.Freeze(false);
+                                        }
+                                    }
+                                    else if (pVal.ItemUID == "fldCtr")
                                     {
                                         Form.PaneLevel = 1;
 
@@ -57,6 +135,7 @@ namespace ChessIT.GeracaoOS.View
                                             //Form.Items.Item("etNrPlaca").Top = 42;
                                             Form.Items.Item("26").Visible = false;
                                             Form.Items.Item("etNrPlaca").Visible = false;
+                                            Form.Items.Item("btPesqPes").Visible = false;
 
                                             string query = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"" from dummy";
 
@@ -86,6 +165,7 @@ namespace ChessIT.GeracaoOS.View
                                             Form.Items.Item("etNrPlaca").Top = 59;
                                             Form.Items.Item("26").Visible = true;
                                             Form.Items.Item("etNrPlaca").Visible = true;
+                                            Form.Items.Item("btPesqPes").Visible = false;
 
                                             string query = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"" from dummy";
 
@@ -120,6 +200,10 @@ namespace ChessIT.GeracaoOS.View
                                     {
                                         GerarFatura();
                                     }
+                                    else if (pVal.ItemUID == "btPesqPes")
+                                    {
+                                        CarregarPes();
+                                    }
                                     else if (pVal.ItemUID == "gridOS")
                                     {
                                         if (pVal.ColUID != "#")
@@ -135,6 +219,441 @@ namespace ChessIT.GeracaoOS.View
                         case BoEventTypes.et_ITEM_PRESSED:
                             if (pVal.BeforeAction)
                             {
+                                if (pVal.ItemUID == "btRateio")
+                                {
+                                    if (((ComboBox)Form.Items.Item("cbTpRateio").Specific).Selected == null)
+                                    {
+                                        LogHelper.InfoError("Selecione o Tipo de Rateio");
+                                    }
+                                    else if (((ComboBox)Form.Items.Item("cbTpRateio").Specific).Selected.Value.Equals("0"))
+                                    {
+                                        LogHelper.InfoError("Selecione o Tipo de Rateio");
+                                    }
+                                    else
+                                    {
+                                        string tiporateio = ((ComboBox)Form.Items.Item("cbTpRateio").Specific).Selected.Value;
+
+                                        if (tiporateio.Equals("R"))//ROTA
+                                        {                                            
+                                            double TotalQuantidadeM3 = VolumeM3TotalSelecionados();
+                                            //dou
+                                            Grid gridPes = (Grid)Form.Items.Item("gridPes").Specific;
+                                            for (int i = 0; i < gridPes.Rows.Count; i++)
+                                            {
+                                                if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
+                                                {
+                                                    SAPbobsCOM.Documents oOrder;
+                                                    oOrder = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                                    if (oOrder.GetByKey(Convert.ToInt32(gridPes.DataTable.GetValue(1, i).ToString())))
+                                                    {
+                                                        double dM3Order = Convert.ToDouble(oOrder.UserFields.Fields.Item("U_VolumeM3").Value);
+                                                        LogHelper.InfoWarning(string.Format("Processando OS {0}", gridPes.DataTable.GetValue(1, i).ToString()));
+
+                                                        BalancaController oBalancaController = new BalancaController(Form);
+
+                                                        StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
+                                                        lblBalanca.Item.Visible = true;
+                                                        Form.Freeze(false);
+                                                        LogHelper.MostraBalanca("", "", Form);
+
+                                                        double dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
+
+                                                        //qual a percentagem do item no total m3
+                                                        double p = (dM3Order * 100) / TotalQuantidadeM3;
+                                                        double dPesoBruto = (dPeso / 100) * p;
+                                                        double PesoLiquido= dPesoBruto
+                                                            - Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value);
+                                                        //Se[Peso Líquido] > 0,000000 significa que a ordem de serviço já possui o peso da[Tara] e com o[Peso Bruto]
+                                                        //inserido no passo(IV)
+                                                        if (PesoLiquido>0)
+                                                        {
+                                                            DateTime myTime = DateTime.Today.Date;
+                                                            myTime = myTime.AddHours(DateTime.Now.Hour);
+                                                            myTime = myTime.AddMinutes(DateTime.Now.Minute);
+
+
+                                                            //a OS pode ser faturada.Nesse cenário atualize os campos:
+                                                            //	ORDR.U_Situacao = 10(Coleta não faturada)
+                                                            //	ORDR.U_DataEntradaOS = Data atual
+                                                            //	ORDR.U_HoraEntradaOS = Horário atualOBalanca.pesoHora
+                                                            oOrder.UserFields.Fields.Item("U_Situacao").Value = "10";
+                                                            oOrder.UserFields.Fields.Item("U_DataEntradaOS").Value = DateTime.Now;
+                                                            oOrder.UserFields.Fields.Item("U_HoraEntradaOS").Value = myTime;
+                                                        }
+                                                        //o Se[Peso Líquido] <= [Peso Bruto] significa que a ordem de serviço em questão
+                                                        //não possui o peso da[Tara].Nesse cenário execute os passos abaixo:
+                                                        if (PesoLiquido<= dPesoBruto)
+                                                        {
+                                                            //	ORDR.U_Situacao = 2(Aguardando Peso Tara)
+                                                            //Essas ordens/ pedidos continuarão na tela de pesagem aguardando a pesagem da tara.
+                                                            oOrder.UserFields.Fields.Item("U_Situacao").Value = "2";
+                                                        }
+
+
+
+
+                                                        if (oOrder.Update() == 0)
+                                                        {
+                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                                string.Format("OS Nº {0} Peso Bruto Atualizado!!", oOrder.DocEntry)
+                                                                , BoMessageTime.bmt_Short
+                                                                , BoStatusBarMessageType.smt_Success
+                                                            );
+                                                        }
+                                                        else
+                                                        {
+                                                            int temp_int;
+                                                            string temp_string;
+                                                            Controller.MainController.Company.GetLastError(out temp_int, out temp_string);
+                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                                string.Format("Erro ao Alterar OS Nº {0} !!", oOrder.DocEntry)
+                                                                , BoMessageTime.bmt_Short
+                                                                , BoStatusBarMessageType.smt_Error
+                                                            );
+                                                        }
+
+                                                    }
+
+                                                    Controller.MainController.LimparObjeto(oOrder);
+                                                }
+                                            }
+
+                                        }
+                                        else if (tiporateio.Equals("C"))//Carga Composto
+                                        {
+                                            Grid gridPes = (Grid)Form.Items.Item("gridPes").Specific;
+
+                                            DateTime myTime = DateTime.Today.Date;                                            
+                                            myTime = myTime.AddHours(DateTime.Now.Hour);
+                                            myTime = myTime.AddMinutes(DateTime.Now.Minute);
+
+
+                                            double dPesoEstimadoTotal = PesoEstimadoTotalSelecionados();
+                                            //PASSO 2 – Encontrar o peso total envolvendo todos os clientes/ ordens.
+                                            //•	Após encontrar o peso estimado de todas as ordens / clientes faça o cálculo e encontre o peso estimado total.
+                                            //o Peso estimado Total = Peso estimado ClienteA +ClienteB + ClienteC
+
+                                            for (int i = 0; i < gridPes.Rows.Count; i++)
+                                            {
+                                                if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
+                                                {
+                                                    SAPbobsCOM.Documents oOrder;
+                                                    oOrder = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                                    if (oOrder.GetByKey(Convert.ToInt32(gridPes.DataTable.GetValue(1, i).ToString())))
+                                                    {
+                                                        //double dM3Order = Convert.ToDouble(oOrder.UserFields.Fields.Item("U_VolumeM3").Value);
+                                                        LogHelper.InfoWarning(string.Format("Processando OS {0}", gridPes.DataTable.GetValue(1, i).ToString()));
+
+                                                        BalancaController oBalancaController = new BalancaController(Form);
+
+                                                        StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
+                                                        lblBalanca.Item.Visible = true;
+                                                        Form.Freeze(false);
+                                                        LogHelper.MostraBalanca("", "", Form);
+
+                                                        //PASSO 1 – Encontrar o peso previsto da ordem de serviço para o cliente.
+                                                        //•	Encontre o volume(RDR1.Quantity) e a densidade(RDR1.U_Densidade) do item resíduo(OTIM.ItmsGrpCod = Resíduo)
+                                                        //que compõe a ordem de serviço.
+                                                        //•	Com base nessas informações faça o cálculo:
+                                                        //o Peso estimado ClienteA = Volume * Densidade.
+                                                        double dPesoEstimadoOS = PesoEstimadoOS(gridPes.DataTable.GetValue(1, i).ToString());
+
+                                                        //PASSO 3 – Encontrar o porcentagem do peso para cada cliente.
+                                                        //•	Após encontrar o peso estimado do cliente e o peso estimado total calcule qual
+                                                        //será a porcentagem correspondendo que deverá ser aplicada na ordem de serviço.
+                                                        //o Porcentagem ClienteA = Peso estimado ClienteA / Peso estimado Total
+                                                        double dPClienteA = dPesoEstimadoOS / dPesoEstimadoTotal;
+
+                                                        //PASSO 4 – Definir o peso que será alocado na ordem de serviço.
+                                                        //•	Após encontrar o peso estimado do cliente e o peso estimado total calcule qual será a porcentagem
+                                                        //correspondendo que deverá ser aplicada na ordem de serviço.
+                                                        //o Peso Cliente A = Peso Líquido Balança / Porcentagem ClienteA
+                                                        double dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
+                                                        double dPesoCliente = dPeso / dPClienteA;
+
+                                                        //double dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
+
+                                                        ////qual a percentagem do item no total m3
+                                                        //double p = (dM3Order * 100) / TotalQuantidadeM3;
+                                                        //double dPesoBruto = (dPeso / 100) * p;
+                                                        //double PesoLiquido = dPesoBruto
+                                                        //    - Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value);
+                                                        ////Se[Peso Líquido] > 0,000000 significa que a ordem de serviço já possui o peso da[Tara] e com o[Peso Bruto]
+                                                        ////inserido no passo(IV)
+                                                        //if (PesoLiquido > 0)
+                                                        //{
+                                                        //    //a OS pode ser faturada.Nesse cenário atualize os campos:
+                                                        //    //	ORDR.U_PesoLiquido = Peso Cliente A
+                                                        //    //	ORDR.U_Situacao = 10(Coleta não faturada)
+                                                        //    //	ORDR.U_DataEntradaOS = Data atual
+                                                        //    //	ORDR.U_HoraEntradaOS = Horário atualOBalanca.pesoHora
+                                                        oOrder.UserFields.Fields.Item("U_PesoLiq").Value = dPesoCliente;
+                                                        oOrder.UserFields.Fields.Item("U_Situacao").Value = "10";
+                                                        oOrder.UserFields.Fields.Item("U_DataEntradaOS").Value = DateTime.Now;
+                                                        oOrder.UserFields.Fields.Item("U_HoraEntradaOS").Value = myTime;
+                  
+                                                        //}
+
+
+
+
+                                                        if (oOrder.Update() == 0)
+                                                        {
+                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                                string.Format("OS Nº {0} Peso Liquido Atualizado!!", oOrder.DocEntry)
+                                                                , BoMessageTime.bmt_Short
+                                                                , BoStatusBarMessageType.smt_Success
+                                                            );
+                                                        }
+                                                        else
+                                                        {
+                                                            int temp_int;
+                                                            string temp_string;
+                                                            Controller.MainController.Company.GetLastError(out temp_int, out temp_string);
+                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                                string.Format("Erro ao Alterar OS Nº {0} !!", oOrder.DocEntry)
+                                                                , BoMessageTime.bmt_Short
+                                                                , BoStatusBarMessageType.smt_Error
+                                                            );
+                                                        }
+
+                                                    }
+
+                                                    Controller.MainController.LimparObjeto(oOrder);
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+                                if (pVal.ItemUID == "btCapPes")
+                                {
+                                    //ComboBox cbDCol= (ComboBox)Form.Items.Item("cbDCol").Specific);
+                                    if (((ComboBox)Form.Items.Item("cbDCol").Specific).Selected==null)
+                                    {
+                                        LogHelper.InfoError("Selecione o Tipo de Pessagem");
+                                    }
+                                    else if (((ComboBox)Form.Items.Item("cbDCol").Specific).Selected.Value.Equals("0"))
+                                    {
+                                        LogHelper.InfoError("Selecione o Tipo de Pessagem");
+                                    }
+                                    else
+                                    {
+                                        //verifica se tem algo selecionado
+                                        Grid gridPes = (Grid)Form.Items.Item("gridPes").Specific;
+                                        bool bSelecionado = false;
+                                        for (int i = 0; i < gridPes.Rows.Count; i++)
+                                        {
+                                            if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
+                                            {
+                                                bSelecionado = true;
+                                                break;
+                                            }
+                                        }
+                                        if (bSelecionado)
+                                        {
+
+                                            StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
+                                            for (int i = 0; i < gridPes.Rows.Count; i++)
+                                            {
+                                                if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
+                                                {
+                                                    LogHelper.InfoWarning(string.Format("Processando OS {0}", gridPes.DataTable.GetValue(1, i).ToString()));
+                                                    BalancaController oBalancaController = new BalancaController(Form);
+
+                                                    
+                                                    lblBalanca.Item.Visible = true;
+                                                    Form.Freeze(false);
+
+
+                                                    LogHelper.MostraBalanca("","", Form);
+
+                                                    SAPbobsCOM.Documents oOrder;
+                                                    oOrder = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                                    if (oOrder.GetByKey(Convert.ToInt32(gridPes.DataTable.GetValue(1, i).ToString())))
+                                                    {
+                                                        string tipoPesagem = ((ComboBox)Form.Items.Item("cbDCol").Specific).Selected.Value;
+
+                                                        if (tipoPesagem.Equals("T"))//tara
+                                                        {
+                                                            if (Convert.ToDouble(oOrder.UserFields.Fields.Item("U_PesoBruto").Value) > 0)
+                                                            {
+                                                                //já tiverem o[Peso Bruto] preenchido > 0,0000, execute cálculo do peso líquido dessas ordens:
+                                                                //ORDR.U_PesoBruto - ORDR.U_Tara => ORDR.U_PesoLiquido.
+                                                                oOrder.UserFields.Fields.Item("U_PesoBruto").Value =
+                                                                (Convert.ToDouble(oOrder.UserFields.Fields.Item("U_PesoBruto").Value) -
+                                                                    Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value)).ToString();
+
+                                                            }
+                                                            oOrder.UserFields.Fields.Item("U_Tara").Value = oBalancaController.OBalanca.peso;
+                                                        }
+                                                        else if (tipoPesagem.Equals("PB"))//Peso Bruto
+                                                        {
+                                                            oOrder.UserFields.Fields.Item("U_PesoBruto").Value = oBalancaController.OBalanca.peso;
+                                                        }
+
+
+
+
+
+                                                        if (oOrder.Update() == 0)
+                                                        {
+                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                                string.Format("OS Nº {0} Tara Atualizada!!", oOrder.DocEntry)
+                                                                , BoMessageTime.bmt_Short
+                                                                , BoStatusBarMessageType.smt_Success
+                                                            );
+                                                        }
+                                                        else
+                                                        {
+                                                            int temp_int;
+                                                            string temp_string;
+                                                            Controller.MainController.Company.GetLastError(out temp_int, out temp_string);
+                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                                string.Format("Erro ao Alterar OS Nº {0} !!", oOrder.DocEntry)
+                                                                , BoMessageTime.bmt_Short
+                                                                , BoStatusBarMessageType.smt_Error
+                                                            );
+                                                        }
+
+                                                    }
+
+                                                    Controller.MainController.LimparObjeto(oOrder);
+
+
+                                                    
+
+
+                                                    //bSelecionado = true;
+                                                    //break;
+                                                }
+                                            }
+                                            lblBalanca.Item.Visible = false;
+                                            LogHelper.InfoWarning("Pessagem concluída!!!");
+                                            CarregarPes();
+
+                                            //string arquivo = Helper.ApiHelper.GetArquivo(ip, porta, caminho);
+
+                                            //if (arquivo == "ARQUIVO NÃO ENCONTRADO")
+                                            //{
+                                            //    throw new Exception("Falha na comunicaçao com a balança capital: arquivo não encontrado");
+                                            //}
+                                        }
+                                        else
+                                        {
+                                            LogHelper.InfoError(string.Format("Não existe registro selecionado, selecione!!"));
+                                        }
+                                    }
+                                }
+                                if (pVal.ItemUID == "btUptPlaca") {
+                                    if (Controller.MainController.Application.MessageBox("Confirma Atualização das Placas da OS?", 1, "Sim", "Não") == 1)
+                                    {
+                                        LogHelper.InfoWarning(string.Format("Atualização das Placas Iniciada...!!"));
+
+                                        Grid gridPes = (Grid)Form.Items.Item("gridPes").Specific;
+                                        //int M3 = 0;
+                                        SAPbobsCOM.Recordset recordSetPlaca = null;
+                                        try
+                                        {
+                                            recordSetPlaca = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                                            string sSQL = string.Format(@"
+		                                                    SELECT 
+		                                                        T0.""U_Placa"" ""Placa""
+                                                                , T0.""U_UFPlaca"" ""UFPlaca""
+                                                                , 'MOTORIOSTA' AS ""MOTORISTA""
+                                                                , 1 TARA
+                                                            FROM
+                                                                ""@VEICULOS"" T0
+                                                            WHERE
+                                                                T0.""U_Placa"" = '{0}'
+                                            ", ((EditText)Form.Items.Item("etPlacaPes").Specific).Value);
+                                            recordSetPlaca.DoQuery(sSQL);
+                                        }
+                                        catch (Exception)
+                                        {
+
+                                            throw;
+                                        }
+
+
+
+                                        for (int i = 0; i < gridPes.Rows.Count; i++)
+                                        {
+                                            if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
+                                            {
+                                                SAPbobsCOM.Documents oOrder;
+                                                oOrder = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                                bool bModificou = false;
+                                                if (oOrder.GetByKey(Convert.ToInt32(gridPes.DataTable.GetValue(1, i).ToString())))
+                                                {
+                                                    //for (int x = 0; x < oOrder.Lines.UserFields.Fields.Count; x++)
+                                                    //{
+                                                    //    Controller.MainController.Application.StatusBar.SetText(
+                                                    //       oOrder.Lines.UserFields.Fields.Item(0).Name
+                                                    //        , BoMessageTime.bmt_Short
+                                                    //        , BoStatusBarMessageType.smt_Success
+                                                    //    );
+
+                                                    //}
+                                                    oOrder.UserFields.Fields.Item("U_NPlaca").Value = recordSetPlaca.Fields.Item("Placa").Value.ToString();
+                                                    oOrder.UserFields.Fields.Item("U_EstPlaca").Value = recordSetPlaca.Fields.Item("UFPlaca").Value.ToString();
+                                                    //oOrder.UserFields.Fields.Item("U_Motorista").Value = recordSetPlaca.Fields.Item("MOTORISTA").Value.ToString();
+                                                    oOrder.UserFields.Fields.Item("U_Tara").Value = recordSetPlaca.Fields.Item("TARA").Value.ToString();
+                                                    bModificou = true;
+                                                    //for (int ii = 0; ii < oOrder.Lines.Count; ii++)
+                                                    //{
+                                                    //    oOrder.Lines.SetCurrentLine(ii);
+                                                    //    if (oOrder.Lines.MeasureUnit.Equals("Metros Cúbicos"))
+                                                    //    {
+                                                    //        string t = recordSetPlaca.Fields.Item("Placa").Value.ToString();
+                                                    //        //Order.Lines.UserFields.Fields.Item("U_NPlaca").Value = recordSetPlaca.Fields.Item("Placa").Value.ToString();
+                                                    //        oOrder.Lines.UserFields.Fields.Item("U_Estado").Value = recordSetPlaca.Fields.Item("UFPlaca").Value.ToString();
+                                                    //        oOrder.Lines.UserFields.Fields.Item("U_Motorista").Value = recordSetPlaca.Fields.Item("MOTORISTA").Value.ToString();
+                                                    //        oOrder.Lines.UserFields.Fields.Item("U_Tara").Value = recordSetPlaca.Fields.Item("TARA").Value.ToString();
+                                                    //        bModificou = true;
+
+                                                    //    }
+                                                    //}
+                                                }
+                                                if (bModificou)
+                                                {
+                                                    if (oOrder.Update() == 0)
+                                                    {
+                                                        Controller.MainController.Application.StatusBar.SetText(
+                                                            string.Format("OS Nº {0} Atualizada!!", oOrder.DocEntry)
+                                                            , BoMessageTime.bmt_Short
+                                                            , BoStatusBarMessageType.smt_Success
+                                                        );
+                                                    }
+                                                    else
+                                                    {
+                                                        int temp_int;
+                                                        string temp_string;
+                                                        Controller.MainController.Company.GetLastError(out temp_int, out temp_string);
+                                                        Controller.MainController.Application.StatusBar.SetText(
+                                                            string.Format("Erro ao Alterar OS Nº {0} !!", oOrder.DocEntry)
+                                                            , BoMessageTime.bmt_Short
+                                                            , BoStatusBarMessageType.smt_Error
+                                                        );
+                                                    }
+                                                }
+                                                Controller.MainController.LimparObjeto(oOrder);
+                                            }
+
+
+                                            //M3 = M3 + CalculaM3OS(i, gridPes.DataTable.GetValue(1, i).ToString());
+                                        }
+
+                                        Controller.MainController.LimparObjeto(recordSetPlaca);
+                                        Controller.MainController.Application.StatusBar.SetText(
+                                            string.Format("Atualização Concluída!!")
+                                            , BoMessageTime.bmt_Short
+                                            , BoStatusBarMessageType.smt_Success
+                                        );
+                                        CarregarPes();
+                                    }
+                                }
+
                                 if (pVal.ItemUID == "ckSelCtr")
                                 {
                                     if (Form.DataSources.DataTables.Item("dtContr").Rows.Count > 0)
@@ -145,6 +664,39 @@ namespace ChessIT.GeracaoOS.View
                                 {
                                     if (Form.DataSources.DataTables.Item("dtOS").Rows.Count > 0)
                                         CarregarOS();
+                                }
+                                if (pVal.ItemUID == "ckSelTPes")
+                                {
+                                    //if (Form.DataSources.DataTables.Item("dtOS").Rows.Count > 0)
+                                        CarregarPes();
+                                }
+                                if (pVal.ItemUID == "gridPes")
+                                {
+                                    if (pVal.ColUID=="#")
+                                    {
+                                        Grid gridPes = (Grid)Form.Items.Item("gridPes").Specific;
+                                        StaticText lblOsTot = (StaticText)Form.Items.Item("lblOsTot").Specific;
+                                        StaticText lblM3Tot = (StaticText)Form.Items.Item("lblM3Tot").Specific;
+                                        int OsTot = Convert.ToInt32(lblOsTot.Caption);
+                                        int M3Tot = Convert.ToInt32(lblM3Tot.Caption);
+                                        int M3 = 0;
+
+                                        M3 = CalculaM3OS(pVal.Row, gridPes.DataTable.GetValue(1, pVal.Row).ToString());
+
+                                        if (gridPes.DataTable.GetValue(0, pVal.Row).ToString().Equals("Y"))
+                                        {
+                                            OsTot++;
+                                            M3Tot = M3Tot + M3;
+                                        }
+                                        else
+                                        {
+                                            OsTot--;
+                                            M3Tot = M3Tot - M3;
+                                        }
+
+                                        lblOsTot.Caption = OsTot.ToString();
+                                        lblM3Tot.Caption = M3Tot.ToString();
+                                    }
                                 }
                             }
 
@@ -301,6 +853,19 @@ namespace ChessIT.GeracaoOS.View
                                         else if (pVal.ItemUID.Equals("etUsuResp"))
                                         {
                                             Form.DataSources.DataTables.Item("dtFiltro").SetValue("UsuResp", 0, chooseFromListEvent.SelectedObjects.GetValue("U_NAME", 0).ToString());
+                                        }
+                                        else if (pVal.ItemUID.Equals("etPlacaPes"))
+                                        {
+                                            try
+                                            {
+                                                ((EditText)Form.Items.Item("etPlacaPes").Specific).Value = chooseFromListEvent.SelectedObjects.GetValue("U_Placa", 0).ToString();
+                                            }
+                                            catch (Exception)
+                                            {
+
+                                               // throw;
+                                            }
+                                            
                                         }
                                     }
                                 }
@@ -481,6 +1046,214 @@ namespace ChessIT.GeracaoOS.View
                 Controller.MainController.Application.StatusBar.SetText(exception.Message);
             }
         }
+        private double PesoEstimadoTotalSelecionados()
+        {
+            string sDocEntrys = DoscEntrys();
+
+            SAPbobsCOM.Recordset recordSetTotal = null;
+            try
+            {
+
+                string selecionar = ((CheckBox)Form.Items.Item("ckSelTPes").Specific).Checked ? "Y" : "N";
+                string cliente = ((EditText)Form.Items.Item("etCliente").Specific).String;
+                string placa = ((EditText)Form.Items.Item("etNrPlaca").Specific).String;
+                string nrRota = ((EditText)Form.Items.Item("etNrRota").Specific).String;
+                string diaColeta = ((ComboBox)Form.Items.Item("cbDiaCol").Specific).Selected.Description;
+
+                string sSQL = string.Format(@"
+                        select 
+	                        T1.""Quantity"" * coalesce(T1.""U_Densidade"",0)
+                        from
+                            ORDR T0
+	                        inner join RDR1 T1 on T1.""DocEntry""=T0.""DocEntry""    
+	                        inner join OITM T2 on T2.""ItemCode""=T1.""ItemCode""
+	                        inner join OITB t3 on t3.""ItmsGrpCod""=T2.""ItmsGrpCod""
+                        where 
+	                        t3.""ItmsGrpNam""='Resíduos'
+                            and ( T0.""DocEntry""  in ({0}) )
+
+                "
+                , sDocEntrys);
+
+                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                recordSetTotal.DoQuery(sSQL);
+
+                double dRetorno = Convert.ToDouble(recordSetTotal.Fields.Item(0).Value.ToString());
+
+                Controller.MainController.LimparObjeto(recordSetTotal);
+                return dRetorno;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        private double PesoEstimadoOS(string sDocEntry)
+        {
+
+            SAPbobsCOM.Recordset recordSetTotal = null;
+            try
+            {
+
+                string selecionar = ((CheckBox)Form.Items.Item("ckSelTPes").Specific).Checked ? "Y" : "N";
+                string cliente = ((EditText)Form.Items.Item("etCliente").Specific).String;
+                string placa = ((EditText)Form.Items.Item("etNrPlaca").Specific).String;
+                string nrRota = ((EditText)Form.Items.Item("etNrRota").Specific).String;
+                string diaColeta = ((ComboBox)Form.Items.Item("cbDiaCol").Specific).Selected.Description;
+
+                string sSQL = string.Format(@"
+                        select 
+	                        T1.""Quantity"" * coalesce(T1.""U_Densidade"",0)
+                        from
+                            ORDR T0
+	                        inner join RDR1 T1 on T1.""DocEntry""=T0.""DocEntry""    
+	                        inner join OITM T2 on T2.""ItemCode""=T1.""ItemCode""
+	                        inner join OITB t3 on t3.""ItmsGrpCod""=T2.""ItmsGrpCod""
+                        where 
+	                        t3.""ItmsGrpNam""='Resíduos'
+                            and ( T0.""DocEntry""  in ({0}) )
+
+                "
+                , sDocEntry);
+
+                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                recordSetTotal.DoQuery(sSQL);
+
+                double dRetorno = Convert.ToDouble(recordSetTotal.Fields.Item(0).Value.ToString());
+
+                Controller.MainController.LimparObjeto(recordSetTotal);
+                return dRetorno;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        private double VolumeM3TotalSelecionados()
+        {
+            string sDocEntrys = DoscEntrys();
+
+            SAPbobsCOM.Recordset recordSetTotal = null;
+            try
+            {
+
+                string selecionar = ((CheckBox)Form.Items.Item("ckSelTPes").Specific).Checked ? "Y" : "N";
+                string cliente = ((EditText)Form.Items.Item("etCliente").Specific).String;
+                string placa = ((EditText)Form.Items.Item("etNrPlaca").Specific).String;
+                string nrRota = ((EditText)Form.Items.Item("etNrRota").Specific).String;
+                string diaColeta = ((ComboBox)Form.Items.Item("cbDiaCol").Specific).Selected.Description;
+
+                string sSQL = string.Format(@"
+                        select 
+	                        sum (T0.""U_VolumeM3"")
+                        from
+                            ORDR T0
+                            inner join RDR1 T1 on T1.""DocEntry""=T0.""DocEntry""
+                            left join ""@VEICULOS"" ON ""@VEICULOS"".""U_Placa"" = T0.""U_NPlaca""
+                            left join OCRD TRANSP ON TRANSP.""CardCode"" = T0.""U_CodTransp""
+                            left join OUSR ON T0.""UserSign"" = OUSR.""USERID""
+                        where
+                            T0.""CANCELED"" = 'N'
+                            and '{0}'='{0}'
+                            and T0.""DocStatus"" = 'O'
+                            and T0.""U_Status"" = 'P'
+                            and T0.""U_Situacao"" = 3
+                            and('{1}' = '' or '{1}' = T0.""CardCode"")
+                            and('{2}' = '' or '{2}' = T0.""U_NPlaca"")
+                            and('{3}' = '' or '{3}' = (select max(OOAT.""U_Rota"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = T0.""DocEntry""))
+                            and('{4}' = '[Selecionar]' or '{4}' = T0.""U_DiaSemRot"")
+                            and ( T0.""DocEntry""  in ({5}) )
+
+                ",
+                selecionar,
+                cliente,
+                placa,
+                nrRota,
+                diaColeta
+                , sDocEntrys);
+
+                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                recordSetTotal.DoQuery(sSQL);
+
+                double dRetorno = Convert.ToDouble(recordSetTotal.Fields.Item(0).Value.ToString());
+
+                Controller.MainController.LimparObjeto(recordSetTotal);
+                return dRetorno;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private string DoscEntrys()
+        {
+            Grid gridPes = (Grid)Form.Items.Item("gridPes").Specific;
+
+            string sDocEntrys = string.Empty;
+            for (int i = 0; i < gridPes.Rows.Count; i++)
+            {
+                if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
+                {
+
+                    string sDocEntry = gridPes.DataTable.GetValue(1, i).ToString();
+                    if (string.IsNullOrEmpty(sDocEntrys))
+                    {
+                        sDocEntrys = sDocEntry;
+                    }
+                    else
+                    {
+                        sDocEntrys = sDocEntrys + "," + sDocEntry;
+                    }
+                }
+            }
+
+            return sDocEntrys;
+        }
+
+        private static int CalculaM3OS(int pRow, string DocEntry )
+        {
+            int M3=0;
+            SAPbobsCOM.Recordset recordSetVerificacao = null;
+            try
+            {
+                string SQL = string.Format(@"
+                                                    select 
+                                                        sum(T1.""Quantity"")
+                                                    from
+                                                        ORDR T0
+                                                        inner
+                                                    join RDR1 T1 on T1.""DocEntry"" = T0.""DocEntry""
+                                                    where
+
+                                                        T0.""DocEntry"" = {0}
+
+                                                        and T1.""unitMsr"" = 'Metros Cúbicos'
+                                            ", DocEntry);
+
+
+                recordSetVerificacao = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                recordSetVerificacao.DoQuery(SQL);
+                if (recordSetVerificacao.RecordCount > 0)
+                {
+                    M3 = Convert.ToInt32(recordSetVerificacao.Fields.Item(0).Value.ToString());
+                    recordSetVerificacao.MoveNext();
+                }
+            }
+            finally
+            {
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(recordSetVerificacao);
+                GC.Collect();
+            }
+
+            return M3;
+        }
 
         private void CarregarContratos()
         {
@@ -592,6 +1365,147 @@ namespace ChessIT.GeracaoOS.View
             {
                 Form.Freeze(false);
             }
+        }
+
+        private void CarregarPes()
+        {
+
+            Controller.MainController.Application.StatusBar.SetText(
+                "Consulta Pessagem Iniciada..."
+                , BoMessageTime.bmt_Short
+                , BoStatusBarMessageType.smt_Warning
+            );
+
+            string selecionar = ((CheckBox)Form.Items.Item("ckSelTPes").Specific).Checked ? "Y" : "N";
+            string cliente = ((EditText)Form.Items.Item("etCliente").Specific).String;
+            string placa = ((EditText)Form.Items.Item("etNrPlaca").Specific).String;
+            string nrRota = ((EditText)Form.Items.Item("etNrRota").Specific).String;
+            string diaColeta = ((ComboBox)Form.Items.Item("cbDiaCol").Specific).Selected.Description;
+
+            string query = string.Format(@"
+                    select 
+	                    '{0}' as ""#""
+                        , T0.""DocEntry"" as ""Nº Interno""
+                        , T0.""DocNum"" AS ""Nº OS""
+                        , T0.""CardCode""
+                        , T0.""CardName"" ""Cliente""
+                        , T0.""U_NPlaca"" ""Placa""
+                        , T0.""U_VolumeM3"" ""m3""
+                        , T0.""U_Tara"" ""Tara""
+                        , T0.""U_PesoBruto"" ""Peso Bruto""
+                        , T0.""U_PesoLiq"" ""Peso Liq.""
+                    from
+                        ORDR T0
+                        left
+                    join ""@VEICULOS"" ON ""@VEICULOS"".""U_Placa"" = T0.""U_NPlaca""
+                        left join OCRD TRANSP ON TRANSP.""CardCode"" = T0.""U_CodTransp""
+                        left join OUSR ON T0.""UserSign"" = OUSR.""USERID""
+                    where
+                        T0.""CANCELED"" = 'N'
+                        and T0.""DocStatus"" = 'O'
+                        and T0.""U_Status"" = 'P'
+                        and T0.""U_Situacao"" = 3
+                        and('{1}' = '' or '{1}' = T0.""CardCode"")
+                        and('{2}' = '' or '{2}' = T0.""U_NPlaca"")
+                        and('{3}' = '' or '{3}' = (select max(OOAT.""U_Rota"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = T0.""DocEntry""))
+                        and('{4}' = '[Selecionar]' or '{4}' = T0.""U_DiaSemRot"")
+
+            ",
+                                            selecionar,
+                                            cliente,
+                                            placa,
+                                            nrRota,
+                                            diaColeta);
+
+            //and ORDR.""U_Situacao"" IN(4, 10)
+
+            //and('{11}' = '0' or('{11}' = '1' AND(select max(OOAT.""U_DiaColetSeg"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = ORDR.""DocEntry"") = 'Y')
+            //                                                 or('{11}' = '2' AND(select max(OOAT.""U_DiaColetTerc"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = ORDR.""DocEntry"") = 'Y')
+            //                                                 or('{11}' = '3' AND(select max(OOAT.""U_DiaColetQuart"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = ORDR.""DocEntry"") = 'Y')
+            //                                                 or('{11}' = '4' AND(select max(OOAT.""U_DiaColetQuin"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = ORDR.""DocEntry"") = 'Y')
+            //                                                 or('{11}' = '5' AND(select max(OOAT.""U_DiaColetSext"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = ORDR.""DocEntry"") = 'Y')
+            //                                                 or('{11}' = '6' AND(select max(OOAT.""U_DiaColetSab"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = ORDR.""DocEntry"") = 'Y')
+            //                                                 or('{11}' = '7' AND(select max(OOAT.""U_DiaColetDom"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = ORDR.""DocEntry"") = 'Y'))
+
+            //switch (agrupamento)
+            //{
+            //    case "0":
+            //        query += @" order by T0.""DocNum"" DESC";
+            //        break;
+            //    case "1":
+            //        query += @" order by T0.""CardName"" DESC";
+            //        break;
+            //    case "2":
+            //        query += @" order by T0.""CardName"" DESC";
+            //        break;
+            //}
+
+            Form.Freeze(true);
+            try
+            {
+                Form.DataSources.DataTables.Item("dtPes").ExecuteQuery(query);
+
+                if (((CheckBox)Form.Items.Item("ckSelTPes").Specific).Checked)
+                {
+                    ((StaticText)Form.Items.Item("lblOsTot").Specific).Caption = Form.DataSources.DataTables.Item("dtPes").Rows.Count.ToString();
+                    Grid gridPes = (Grid)Form.Items.Item("gridPes").Specific;
+                    int M3 = 0;
+                    for (int i = 0; i < gridPes.Rows.Count; i++)
+                    {
+                        M3 =M3 +  CalculaM3OS(i, gridPes.DataTable.GetValue(1, i).ToString());
+                    }
+                    ((StaticText)Form.Items.Item("lblM3Tot").Specific).Caption = M3.ToString();
+                }
+                else
+                {
+                    ((StaticText)Form.Items.Item("lblOsTot").Specific).Caption = "0";
+                    ((StaticText)Form.Items.Item("lblM3Tot").Specific).Caption = "0";
+                }
+                
+
+                ConfiguraGridPes();
+
+                Controller.MainController.Application.StatusBar.SetText(
+                    "Consulta Pessagem Finalizada!!!"
+                    , BoMessageTime.bmt_Short
+                    , BoStatusBarMessageType.smt_Success
+                );
+            }
+            catch (Exception ex)
+            {
+                System.IO.File.WriteAllText("Sql.sql", query);
+
+                throw ex;
+            }
+            finally
+            {
+                Form.Freeze(false);
+            }
+        }
+
+        private void ConfiguraGridPes()
+        {
+            Grid gridPes = (Grid)Form.Items.Item("gridPes").Specific;
+            gridPes.Columns.Item(1).Editable = false;
+            gridPes.Columns.Item(2).Editable = false;
+            gridPes.Columns.Item(3).Editable = false;
+            gridPes.Columns.Item(4).Editable = false;
+
+            //gridOS.Columns.Item("Nº Interno").Editable = false;
+            //gridOS.Columns.Item("Nº OS").Editable = false;
+            //gridOS.Columns.Item("Dt Saída").Editable = false;
+            //gridOS.Columns.Item("Resp. Faturamento").Editable = false;
+            //gridOS.Columns.Item("Cód. Cliente").Editable = false;
+            //gridOS.Columns.Item("Nome Cliente").Editable = false;
+            //gridOS.Columns.Item("Motorista").Editable = false;
+            //gridOS.Columns.Item("Veículo").Editable = false;
+            //gridOS.Columns.Item("Situação").Editable = false;
+            //gridOS.Columns.Item("Status").Editable = false;
+
+            gridPes.Columns.Item("#").Type = BoGridColumnType.gct_CheckBox;
+
+            ((EditTextColumn)gridPes.Columns.Item("Nº Interno")).LinkedObjectType = "17";
+            ((EditTextColumn)gridPes.Columns.Item(3)).LinkedObjectType = "2";
         }
 
         private void CarregarOS()

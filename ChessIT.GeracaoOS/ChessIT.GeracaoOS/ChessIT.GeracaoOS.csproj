@@ -73,8 +73,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\BalancaController.cs" />
     <Compile Include="Controller\MainController.cs" />
     <Compile Include="Helper\ApiHelper.cs" />
+    <Compile Include="Helper\LogHelper.cs" />
+    <Compile Include="Model\Balanca.cs" />
     <Compile Include="Model\FaturaGroupModel.cs" />
     <Compile Include="Model\FaturaModel.cs" />
     <Compile Include="Program.cs" />

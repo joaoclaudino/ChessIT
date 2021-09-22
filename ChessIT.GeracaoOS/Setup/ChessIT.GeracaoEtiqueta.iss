@@ -2,9 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 [Setup]
-AppName=GeracaoOS
-AppVerName=GeracaoOS
-AppPublisher=ChessIT
+AppName=T1GeracaoOS
+AppVerName=T1GeracaoOS
+AppPublisher=TChessIT
 DefaultDirName={code:GetDefaultAddOnDir}
 DisableDirPage=yes
 Compression=lzma
@@ -12,10 +12,10 @@ SolidCompression=yes
 UsePreviousAppDir=no
 AppendDefaultDirName=yes
 Uninstallable=yes
-OutputDir="C:\AddOn\ChessIT\ChessIT.GeracaoOS\Setup"
+OutputDir="C:\Users\kuricaambiental_02\source\repos\ChessIT\ChessIT.GeracaoOS\Setup"
 CloseApplications=force
 OutputBaseFilename=setup
-SourceDir="C:\AddOn\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\bin\x64\Release"
+SourceDir="C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\bin\x64\Release"
 
 [Files]
 Source: ChessIT.GeracaoOS.exe; Flags: ignoreversion; DestDir: {app}
@@ -23,13 +23,13 @@ Source: ChessIT.GeracaoOS.exe.config; Flags: ignoreversion; DestDir: {app}
 Source: *.dll; Flags: ignoreversion; DestDir: {app}
 Source: SrfFiles\*; Flags: ignoreversion; DestDir: {app}\SrfFiles
 Source: Menu.xml; Flags: ignoreversion; DestDir: {app}
-Source: C:\Program Files (x86)\SAP\SAP Business One\AddOnInstallAPI.dll; Flags: dontcopy
+Source: C:\Users\kuricaambiental_02\source\repos\ChessIT\ChessIT.GeracaoOS\Setup\AddOnInstallAPI.dll; Flags: dontcopy
 
 ;InformaciÃ³n para la desinstalaciÃ³n
 [Registry]
-Root: HKCU; Subkey: Software\ChessIT\ChessIT.GeracaoOS; Flags: uninsdeletekey
-Root: HKLM; Subkey: Software\ChessIT\ChessIT.GeracaoOS; Flags: uninsdeletekey
-Root: HKLM; Subkey: Software\ChessIT\ChessIT.GeracaoOS; ValueType: string; ValueName: InstallPath; ValueData: {app}
+Root: HKCU; Subkey: Software\TChessIT\ChessIT.T1GeracaoOS; Flags: uninsdeletekey
+Root: HKLM; Subkey: Software\TChessIT\ChessIT.T1GeracaoOS; Flags: uninsdeletekey
+Root: HKLM; Subkey: Software\TChessIT\ChessIT.T1GeracaoOS; ValueType: string; ValueName: InstallPath; ValueData: {app}
 
 [Languages]
 Name: Portugues; MessagesFile: compiler:Languages\BrazilianPortuguese.isl
@@ -43,14 +43,14 @@ var
   Uninstalling : Boolean;
 
 const
-  ADDON_ID   = 'GeracaoOS';
-  PARTNER_ID = 'ChessIT';
+  ADDON_ID   = 'T1GeracaoOS';
+  PARTNER_ID = 'TChessIT';
 
 //-External Functions (AddOnInstallAPI.dll)
 function EndInstall: integer; external 'EndInstall@files:AddOnInstallAPI.dll stdcall';
 function SetAddOnFolder(srcPath : string): integer; external 'SetAddOnFolder@files:AddOnInstallAPI.dll stdcall';
 function RestartNeeded :integer; external 'RestartNeeded@files:AddOnInstallAPI.dll stdcall delayload ';
-
+function EndUninstall(path: string; succeed: boolean): integer; external 'EndUninstall@files:AddOnInstallAPI.dll stdcall';
 
 //-Check if the application is installed;
 //- if yes --> suggest to Remove
@@ -71,36 +71,69 @@ function CheckInstalled(): boolean;
           end;
       end;
   end;
-
+ procedure UninstallCurrentVersion();
+  var
+    ResultCode: Integer;
+  begin
+    if RegQueryStringValue(HKLM, 'Software\TChessIT\TGeracaoOS\Management','InstallPath', CurrentLocation) then
+      begin
+        MsgBox('Pressione [OK] para remover a versão existente', mbInformation, MB_OK)
+        //-...Execute the uninstall to remove
+        Exec(CurrentLocation + '\unins000.exe', '', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
+      end;
+  end;
 //-When Setup starts, get the parameters of B1
 function PreparePaths() : Boolean;
   var
     position : integer;
     aux : string;
     ResultCode : Integer;
+    cont : integer;
+    Uninstall : boolean;
   begin
-    //-First Check if the application is installed
-    if CheckInstalled then
+    Uninstall := false;
+    if IsUninstaller then
       begin
-        Result := False;
+        Result := True
       end
     else
-      //-If not yet installed, the 6th parameter has to be character "|" to be a valid call from B1
-      if pos('|', paramstr(2)) <> 0 then
-        begin
-          aux := paramstr(2);
-          position := Pos('|', aux)
-          AddOnDir := Copy(aux,0, position - 1)
-          Result := True;
+      begin
+        Result := False;
+        for cont := 0 to ParamCount() do
+          begin
+            //MsgBox('Param(' + inttostr(cont) + ') = ' + paramstr(cont), mbInformation, MB_OK);
+            if pos('|', paramstr(cont)) <> 0 then
+              begin
+                aux := paramstr(cont);
+                position := Pos('|', aux)
+                AddOnDir := Copy(aux,0, position - 1)
+                Result := True;
+                cont := ParamCount()+1
+              end;
+            if paramstr(cont) = '/u' then
+              begin
+                Uninstall := true;
+              end;
+          end;
 
-        end
-      else
-        begin
-          //-The Setup just Runs if Called from B1
-          MsgBox('The Setup just can be run from Business One.', mbInformation, MB_OK)
-
-          Result := False;
-        end;
+        if Result = False then
+          begin
+            if Uninstall Then
+              begin
+                RegQueryStringValue(HKLM, 'Software\TChessIT\TGeracaoOS\Management','InstallPath', CurrentLocation)
+                Exec(CurrentLocation + '\unins000.exe', '', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
+                EndUninstall(CurrentLocation, true);
+              end
+            else
+              begin
+                MsgBox('O add-on só pode ser instalado apartir do SAP Business One.', mbError, MB_OK);
+              end;
+          end
+        else
+          begin
+            UninstallCurrentVersion
+          end;
+      end;
   end;
 
 function GetDefaultAddOnDir(Param : string): string;
