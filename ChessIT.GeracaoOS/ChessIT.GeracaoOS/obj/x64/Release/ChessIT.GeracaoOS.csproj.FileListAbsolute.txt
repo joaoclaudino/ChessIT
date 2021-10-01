@@ -40,3 +40,4 @@ C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.Gerac
 C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\obj\x64\Release\ChessIT.GeracaoOS.csproj.CopyComplete
 C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\obj\x64\Release\ChessIT.GeracaoOS.exe
 C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\obj\x64\Release\ChessIT.GeracaoOS.pdb
+C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\obj\x64\Release\ChessIT.GeracaoOS.csproj.AssemblyReference.cache

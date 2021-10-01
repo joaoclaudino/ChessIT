@@ -1,0 +1,23 @@
+﻿<BOM>
+	<BO>
+		<AdmInfo>
+			<Object>152</Object>
+			<Version>2</Version>
+		</AdmInfo>
+		<UserFieldsMD>
+			<row>
+				<Name>SENHA_COLETOR</Name>
+				<Type>db_Alpha</Type>
+				<Size>15</Size>
+				<Description>SENHA COLETOR</Description>
+				<SubType>st_None</SubType>
+				<LinkedTable></LinkedTable>
+				<DefaultValue></DefaultValue>
+				<TableName>OUSR</TableName>
+				<FieldID>0</FieldID>
+				<EditSize>30</EditSize>
+				<Mandatory>tNO</Mandatory>
+			</row>
+		</UserFieldsMD>
+	</BO>
+</BOM>

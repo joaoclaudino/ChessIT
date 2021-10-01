@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ChessIT.GeracaoOS.Controller;
 using ChessIT.GeracaoOS.Helper;
+using ChessIT.GeracaoOS.Model;
 using SAPbouiCOM;
 
 
@@ -76,6 +77,27 @@ namespace ChessIT.GeracaoOS.View
                                             Form.Items.Item("etCliente").Visible = true;
                                             Form.Items.Item("2").Visible = true;
 
+                                            //rota
+                                            Form.Items.Item("18").Left = 17;
+                                            Form.Items.Item("etNrRota").Left = 98;
+                                            //placa
+                                            Form.Items.Item("26").Left = 17;
+                                            Form.Items.Item("26").Top = 27;
+                                            Form.Items.Item("etNrPlaca").Left = 98;
+                                            Form.Items.Item("etNrPlaca").Top = 27;
+
+
+                                            //cliente
+                                            Form.Items.Item("2").Top = 60;
+                                            Form.Items.Item("etCliente").Top = 60;
+                                            Form.Items.Item("etClienteN").Top = 60;
+
+                                            //dia coleta
+                                            Form.Items.Item("20").Top = 42;
+                                            Form.Items.Item("cbDiaCol").Top = 42;
+                                            Form.Items.Item("20").Left = 17;
+                                            Form.Items.Item("cbDiaCol").Left = 98;
+
 
                                             string query = @"
                                                     select 
@@ -137,6 +159,23 @@ namespace ChessIT.GeracaoOS.View
                                             Form.Items.Item("etNrPlaca").Visible = false;
                                             Form.Items.Item("btPesqPes").Visible = false;
 
+
+                                            //rota
+                                            Form.Items.Item("18").Left = 510;
+                                            Form.Items.Item("etNrRota").Left = 590;
+                                            //placa
+                                            Form.Items.Item("26").Left = 510;
+                                            Form.Items.Item("26").Top = 42;
+                                            Form.Items.Item("etNrPlaca").Left = 590;
+                                            Form.Items.Item("etNrPlaca").Top = 42;
+
+
+                                            //cliente
+                                            Form.Items.Item("2").Top = 13;
+                                            Form.Items.Item("etCliente").Top = 13;
+                                            Form.Items.Item("etClienteN").Top = 13;
+
+ 
                                             string query = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"" from dummy";
 
                                             Form.DataSources.DataTables.Item("dtFiltro").ExecuteQuery(query);
@@ -166,6 +205,21 @@ namespace ChessIT.GeracaoOS.View
                                             Form.Items.Item("26").Visible = true;
                                             Form.Items.Item("etNrPlaca").Visible = true;
                                             Form.Items.Item("btPesqPes").Visible = false;
+
+                                            //rota
+                                            Form.Items.Item("18").Left = 510;
+                                            Form.Items.Item("etNrRota").Left = 590;
+                                            //placa
+                                            Form.Items.Item("26").Left = 510;
+                                            Form.Items.Item("26").Top = 42;
+                                            Form.Items.Item("etNrPlaca").Left = 590;
+                                            Form.Items.Item("etNrPlaca").Top = 42;
+
+
+                                            //cliente
+                                            Form.Items.Item("2").Top = 13;
+                                            Form.Items.Item("etCliente").Top = 13;
+                                            Form.Items.Item("etClienteN").Top = 13;
 
                                             string query = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"" from dummy";
 
@@ -246,23 +300,41 @@ namespace ChessIT.GeracaoOS.View
                                                     oOrder = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
                                                     if (oOrder.GetByKey(Convert.ToInt32(gridPes.DataTable.GetValue(1, i).ToString())))
                                                     {
-                                                        double dM3Order = Convert.ToDouble(oOrder.UserFields.Fields.Item("U_VolumeM3").Value);
+                                                        double dM3Order = VolumeM3TotalOS(gridPes.DataTable.GetValue(1, i).ToString());
+
+
                                                         LogHelper.InfoWarning(string.Format("Processando OS {0}", gridPes.DataTable.GetValue(1, i).ToString()));
 
-                                                        BalancaController oBalancaController = new BalancaController(Form);
 
-                                                        StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
-                                                        lblBalanca.Item.Visible = true;
-                                                        Form.Freeze(false);
-                                                        LogHelper.MostraBalanca("", "", Form);
+                                                        double dPeso;// = Convert.ToDouble(oBalancaController.OBalanca.peso);
+                                                        if (((CheckBox)Form.Items.Item("chkBal").Specific).Checked)
+                                                        {
 
-                                                        double dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
+                                                            BalancaController oBalancaController = new BalancaController(Form);
+
+                                                            StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
+                                                            lblBalanca.Item.Visible = true;
+                                                            Form.Freeze(false);
+                                                            LogHelper.MostraBalanca("", "", Form);
+
+                                                            dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
+                                                            
+                                                        }
+                                                        else
+                                                        {
+                                                            dPeso = Convert.ToDouble(((EditText)Form.Items.Item("edtPeso").Specific).Value);
+                                                        }
+                                                            
 
                                                         //qual a percentagem do item no total m3
                                                         double p = (dM3Order * 100) / TotalQuantidadeM3;
-                                                        double dPesoBruto = (dPeso / 100) * p;
-                                                        double PesoLiquido= dPesoBruto
-                                                            - Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value);
+
+
+                                                        //double dPesoBruto = (dPeso / 100) * p;
+
+
+                                                        double PesoLiquido = (p/100) * dPeso;
+                                                            //- Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value);
                                                         //Se[Peso Líquido] > 0,000000 significa que a ordem de serviço já possui o peso da[Tara] e com o[Peso Bruto]
                                                         //inserido no passo(IV)
                                                         if (PesoLiquido>0)
@@ -279,10 +351,13 @@ namespace ChessIT.GeracaoOS.View
                                                             oOrder.UserFields.Fields.Item("U_Situacao").Value = "10";
                                                             oOrder.UserFields.Fields.Item("U_DataEntradaOS").Value = DateTime.Now;
                                                             oOrder.UserFields.Fields.Item("U_HoraEntradaOS").Value = myTime;
+
+                                                            oOrder.UserFields.Fields.Item("U_PesoLiq").Value = PesoLiquido- Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value);
+                                                            oOrder.UserFields.Fields.Item("U_PesoBruto").Value = dPeso;
                                                         }
                                                         //o Se[Peso Líquido] <= [Peso Bruto] significa que a ordem de serviço em questão
                                                         //não possui o peso da[Tara].Nesse cenário execute os passos abaixo:
-                                                        if (PesoLiquido<= dPesoBruto)
+                                                        if (PesoLiquido<= dPeso)
                                                         {
                                                             //	ORDR.U_Situacao = 2(Aguardando Peso Tara)
                                                             //Essas ordens/ pedidos continuarão na tela de pesagem aguardando a pesagem da tara.
@@ -343,13 +418,22 @@ namespace ChessIT.GeracaoOS.View
                                                     {
                                                         //double dM3Order = Convert.ToDouble(oOrder.UserFields.Fields.Item("U_VolumeM3").Value);
                                                         LogHelper.InfoWarning(string.Format("Processando OS {0}", gridPes.DataTable.GetValue(1, i).ToString()));
+                                                        double dPeso;
+                                                        if (((CheckBox)Form.Items.Item("chkBal").Specific).Checked)
+                                                        {
+                                                            BalancaController oBalancaController = new BalancaController(Form);
 
-                                                        BalancaController oBalancaController = new BalancaController(Form);
-
-                                                        StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
-                                                        lblBalanca.Item.Visible = true;
-                                                        Form.Freeze(false);
-                                                        LogHelper.MostraBalanca("", "", Form);
+                                                            StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
+                                                            lblBalanca.Item.Visible = true;
+                                                            Form.Freeze(false);
+                                                            LogHelper.MostraBalanca("", "", Form);
+                                                            dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
+                                                        }
+                                                        else
+                                                        {
+                                                            dPeso = Convert.ToDouble(((EditText)Form.Items.Item("edtPeso").Specific).Value);
+                                                        }
+        
 
                                                         //PASSO 1 – Encontrar o peso previsto da ordem de serviço para o cliente.
                                                         //•	Encontre o volume(RDR1.Quantity) e a densidade(RDR1.U_Densidade) do item resíduo(OTIM.ItmsGrpCod = Resíduo)
@@ -368,8 +452,8 @@ namespace ChessIT.GeracaoOS.View
                                                         //•	Após encontrar o peso estimado do cliente e o peso estimado total calcule qual será a porcentagem
                                                         //correspondendo que deverá ser aplicada na ordem de serviço.
                                                         //o Peso Cliente A = Peso Líquido Balança / Porcentagem ClienteA
-                                                        double dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
-                                                        double dPesoCliente = dPeso / dPClienteA;
+                                                        
+                                                        double dPesoCliente = (dPeso - Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value) )* dPClienteA;
 
                                                         //double dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
 
@@ -387,7 +471,9 @@ namespace ChessIT.GeracaoOS.View
                                                         //    //	ORDR.U_Situacao = 10(Coleta não faturada)
                                                         //    //	ORDR.U_DataEntradaOS = Data atual
                                                         //    //	ORDR.U_HoraEntradaOS = Horário atualOBalanca.pesoHora
-                                                        oOrder.UserFields.Fields.Item("U_PesoLiq").Value = dPesoCliente;
+
+                                                        oOrder.UserFields.Fields.Item("U_PesoBruto").Value = dPeso;
+                                                        oOrder.UserFields.Fields.Item("U_PesoLiq").Value = dPesoCliente; ;
                                                         oOrder.UserFields.Fields.Item("U_Situacao").Value = "10";
                                                         oOrder.UserFields.Fields.Item("U_DataEntradaOS").Value = DateTime.Now;
                                                         oOrder.UserFields.Fields.Item("U_HoraEntradaOS").Value = myTime;
@@ -424,6 +510,10 @@ namespace ChessIT.GeracaoOS.View
                                             }
                                         }
 
+
+                                        CarregarPes();
+                                        LogHelper.InfoSuccess("Rateio Concluído!!!");
+
                                     }
                                 }
                                 if (pVal.ItemUID == "btCapPes")
@@ -459,14 +549,22 @@ namespace ChessIT.GeracaoOS.View
                                                 if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
                                                 {
                                                     LogHelper.InfoWarning(string.Format("Processando OS {0}", gridPes.DataTable.GetValue(1, i).ToString()));
-                                                    BalancaController oBalancaController = new BalancaController(Form);
 
-                                                    
-                                                    lblBalanca.Item.Visible = true;
-                                                    Form.Freeze(false);
+                                                    Balanca OBalanca;
+                                                    if (((CheckBox)Form.Items.Item("chkBal").Specific).Checked)
+                                                    {
+                                                        BalancaController oBalancaController = new BalancaController(Form);
+                                                        lblBalanca.Item.Visible = true;
+                                                        Form.Freeze(false);
+                                                        LogHelper.MostraBalanca("", "", Form);
+                                                        OBalanca = oBalancaController.OBalanca;
+                                                    }
+                                                    else
+                                                    {
+                                                        OBalanca = new Balanca();
+                                                        OBalanca.peso = ((EditText)Form.Items.Item("edtPeso").Specific).Value;
+                                                    }
 
-
-                                                    LogHelper.MostraBalanca("","", Form);
 
                                                     SAPbobsCOM.Documents oOrder;
                                                     oOrder = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
@@ -478,18 +576,24 @@ namespace ChessIT.GeracaoOS.View
                                                         {
                                                             if (Convert.ToDouble(oOrder.UserFields.Fields.Item("U_PesoBruto").Value) > 0)
                                                             {
+                                                                oOrder.UserFields.Fields.Item("U_Tara").Value = OBalanca.peso;
                                                                 //já tiverem o[Peso Bruto] preenchido > 0,0000, execute cálculo do peso líquido dessas ordens:
                                                                 //ORDR.U_PesoBruto - ORDR.U_Tara => ORDR.U_PesoLiquido.
-                                                                oOrder.UserFields.Fields.Item("U_PesoBruto").Value =
+                                                                oOrder.UserFields.Fields.Item("U_PesoLiq").Value =
                                                                 (Convert.ToDouble(oOrder.UserFields.Fields.Item("U_PesoBruto").Value) -
                                                                     Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value)).ToString();
 
                                                             }
-                                                            oOrder.UserFields.Fields.Item("U_Tara").Value = oBalancaController.OBalanca.peso;
+                                                            
                                                         }
                                                         else if (tipoPesagem.Equals("PB"))//Peso Bruto
                                                         {
-                                                            oOrder.UserFields.Fields.Item("U_PesoBruto").Value = oBalancaController.OBalanca.peso;
+                                                            oOrder.UserFields.Fields.Item("U_PesoLiq").Value = 
+                                                                    Convert.ToDouble(OBalanca.peso) -
+                                                                    Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value);
+
+
+                                                            oOrder.UserFields.Fields.Item("U_PesoBruto").Value = Convert.ToDouble(OBalanca.peso);
                                                         }
 
 
@@ -560,7 +664,7 @@ namespace ChessIT.GeracaoOS.View
 		                                                    SELECT 
 		                                                        T0.""U_Placa"" ""Placa""
                                                                 , T0.""U_UFPlaca"" ""UFPlaca""
-                                                                , 'MOTORIOSTA' AS ""MOTORISTA""
+                                                                , T0.""U_PNCode"" AS ""MOTORISTA""
                                                                 , 1 TARA
                                                             FROM
                                                                 ""@VEICULOS"" T0
@@ -597,7 +701,7 @@ namespace ChessIT.GeracaoOS.View
                                                     //}
                                                     oOrder.UserFields.Fields.Item("U_NPlaca").Value = recordSetPlaca.Fields.Item("Placa").Value.ToString();
                                                     oOrder.UserFields.Fields.Item("U_EstPlaca").Value = recordSetPlaca.Fields.Item("UFPlaca").Value.ToString();
-                                                    //oOrder.UserFields.Fields.Item("U_Motorista").Value = recordSetPlaca.Fields.Item("MOTORISTA").Value.ToString();
+                                                    oOrder.UserFields.Fields.Item("U_CodTransp").Value = recordSetPlaca.Fields.Item("MOTORISTA").Value.ToString();
                                                     oOrder.UserFields.Fields.Item("U_Tara").Value = recordSetPlaca.Fields.Item("TARA").Value.ToString();
                                                     bModificou = true;
                                                     //for (int ii = 0; ii < oOrder.Lines.Count; ii++)
@@ -1034,8 +1138,8 @@ namespace ChessIT.GeracaoOS.View
                         case BoEventTypes.et_FORM_RESIZE:
                             if (!pVal.BeforeAction)
                             {
-                                if (Loaded)
-                                    Form.Items.Item("33").Height = 1;
+                                //if (Loaded)
+                                //    Form.Items.Item("33").Height = 1;
                             }                            
                             break;
                     }
@@ -1062,7 +1166,7 @@ namespace ChessIT.GeracaoOS.View
 
                 string sSQL = string.Format(@"
                         select 
-	                        T1.""Quantity"" * coalesce(T1.""U_Densidade"",0)
+	                        sum(T1.""Quantity"" * coalesce(T1.""U_Densidade"",0))
                         from
                             ORDR T0
 	                        inner join RDR1 T1 on T1.""DocEntry""=T0.""DocEntry""    
@@ -1105,7 +1209,7 @@ namespace ChessIT.GeracaoOS.View
 
                 string sSQL = string.Format(@"
                         select 
-	                        T1.""Quantity"" * coalesce(T1.""U_Densidade"",0)
+	                        sum(T1.""Quantity"" * coalesce(T1.""U_Densidade"",0))
                         from
                             ORDR T0
 	                        inner join RDR1 T1 on T1.""DocEntry""=T0.""DocEntry""    
@@ -1133,6 +1237,48 @@ namespace ChessIT.GeracaoOS.View
                 throw;
             }
         }
+
+        private double VolumeM3TotalOS(string docEntry)
+        {
+            string sDocEntrys = DoscEntrys();
+
+            SAPbobsCOM.Recordset recordSetTotal = null;
+            try
+            {
+
+
+
+                string sSQL = string.Format(@"
+                        select 
+	                        sum (T1.""Quantity"")
+                        from
+                            ORDR T0
+                            inner
+                        join RDR1 T1 on T1.""DocEntry"" = T0.""DocEntry""
+                        where
+                            T0.""CANCELED"" = 'N'
+                            and T1.""unitMsr"" = 'Metros Cúbicos'
+                            and ( T0.""DocEntry""  in ({0}) )
+
+                ", docEntry);
+
+                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                recordSetTotal.DoQuery(sSQL);
+
+                double dRetorno = Convert.ToDouble(recordSetTotal.Fields.Item(0).Value.ToString());
+
+                Controller.MainController.LimparObjeto(recordSetTotal);
+                return dRetorno;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+
         private double VolumeM3TotalSelecionados()
         {
             string sDocEntrys = DoscEntrys();
@@ -1149,23 +1295,14 @@ namespace ChessIT.GeracaoOS.View
 
                 string sSQL = string.Format(@"
                         select 
-	                        sum (T0.""U_VolumeM3"")
+	                        sum (T1.""Quantity"")
                         from
                             ORDR T0
-                            inner join RDR1 T1 on T1.""DocEntry""=T0.""DocEntry""
-                            left join ""@VEICULOS"" ON ""@VEICULOS"".""U_Placa"" = T0.""U_NPlaca""
-                            left join OCRD TRANSP ON TRANSP.""CardCode"" = T0.""U_CodTransp""
-                            left join OUSR ON T0.""UserSign"" = OUSR.""USERID""
+                            inner
+                        join RDR1 T1 on T1.""DocEntry"" = T0.""DocEntry""
                         where
                             T0.""CANCELED"" = 'N'
-                            and '{0}'='{0}'
-                            and T0.""DocStatus"" = 'O'
-                            and T0.""U_Status"" = 'P'
-                            and T0.""U_Situacao"" = 3
-                            and('{1}' = '' or '{1}' = T0.""CardCode"")
-                            and('{2}' = '' or '{2}' = T0.""U_NPlaca"")
-                            and('{3}' = '' or '{3}' = (select max(OOAT.""U_Rota"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = T0.""DocEntry""))
-                            and('{4}' = '[Selecionar]' or '{4}' = T0.""U_DiaSemRot"")
+                            and T1.""unitMsr"" = 'Metros Cúbicos'
                             and ( T0.""DocEntry""  in ({5}) )
 
                 ",

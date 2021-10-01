@@ -10,52 +10,54 @@ using System.Text;
 
 namespace ChessIT.GeracaoOS.Controller
 {
-    class MainController
+    public class MainController
     {
         public static SAPbouiCOM.Application Application;
         public static SAPbobsCOM.Company Company;
 
-        public MainController()
+        public MainController(SAPbouiCOM.Application pApplication, SAPbobsCOM.Company pCompany)
            : base()
         {
-            try
-            {
-                SboGuiApi SboGuiApi = null;
-                string connectionString = null;
+            Application = pApplication;
+            Company = pCompany;
+            //try
+            //{
+            //    SboGuiApi SboGuiApi = null;
+            //    string connectionString = null;
 
-                SboGuiApi = new SboGuiApi();
+            //    SboGuiApi = new SboGuiApi();
 
-                connectionString = Convert.ToString(Environment.GetCommandLineArgs().GetValue(1));
+            //    connectionString = Convert.ToString(Environment.GetCommandLineArgs().GetValue(1));
 
-                SboGuiApi.Connect(connectionString);
+            //    SboGuiApi.Connect(connectionString);
 
-                Application = SboGuiApi.GetApplication(-1);
-            }
-            catch (Exception exception)
-            {
-                System.Windows.Forms.MessageBox.Show("Erro na conexão com o SAP Business One: " + exception.Message);
-                Environment.Exit(-1);
-            }
+            //    Application = SboGuiApi.GetApplication(-1);
+            //}
+            //catch (Exception exception)
+            //{
+            //    System.Windows.Forms.MessageBox.Show("Erro na conexão com o SAP Business One: " + exception.Message);
+            //    Environment.Exit(-1);
+            //}
 
-            try
-            {
-                Company = (SAPbobsCOM.Company)Application.Company.GetDICompany();
+            //try
+            //{
+            //    Company = (SAPbobsCOM.Company)Application.Company.GetDICompany();
 
-                if (Company == null || !Company.Connected)
-                {
-                    int CodErro = 0;
-                    string MsgErro = "";
+            //    if (Company == null || !Company.Connected)
+            //    {
+            //        int CodErro = 0;
+            //        string MsgErro = "";
 
-                    Company.GetLastError(out CodErro, out MsgErro);
-                    throw new Exception(CodErro.ToString() + " " + MsgErro);
-                }
+            //        Company.GetLastError(out CodErro, out MsgErro);
+            //        throw new Exception(CodErro.ToString() + " " + MsgErro);
+            //    }
 
-            }
-            catch (Exception exception)
-            {
-                Application.StatusBar.SetText("Erro na conexão da DI: " + exception.Message, BoMessageTime.bmt_Short, BoStatusBarMessageType.smt_Error);
-                Environment.Exit(-1);
-            }
+            //}
+            //catch (Exception exception)
+            //{
+            //    Application.StatusBar.SetText("Erro na conexão da DI: " + exception.Message, BoMessageTime.bmt_Short, BoStatusBarMessageType.smt_Error);
+            //    Environment.Exit(-1);
+            //}
 
             Form sboForm = Application.Forms.GetFormByTypeAndCount(169, 1);
 

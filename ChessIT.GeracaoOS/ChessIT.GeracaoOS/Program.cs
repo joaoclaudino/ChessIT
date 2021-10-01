@@ -14,7 +14,7 @@ namespace ChessIT.GeracaoOS
         [STAThread]
         static void Main()
         {
-            Controller.MainController mainController = new Controller.MainController();
+            //Controller.MainController mainController = new Controller.MainController();
 
             System.Windows.Forms.Application.Run();
         }

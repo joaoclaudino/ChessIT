@@ -46,6 +46,10 @@ namespace ChessIT.GeracaoOS.Controller
                     LogHelper.InfoError(arquivo);
                     //throw new Exception("Falha na comunicaçao com a balança capital: arquivo não encontrado");
                 }
+                else if (arquivo.Contains( "O caminho da rede não foi encontrado"))
+                {
+                    LogHelper.InfoError(arquivo);
+                }
                 else
                 {
                     //LogHelper.InfoWarning(string.Format("Processando arquivo tentativa {0}/{1} para o horário {2}", i, this.OBalanca.iTentativas, hora));
@@ -61,8 +65,8 @@ namespace ChessIT.GeracaoOS.Controller
                     {
                         string clearedLine = line.Replace("\\", "").Replace(" ", "").Replace("\"", "").Trim();
 
-                        if (clearedLine.Substring(6, 8) == hora)
-                        {
+                        //if (clearedLine.Substring(6, 8) == hora)
+                        //{
                             linhaEncontrada = true;
 
                             OBalanca.peso = clearedLine.Substring(0, 6);
@@ -73,12 +77,12 @@ namespace ChessIT.GeracaoOS.Controller
 
                             break;
 
-                        }
-                        else
-                        {
-                            OBalanca.pesoHora = clearedLine.Substring(0, 6);
-                            LogHelper.MostraBalanca(OBalanca.pesoHora, hora, this.pForm);
-                        }
+                        //}
+                        //else
+                        //{
+                        //    OBalanca.pesoHora = clearedLine.Substring(0, 6);
+                        //    LogHelper.MostraBalanca(OBalanca.pesoHora, hora, this.pForm);
+                        //}
                     }
                     if (!linhaEncontrada)
                     {
