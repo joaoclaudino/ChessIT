@@ -74,7 +74,7 @@ namespace ChessIT.GeracaoOS.View
             else
             {
 
-                Controller.MainController.Application.StatusBar.SetText("Z" + m_Notas.Count);
+                Controller.MainController.oApplication.StatusBar.SetText("Z" + m_Notas.Count);
 
             }
         }

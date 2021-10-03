@@ -10,7 +10,7 @@ using ChessIT.GeracaoOS.Controller;
 
 namespace JBC.ChessITServices
 {
-    //[ResourceBOM("JBC.COLETOR.resources.BOM.UDF.xml", ResourceType.UserField)]
+    //[ResourceBOM("JBC.ChessITServices.resources.BOM.UDF.xml", ResourceType.UserField)]
     [AddIn(
         Name = "JBC.ChessITServices"
         , Description = "JBC.ChessITServices - Claudino Soluções em Software"

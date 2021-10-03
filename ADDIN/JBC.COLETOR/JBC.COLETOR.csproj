@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{511696FB-29EC-4294-91BC-C57FC360AA70}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>JBC.COLETOR</RootNamespace>
-    <AssemblyName>JBC.COLETOR</AssemblyName>
+    <RootNamespace>JBC.Coletor</RootNamespace>
+    <AssemblyName>JBC.Coletor</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -100,15 +100,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FormClass\systemform\frmPicking.cs" />
-    <Compile Include="Model\PickingItem.cs" />
+    <Compile Include="Helper\ApiHelper.cs" />
+    <Compile Include="Helper\LogHelper.cs" />
+    <Compile Include="Model\Balanca.cs" />
+    <Compile Include="Controller\BalancaController.cs" />
+    <Compile Include="Model\FaturaGroupModel.cs" />
+    <Compile Include="Model\FaturaModel.cs" />
+    <Compile Include="Controller\MainController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\JBCCOLETORService.cs" />
+    <Compile Include="View\CnfIntegraBalancaView.cs" />
+    <Compile Include="View\GeraOSView.cs" />
+    <Compile Include="View\NotasGeradasView.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="publicKey.xml" />
     <EmbeddedResource Include="resources\BOM\UDF.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -116,9 +123,26 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Certificate.snk" />
+    <EmbeddedResource Include="SrfFiles\FrmCnfIntegraBalanca.srf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SrfFiles\FrmGeraOS.srf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SrfFiles\FrmNotasGeradas.srf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="resources\frmPicking.srf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="FormClass\systemform\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="xml\Menu.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -12,21 +12,21 @@ namespace ChessIT.GeracaoOS.Helper
     {
         public static void InfoError(string pMesg)
         {
-            Controller.MainController.Application.StatusBar.SetText(
+            Controller.MainController.oApplication.StatusBar.SetText(
             pMesg
             , BoMessageTime.bmt_Short
             , BoStatusBarMessageType.smt_Error);
         }
         public static void InfoSuccess(string pMesg)
         {
-            Controller.MainController.Application.StatusBar.SetText(
+            Controller.MainController.oApplication.StatusBar.SetText(
             pMesg
             , BoMessageTime.bmt_Short
             , BoStatusBarMessageType.smt_Success);
         }
         public static void InfoWarning(string pMesg)
         {
-            Controller.MainController.Application.StatusBar.SetText(
+            Controller.MainController.oApplication.StatusBar.SetText(
             pMesg
             , BoMessageTime.bmt_Short
             , BoStatusBarMessageType.smt_Warning);
@@ -75,7 +75,7 @@ namespace ChessIT.GeracaoOS.Helper
             lblBalanca.Item.Visible = true;
 
             //Form.Update();
-            Controller.MainController.Application.Forms.ActiveForm.Refresh();
+            Controller.MainController.oApplication.Forms.ActiveForm.Refresh();
         }
     }
 }

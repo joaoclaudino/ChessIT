@@ -151,7 +151,7 @@ namespace ChessIT.GeracaoOS.Controller
             {
                 string query = @"SELECT * FROM ""@INTCFG"" ";
 
-                recordSet = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                recordSet = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
                 recordSet.DoQuery(query);
 
                 if (!recordSet.EoF)

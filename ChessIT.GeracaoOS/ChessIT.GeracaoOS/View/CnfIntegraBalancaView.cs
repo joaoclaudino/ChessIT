@@ -28,7 +28,7 @@ namespace ChessIT.GeracaoOS.View
             Form.EnableMenu("1285", false);
             Form.EnableMenu("1286", false);
 
-            Controller.MainController.Application.ItemEvent += HandleItemEvent;
+            Controller.MainController.oApplication.ItemEvent += HandleItemEvent;
         }
 
         [DllImport("advapi32.dll")]
@@ -81,16 +81,16 @@ namespace ChessIT.GeracaoOS.View
                                                                 '{5}'                                                            
                                                             )", ip, porta, usuario, senha, diretorio, nomeArquivo);
 
-                                            recordSet = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                                            recordSet = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
                                             recordSet.DoQuery(query);
 
-                                            Controller.MainController.Application.StatusBar.SetText("Operação completada com êxito", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Success);
+                                            Controller.MainController.oApplication.StatusBar.SetText("Operação completada com êxito", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Success);
 
                                             Form.Close();
                                         }
                                         catch (Exception ex)
                                         {
-                                            Controller.MainController.Application.StatusBar.SetText("Erro ao salvar: " + ex.Message);
+                                            Controller.MainController.oApplication.StatusBar.SetText("Erro ao salvar: " + ex.Message);
                                         }
                                         finally
                                         {
@@ -112,13 +112,13 @@ namespace ChessIT.GeracaoOS.View
                                         //if (ip.Equals(string.Empty) || usuario.Equals(string.Empty) || senha.Equals(string.Empty) || diretorio.Equals(string.Empty) || nomeArquivo.Equals(string.Empty))
                                         if (ip.Equals(string.Empty) || diretorio.Equals(string.Empty) || nomeArquivo.Equals(string.Empty))
                                         {
-                                            Controller.MainController.Application.StatusBar.SetText("Preencher dados para conexão");
+                                            Controller.MainController.oApplication.StatusBar.SetText("Preencher dados para conexão");
                                         }
                                         else
                                         {
                                             try
                                             {
-                                                Controller.MainController.Application.SendKeys("{TAB}");
+                                                Controller.MainController.oApplication.SendKeys("{TAB}");
 
                                                 //string maquina = ip + (porta == "" ? "" : ":" + porta);
 
@@ -155,17 +155,17 @@ namespace ChessIT.GeracaoOS.View
 
                                                 if (sucesso)
                                                 {
-                                                    Controller.MainController.Application.StatusBar.SetText("Conexão estabelecida com êxito", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Success);
+                                                    Controller.MainController.oApplication.StatusBar.SetText("Conexão estabelecida com êxito", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Success);
                                                 }
                                                 else
                                                 {
-                                                    Controller.MainController.Application.StatusBar.SetText("Não foi possível estabelecer conexão");
+                                                    Controller.MainController.oApplication.StatusBar.SetText("Não foi possível estabelecer conexão");
                                                 }
                                             }
                                             catch (Exception ex)
                                             {
                                                 
-                                                Controller.MainController.Application.StatusBar.SetText("Erro ao testar conexão: " + ex.Message);
+                                                Controller.MainController.oApplication.StatusBar.SetText("Erro ao testar conexão: " + ex.Message);
                                             }
                                         }
                                     }
@@ -190,7 +190,7 @@ namespace ChessIT.GeracaoOS.View
                                 }
                                 else
                                 {
-                                    Controller.MainController.Application.ItemEvent -= HandleItemEvent;
+                                    Controller.MainController.oApplication.ItemEvent -= HandleItemEvent;
                                 }
                             }
                             break;
@@ -212,7 +212,7 @@ namespace ChessIT.GeracaoOS.View
                                         {
                                             string query = @"SELECT * FROM ""@INTCFG"" ";
 
-                                            recordSet = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                                            recordSet = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
                                             recordSet.DoQuery(query);
                                             
                                             if (!recordSet.EoF)
@@ -251,7 +251,7 @@ namespace ChessIT.GeracaoOS.View
             }
             catch (Exception exception)
             {
-                Controller.MainController.Application.StatusBar.SetText(exception.Message);
+                Controller.MainController.oApplication.StatusBar.SetText(exception.Message);
             }
         }
 

@@ -17,11 +17,11 @@ C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.Gerac
 C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\bin\Debug\SrfFiles\FrmCnfIntegraBalanca.srf
 C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\bin\Debug\SrfFiles\FrmGeraOS.srf
 C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\bin\Debug\SrfFiles\FrmNotasGeradas.srf
-C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\bin\Debug\ChessIT.GeracaoOS.exe.config
-C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\bin\Debug\ChessIT.GeracaoOS.exe
 C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\bin\Debug\ChessIT.GeracaoOS.pdb
 C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\obj\Debug\ChessIT.GeracaoOS.Properties.Resources.resources
 C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\obj\Debug\ChessIT.GeracaoOS.csproj.GenerateResource.cache
 C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\obj\Debug\ChessIT.GeracaoOS.csproj.CoreCompileInputs.cache
-C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\obj\Debug\ChessIT.GeracaoOS.exe
 C:\Users\kuricaambiental_02\Source\Repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\obj\Debug\ChessIT.GeracaoOS.pdb
+C:\Users\kuricaambiental_02\source\repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\bin\Debug\ChessIT.GeracaoOS.dll.config
+C:\Users\kuricaambiental_02\source\repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\bin\Debug\ChessIT.GeracaoOS.dll
+C:\Users\kuricaambiental_02\source\repos\ChessIT\ChessIT.GeracaoOS\ChessIT.GeracaoOS\obj\Debug\ChessIT.GeracaoOS.dll

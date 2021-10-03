@@ -16,7 +16,7 @@ namespace ChessIT.GeracaoOS
         {
             //Controller.MainController mainController = new Controller.MainController();
 
-            System.Windows.Forms.Application.Run();
+            //System.Windows.Forms.Application.Run();
         }
     }
 }

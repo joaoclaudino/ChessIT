@@ -12,14 +12,14 @@ namespace ChessIT.GeracaoOS.Controller
 {
     public class MainController
     {
-        public static SAPbouiCOM.Application Application;
-        public static SAPbobsCOM.Company Company;
+        public static SAPbouiCOM.Application oApplication;
+        public static SAPbobsCOM.Company oCompany;
 
         public MainController(SAPbouiCOM.Application pApplication, SAPbobsCOM.Company pCompany)
            : base()
         {
-            Application = pApplication;
-            Company = pCompany;
+            oApplication = pApplication;
+            oCompany = pCompany;
             //try
             //{
             //    SboGuiApi SboGuiApi = null;
@@ -59,7 +59,7 @@ namespace ChessIT.GeracaoOS.Controller
             //    Environment.Exit(-1);
             //}
 
-            Form sboForm = Application.Forms.GetFormByTypeAndCount(169, 1);
+            Form sboForm = oApplication.Forms.GetFormByTypeAndCount(169, 1);
 
             sboForm.Freeze(true);
             try
@@ -68,11 +68,11 @@ namespace ChessIT.GeracaoOS.Controller
                 xmlDoc.Load(System.Environment.CurrentDirectory + "\\Menu.xml");
 
                 string xml = xmlDoc.InnerXml.ToString();
-                Application.LoadBatchActions(ref xml);
+                oApplication.LoadBatchActions(ref xml);
             }
             catch (Exception exception)
             {
-                Application.StatusBar.SetText("Erro ao criar menu: " + exception.Message, BoMessageTime.bmt_Short, BoStatusBarMessageType.smt_Error);
+                oApplication.StatusBar.SetText("Erro ao criar menu: " + exception.Message, BoMessageTime.bmt_Short, BoStatusBarMessageType.smt_Error);
                 Environment.Exit(-1);
             }
             finally
@@ -81,10 +81,10 @@ namespace ChessIT.GeracaoOS.Controller
                 sboForm.Update();
             }
 
-            Application.AppEvent += HandleAppEvent;
-            Application.MenuEvent += HandleMenuEvent;
-            Application.ItemEvent += HandleFormLoadEvent;
-            Application.ItemEvent += HandleButtonClickEvent;
+            oApplication.AppEvent += HandleAppEvent;
+            oApplication.MenuEvent += HandleMenuEvent;
+            oApplication.ItemEvent += HandleFormLoadEvent;
+            oApplication.ItemEvent += HandleButtonClickEvent;
         }
 
         private void HandleAppEvent(SAPbouiCOM.BoAppEventTypes EventType)
@@ -126,11 +126,11 @@ namespace ChessIT.GeracaoOS.Controller
 //                    xml = xml.Replace("from dummy", "");
 //#endif
 
-                    Application.LoadBatchActions(ref xml);
+                    oApplication.LoadBatchActions(ref xml);
                 }
                 catch (Exception exception)
                 {
-                    Application.StatusBar.SetText(exception.Message, BoMessageTime.bmt_Short, BoStatusBarMessageType.smt_Error);
+                    oApplication.StatusBar.SetText(exception.Message, BoMessageTime.bmt_Short, BoStatusBarMessageType.smt_Error);
                 }
             }
 
@@ -155,11 +155,11 @@ namespace ChessIT.GeracaoOS.Controller
                     xml = xml.Replace("from dummy", "");
 #endif
 
-                    Application.LoadBatchActions(ref xml);
+                    oApplication.LoadBatchActions(ref xml);
                 }
                 catch (Exception exception)
                 {
-                    Application.StatusBar.SetText(exception.Message, BoMessageTime.bmt_Short, BoStatusBarMessageType.smt_Error);
+                    oApplication.StatusBar.SetText(exception.Message, BoMessageTime.bmt_Short, BoStatusBarMessageType.smt_Error);
                 }
             }
         }
@@ -172,28 +172,28 @@ namespace ChessIT.GeracaoOS.Controller
             {
                 if (pVal.FormTypeEx == "FrmGeraOS")
                 {
-                    Form form = Application.Forms.Item(pVal.FormUID);
+                    Form form = oApplication.Forms.Item(pVal.FormUID);
 
                     new View.GeraOSView(form);
                 }
 
                 if (pVal.FormTypeEx == "FrmCnfIntegraBalanca")
                 {
-                    Form form = Application.Forms.Item(pVal.FormUID);
+                    Form form = oApplication.Forms.Item(pVal.FormUID);
 
                     new View.CnfIntegraBalancaView(form);
                 }
 
                 if (pVal.FormTypeEx == "FrmNotasGeradas")
                 {
-                    Form form = Application.Forms.Item(pVal.FormUID);
+                    Form form = oApplication.Forms.Item(pVal.FormUID);
 
                     new View.NotasGeradasView(form, m_NotasGeradas);
                 }
 
                 if (pVal.FormTypeEx == "139") //Pedido de Venda (OS)
                 {
-                    Form form = Application.Forms.Item(pVal.FormUID);
+                    Form form = oApplication.Forms.Item(pVal.FormUID);
 
                     Item _stParPeso = form.Items.Add("stParPeso", BoFormItemTypes.it_STATIC);
                     _stParPeso.Top = form.Items.Item("1980000501").Top - 70;
@@ -243,9 +243,9 @@ namespace ChessIT.GeracaoOS.Controller
                 bool sucesso = false;
                 string mensagem = "";
 
-                Application.StatusBar.SetText("Lendo peso...", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Warning);
+                oApplication.StatusBar.SetText("Lendo peso...", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Warning);
 
-                ProgressBar progressBar = Application.StatusBar.CreateProgressBar("Lendo peso...", 100, false);
+                ProgressBar progressBar = oApplication.StatusBar.CreateProgressBar("Lendo peso...", 100, false);
 
                 string ip = "";
                 string porta = "";
@@ -259,7 +259,7 @@ namespace ChessIT.GeracaoOS.Controller
                     {
                         string query = @"SELECT * FROM ""@INTCFG"" ";
 
-                        recordSet = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                        recordSet = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
                         recordSet.DoQuery(query);
 
                         if (!recordSet.EoF)
@@ -283,7 +283,7 @@ namespace ChessIT.GeracaoOS.Controller
 
                     progressBar.Value = 10;
 
-                    Form form = Application.Forms.Item(pVal.FormUID);
+                    Form form = oApplication.Forms.Item(pVal.FormUID);
 
                     Matrix matrix = (Matrix)form.Items.Item("38").Specific;
 
@@ -594,11 +594,11 @@ namespace ChessIT.GeracaoOS.Controller
 
                 if (sucesso)
                 {
-                    Controller.MainController.Application.StatusBar.SetText("Operação completada com êxito", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Success);
+                    Controller.MainController.oApplication.StatusBar.SetText("Operação completada com êxito", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Success);
                 }
                 else
                 {
-                    Controller.MainController.Application.StatusBar.SetText(mensagem);
+                    Controller.MainController.oApplication.StatusBar.SetText(mensagem);
                 }
             }
         }
@@ -628,11 +628,11 @@ namespace ChessIT.GeracaoOS.Controller
                     xml = xml.Replace("from dummy", "");
 #endif
 
-                Application.LoadBatchActions(ref xml);
+                oApplication.LoadBatchActions(ref xml);
             }
             catch (Exception exception)
             {
-                Application.StatusBar.SetText(exception.Message, BoMessageTime.bmt_Short, BoStatusBarMessageType.smt_Error);
+                oApplication.StatusBar.SetText(exception.Message, BoMessageTime.bmt_Short, BoStatusBarMessageType.smt_Error);
             }
         }
 
@@ -666,7 +666,7 @@ namespace ChessIT.GeracaoOS.Controller
 
                 try
                 {
-                    Application.Forms.GetForm(formType, count);
+                    oApplication.Forms.GetForm(formType, count);
                 }
                 catch
                 {

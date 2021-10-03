@@ -1,5 +1,3 @@
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\JBC.ChessITServices.exe.config
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\JBC.ChessITServices.exe
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\JBC.ChessITServices.pdb
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\Castle.Core.dll
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\Castle.Facilities.Logging.dll
@@ -15,12 +13,14 @@ C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\D
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\obj\Debug\JBC.ChessITServices.csproj.AssemblyReference.cache
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\obj\Debug\JBC.ChessITServices.csproj.CoreCompileInputs.cache
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\obj\Debug\JBC.ChessITServices.csproj.CopyComplete
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\obj\Debug\JBC.ChessITServices.exe
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\obj\Debug\JBC.ChessITServices.pdb
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\Menu.xml
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\SrfFiles\FrmCnfIntegraBalanca.srf
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\SrfFiles\FrmGeraOS.srf
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\SrfFiles\FrmNotasGeradas.srf
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\ChessIT.GeracaoOS.exe
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\ChessIT.GeracaoOS.pdb
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\ChessIT.GeracaoOS.exe.config
+C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\JBC.ChessITServices.dll.config
+C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\JBC.ChessITServices.dll
+C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\obj\Debug\JBC.ChessITServices.dll
+C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\ChessIT.GeracaoOS.dll
+C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.ChessITServices\bin\Debug\ChessIT.GeracaoOS.dll.config

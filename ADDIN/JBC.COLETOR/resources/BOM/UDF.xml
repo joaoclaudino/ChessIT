@@ -6,10 +6,10 @@
 		</AdmInfo>
 		<UserFieldsMD>
 			<row>
-				<Name>SENHA_COLETOR</Name>
+				<Name>SENHA_Coletor</Name>
 				<Type>db_Alpha</Type>
 				<Size>15</Size>
-				<Description>SENHA COLETOR</Description>
+				<Description>SENHA Coletor</Description>
 				<SubType>st_None</SubType>
 				<LinkedTable></LinkedTable>
 				<DefaultValue></DefaultValue>

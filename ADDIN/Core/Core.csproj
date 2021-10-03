@@ -213,9 +213,13 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\JBC.ChessITServices\JBC.ChessITServices.csproj">
-      <Project>{8e91e7de-d4c3-4245-be80-bf896364e453}</Project>
-      <Name>JBC.ChessITServices</Name>
+    <ProjectReference Include="..\..\ChessIT.GeracaoOS\ChessIT.GeracaoOS\ChessIT.GeracaoOS.csproj">
+      <Project>{460225ae-7b75-49a5-940f-3f0299265cca}</Project>
+      <Name>ChessIT.GeracaoOS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JBC.COLETOR\JBC.COLETOR.csproj">
+      <Project>{511696fb-29ec-4294-91bc-c57fc360aa70}</Project>
+      <Name>JBC.COLETOR</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

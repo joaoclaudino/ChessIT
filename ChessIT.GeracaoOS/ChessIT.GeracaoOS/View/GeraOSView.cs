@@ -31,7 +31,7 @@ namespace ChessIT.GeracaoOS.View
 
 
 
-            Controller.MainController.Application.ItemEvent += HandleItemEvent;
+            Controller.MainController.oApplication.ItemEvent += HandleItemEvent;
         }
 
         private void HandleItemEvent(string formUID, ref ItemEvent pVal, out bool bubbleEvent)
@@ -297,7 +297,7 @@ namespace ChessIT.GeracaoOS.View
                                                 if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
                                                 {
                                                     SAPbobsCOM.Documents oOrder;
-                                                    oOrder = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                                    oOrder = (SAPbobsCOM.Documents)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
                                                     if (oOrder.GetByKey(Convert.ToInt32(gridPes.DataTable.GetValue(1, i).ToString())))
                                                     {
                                                         double dM3Order = VolumeM3TotalOS(gridPes.DataTable.GetValue(1, i).ToString());
@@ -369,7 +369,7 @@ namespace ChessIT.GeracaoOS.View
 
                                                         if (oOrder.Update() == 0)
                                                         {
-                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                            Controller.MainController.oApplication.StatusBar.SetText(
                                                                 string.Format("OS Nº {0} Peso Bruto Atualizado!!", oOrder.DocEntry)
                                                                 , BoMessageTime.bmt_Short
                                                                 , BoStatusBarMessageType.smt_Success
@@ -379,8 +379,8 @@ namespace ChessIT.GeracaoOS.View
                                                         {
                                                             int temp_int;
                                                             string temp_string;
-                                                            Controller.MainController.Company.GetLastError(out temp_int, out temp_string);
-                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                            Controller.MainController.oCompany.GetLastError(out temp_int, out temp_string);
+                                                            Controller.MainController.oApplication.StatusBar.SetText(
                                                                 string.Format("Erro ao Alterar OS Nº {0} !!", oOrder.DocEntry)
                                                                 , BoMessageTime.bmt_Short
                                                                 , BoStatusBarMessageType.smt_Error
@@ -413,7 +413,7 @@ namespace ChessIT.GeracaoOS.View
                                                 if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
                                                 {
                                                     SAPbobsCOM.Documents oOrder;
-                                                    oOrder = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                                    oOrder = (SAPbobsCOM.Documents)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
                                                     if (oOrder.GetByKey(Convert.ToInt32(gridPes.DataTable.GetValue(1, i).ToString())))
                                                     {
                                                         //double dM3Order = Convert.ToDouble(oOrder.UserFields.Fields.Item("U_VolumeM3").Value);
@@ -485,7 +485,7 @@ namespace ChessIT.GeracaoOS.View
 
                                                         if (oOrder.Update() == 0)
                                                         {
-                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                            Controller.MainController.oApplication.StatusBar.SetText(
                                                                 string.Format("OS Nº {0} Peso Liquido Atualizado!!", oOrder.DocEntry)
                                                                 , BoMessageTime.bmt_Short
                                                                 , BoStatusBarMessageType.smt_Success
@@ -495,8 +495,8 @@ namespace ChessIT.GeracaoOS.View
                                                         {
                                                             int temp_int;
                                                             string temp_string;
-                                                            Controller.MainController.Company.GetLastError(out temp_int, out temp_string);
-                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                            Controller.MainController.oCompany.GetLastError(out temp_int, out temp_string);
+                                                            Controller.MainController.oApplication.StatusBar.SetText(
                                                                 string.Format("Erro ao Alterar OS Nº {0} !!", oOrder.DocEntry)
                                                                 , BoMessageTime.bmt_Short
                                                                 , BoStatusBarMessageType.smt_Error
@@ -567,7 +567,7 @@ namespace ChessIT.GeracaoOS.View
 
 
                                                     SAPbobsCOM.Documents oOrder;
-                                                    oOrder = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                                    oOrder = (SAPbobsCOM.Documents)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
                                                     if (oOrder.GetByKey(Convert.ToInt32(gridPes.DataTable.GetValue(1, i).ToString())))
                                                     {
                                                         string tipoPesagem = ((ComboBox)Form.Items.Item("cbDCol").Specific).Selected.Value;
@@ -602,7 +602,7 @@ namespace ChessIT.GeracaoOS.View
 
                                                         if (oOrder.Update() == 0)
                                                         {
-                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                            Controller.MainController.oApplication.StatusBar.SetText(
                                                                 string.Format("OS Nº {0} Tara Atualizada!!", oOrder.DocEntry)
                                                                 , BoMessageTime.bmt_Short
                                                                 , BoStatusBarMessageType.smt_Success
@@ -612,8 +612,8 @@ namespace ChessIT.GeracaoOS.View
                                                         {
                                                             int temp_int;
                                                             string temp_string;
-                                                            Controller.MainController.Company.GetLastError(out temp_int, out temp_string);
-                                                            Controller.MainController.Application.StatusBar.SetText(
+                                                            Controller.MainController.oCompany.GetLastError(out temp_int, out temp_string);
+                                                            Controller.MainController.oApplication.StatusBar.SetText(
                                                                 string.Format("Erro ao Alterar OS Nº {0} !!", oOrder.DocEntry)
                                                                 , BoMessageTime.bmt_Short
                                                                 , BoStatusBarMessageType.smt_Error
@@ -650,7 +650,7 @@ namespace ChessIT.GeracaoOS.View
                                     }
                                 }
                                 if (pVal.ItemUID == "btUptPlaca") {
-                                    if (Controller.MainController.Application.MessageBox("Confirma Atualização das Placas da OS?", 1, "Sim", "Não") == 1)
+                                    if (Controller.MainController.oApplication.MessageBox("Confirma Atualização das Placas da OS?", 1, "Sim", "Não") == 1)
                                     {
                                         LogHelper.InfoWarning(string.Format("Atualização das Placas Iniciada...!!"));
 
@@ -659,7 +659,7 @@ namespace ChessIT.GeracaoOS.View
                                         SAPbobsCOM.Recordset recordSetPlaca = null;
                                         try
                                         {
-                                            recordSetPlaca = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                                            recordSetPlaca = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
                                             string sSQL = string.Format(@"
 		                                                    SELECT 
 		                                                        T0.""U_Placa"" ""Placa""
@@ -686,7 +686,7 @@ namespace ChessIT.GeracaoOS.View
                                             if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
                                             {
                                                 SAPbobsCOM.Documents oOrder;
-                                                oOrder = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                                oOrder = (SAPbobsCOM.Documents)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
                                                 bool bModificou = false;
                                                 if (oOrder.GetByKey(Convert.ToInt32(gridPes.DataTable.GetValue(1, i).ToString())))
                                                 {
@@ -723,7 +723,7 @@ namespace ChessIT.GeracaoOS.View
                                                 {
                                                     if (oOrder.Update() == 0)
                                                     {
-                                                        Controller.MainController.Application.StatusBar.SetText(
+                                                        Controller.MainController.oApplication.StatusBar.SetText(
                                                             string.Format("OS Nº {0} Atualizada!!", oOrder.DocEntry)
                                                             , BoMessageTime.bmt_Short
                                                             , BoStatusBarMessageType.smt_Success
@@ -733,8 +733,8 @@ namespace ChessIT.GeracaoOS.View
                                                     {
                                                         int temp_int;
                                                         string temp_string;
-                                                        Controller.MainController.Company.GetLastError(out temp_int, out temp_string);
-                                                        Controller.MainController.Application.StatusBar.SetText(
+                                                        Controller.MainController.oCompany.GetLastError(out temp_int, out temp_string);
+                                                        Controller.MainController.oApplication.StatusBar.SetText(
                                                             string.Format("Erro ao Alterar OS Nº {0} !!", oOrder.DocEntry)
                                                             , BoMessageTime.bmt_Short
                                                             , BoStatusBarMessageType.smt_Error
@@ -749,7 +749,7 @@ namespace ChessIT.GeracaoOS.View
                                         }
 
                                         Controller.MainController.LimparObjeto(recordSetPlaca);
-                                        Controller.MainController.Application.StatusBar.SetText(
+                                        Controller.MainController.oApplication.StatusBar.SetText(
                                             string.Format("Atualização Concluída!!")
                                             , BoMessageTime.bmt_Short
                                             , BoStatusBarMessageType.smt_Success
@@ -982,7 +982,7 @@ namespace ChessIT.GeracaoOS.View
                                 }
                                 else
                                 {
-                                    Controller.MainController.Application.ItemEvent -= HandleItemEvent;
+                                    Controller.MainController.oApplication.ItemEvent -= HandleItemEvent;
                                 }
                             }
                             break;
@@ -1147,7 +1147,7 @@ namespace ChessIT.GeracaoOS.View
             }
             catch (Exception exception)
             {
-                Controller.MainController.Application.StatusBar.SetText(exception.Message);
+                Controller.MainController.oApplication.StatusBar.SetText(exception.Message);
             }
         }
         private double PesoEstimadoTotalSelecionados()
@@ -1179,7 +1179,7 @@ namespace ChessIT.GeracaoOS.View
                 "
                 , sDocEntrys);
 
-                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
 
                 recordSetTotal.DoQuery(sSQL);
 
@@ -1222,7 +1222,7 @@ namespace ChessIT.GeracaoOS.View
                 "
                 , sDocEntry);
 
-                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
 
                 recordSetTotal.DoQuery(sSQL);
 
@@ -1262,7 +1262,7 @@ namespace ChessIT.GeracaoOS.View
 
                 ", docEntry);
 
-                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
 
                 recordSetTotal.DoQuery(sSQL);
 
@@ -1313,7 +1313,7 @@ namespace ChessIT.GeracaoOS.View
                 diaColeta
                 , sDocEntrys);
 
-                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                recordSetTotal = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
 
                 recordSetTotal.DoQuery(sSQL);
 
@@ -1375,7 +1375,7 @@ namespace ChessIT.GeracaoOS.View
                                             ", DocEntry);
 
 
-                recordSetVerificacao = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                recordSetVerificacao = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
                 recordSetVerificacao.DoQuery(SQL);
                 if (recordSetVerificacao.RecordCount > 0)
                 {
@@ -1507,7 +1507,7 @@ namespace ChessIT.GeracaoOS.View
         private void CarregarPes()
         {
 
-            Controller.MainController.Application.StatusBar.SetText(
+            Controller.MainController.oApplication.StatusBar.SetText(
                 "Consulta Pessagem Iniciada..."
                 , BoMessageTime.bmt_Short
                 , BoStatusBarMessageType.smt_Warning
@@ -1602,7 +1602,7 @@ namespace ChessIT.GeracaoOS.View
 
                 ConfiguraGridPes();
 
-                Controller.MainController.Application.StatusBar.SetText(
+                Controller.MainController.oApplication.StatusBar.SetText(
                     "Consulta Pessagem Finalizada!!!"
                     , BoMessageTime.bmt_Short
                     , BoStatusBarMessageType.smt_Success
@@ -1809,7 +1809,7 @@ namespace ChessIT.GeracaoOS.View
 
             if (dataSaidaOS == DateTime.MinValue)
             {
-                Controller.MainController.Application.StatusBar.SetText("Informe a data de saída da OS", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
+                Controller.MainController.oApplication.StatusBar.SetText("Informe a data de saída da OS", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
 
                 return;
             }
@@ -1817,14 +1817,14 @@ namespace ChessIT.GeracaoOS.View
 
             if (horaSaidaOS == "")
             {
-                Controller.MainController.Application.StatusBar.SetText("Informe a hora de saída da OS", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
+                Controller.MainController.oApplication.StatusBar.SetText("Informe a hora de saída da OS", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
 
                 return;
             }
 
             if (placaOS == "")
             {
-                Controller.MainController.Application.StatusBar.SetText("Informe a placa", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
+                Controller.MainController.oApplication.StatusBar.SetText("Informe a placa", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
 
                 return;
             }
@@ -1832,15 +1832,15 @@ namespace ChessIT.GeracaoOS.View
 
             if (diaColeta == "[Selecionar]")
             {
-                Controller.MainController.Application.StatusBar.SetText("Informe o dia da coleta", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
+                Controller.MainController.oApplication.StatusBar.SetText("Informe o dia da coleta", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
 
                 return;
             }
 
-            Controller.MainController.Application.StatusBar.SetText("Gerando ordens de serviço", BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Warning);
+            Controller.MainController.oApplication.StatusBar.SetText("Gerando ordens de serviço", BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Warning);
 
-            if (!Controller.MainController.Company.InTransaction)
-                Controller.MainController.Company.StartTransaction();
+            if (!Controller.MainController.oCompany.InTransaction)
+                Controller.MainController.oCompany.StartTransaction();
             try
             {
                 
@@ -1852,7 +1852,7 @@ namespace ChessIT.GeracaoOS.View
                 {
                     Dictionary<string, string> notasVencidas = new Dictionary<string, string>();
 
-                    SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                    SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
                     try
                     {
                         if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
@@ -1870,7 +1870,7 @@ namespace ChessIT.GeracaoOS.View
                             SAPbobsCOM.Recordset recordSetVerificacao = null;
                             try
                             {
-                                recordSetVerificacao = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                                recordSetVerificacao = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
                                 recordSetVerificacao.DoQuery(queryVerificacao);
                                 while (!recordSetVerificacao.EoF)
                                 {
@@ -1887,7 +1887,7 @@ namespace ChessIT.GeracaoOS.View
                             
                             if (notasVencidas.Count > 0)
                             {
-                                Controller.MainController.Application.MessageBox(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
+                                Controller.MainController.oApplication.MessageBox(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
                                     string.Join(",", notasVencidas.Select(r => r.Key).ToArray()), notasVencidas.Select(r => r.Value).First()));
 
                                 continue;
@@ -1914,7 +1914,7 @@ namespace ChessIT.GeracaoOS.View
                             SAPbobsCOM.Recordset recordSet = null;
                             try
                             {
-                                recordSet = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                                recordSet = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
                                 recordSet.DoQuery(query);
                                 if (!recordSet.EoF)
                                 {
@@ -1977,7 +1977,7 @@ namespace ChessIT.GeracaoOS.View
                                         int codigoErro;
                                         string msgErro;
 
-                                        Controller.MainController.Company.GetLastError(out codigoErro, out msgErro);
+                                        Controller.MainController.oCompany.GetLastError(out codigoErro, out msgErro);
 
                                         throw new Exception(msgErro);
                                     }
@@ -1999,11 +1999,11 @@ namespace ChessIT.GeracaoOS.View
                     }
                 }
 
-                Controller.MainController.Company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
+                Controller.MainController.oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
 
                 if (osGeradas)
                 {
-                    Controller.MainController.Application.MessageBox("Ordens de serviço geradas", 1, "OK");
+                    Controller.MainController.oApplication.MessageBox("Ordens de serviço geradas", 1, "OK");
 
                     Form.DataSources.UserDataSources.Item("nrPlacaOS").Value = string.Empty;
                     Form.DataSources.UserDataSources.Item("dtSaidaOS").Value = string.Empty;
@@ -2018,10 +2018,10 @@ namespace ChessIT.GeracaoOS.View
             }
             catch (Exception ex)
             {
-                if (Controller.MainController.Company.InTransaction)
-                    Controller.MainController.Company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
+                if (Controller.MainController.oCompany.InTransaction)
+                    Controller.MainController.oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
 
-                Controller.MainController.Application.MessageBox("Erro ao gerar ordens de serviço: " + ex.Message, 1, "OK");
+                Controller.MainController.oApplication.MessageBox("Erro ao gerar ordens de serviço: " + ex.Message, 1, "OK");
             }
         }
 
@@ -2033,15 +2033,15 @@ namespace ChessIT.GeracaoOS.View
 
             if (tipoFaturamento == "")
             {
-                Controller.MainController.Application.StatusBar.SetText("Selecionar o tipo de faturamento", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
+                Controller.MainController.oApplication.StatusBar.SetText("Selecionar o tipo de faturamento", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
 
                 return;
             }
 
-            Controller.MainController.Application.StatusBar.SetText("Gerando faturas", BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Warning);
+            Controller.MainController.oApplication.StatusBar.SetText("Gerando faturas", BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Warning);
 
-            if (!Controller.MainController.Company.InTransaction)
-                Controller.MainController.Company.StartTransaction();
+            if (!Controller.MainController.oCompany.InTransaction)
+                Controller.MainController.oCompany.StartTransaction();
             try
             {
                 List<Model.FaturaModel> faturaList = new List<Model.FaturaModel>();
@@ -2072,7 +2072,7 @@ namespace ChessIT.GeracaoOS.View
                         SAPbobsCOM.Recordset recordSet = null;
                         try
                         {
-                            recordSet = (SAPbobsCOM.Recordset)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                            recordSet = (SAPbobsCOM.Recordset)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
                             recordSet.DoQuery(query);
                             while (!recordSet.EoF)
                             {
@@ -2115,8 +2115,8 @@ namespace ChessIT.GeracaoOS.View
 
                 foreach (var faturaGroup in faturaGroupList)
                 {
-                    SAPbobsCOM.Documents documentNFSE = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
-                    SAPbobsCOM.Documents documentFAT = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
+                    SAPbobsCOM.Documents documentNFSE = (SAPbobsCOM.Documents)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
+                    SAPbobsCOM.Documents documentFAT = (SAPbobsCOM.Documents)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
                     try
                     {
                         int erro = 0;
@@ -2156,12 +2156,12 @@ namespace ChessIT.GeracaoOS.View
                                 {
                                     string msg = "";
 
-                                    Controller.MainController.Company.GetLastError(out erro, out msg);
+                                    Controller.MainController.oCompany.GetLastError(out erro, out msg);
 
                                     throw new Exception(erro + " - " + msg);
                                 }
 
-                                notasGeradas.Add(Convert.ToInt32(Controller.MainController.Company.GetNewObjectKey()));
+                                notasGeradas.Add(Convert.ToInt32(Controller.MainController.oCompany.GetNewObjectKey()));
 
                                 break;
                             case "C-TRT":
@@ -2218,14 +2218,14 @@ namespace ChessIT.GeracaoOS.View
                                 {
                                     string msg = "";
 
-                                    Controller.MainController.Company.GetLastError(out erro, out msg);
+                                    Controller.MainController.oCompany.GetLastError(out erro, out msg);
 
                                     throw new Exception(erro + " - " + msg);
                                 }
 
                                 if (tipoFaturamento == "1")
                                 {
-                                    int nota = Convert.ToInt32(Controller.MainController.Company.GetNewObjectKey());
+                                    int nota = Convert.ToInt32(Controller.MainController.oCompany.GetNewObjectKey());
                                     
                                     foreach (Model.FaturaModel faturaModel in faturaGroup)
                                     {
@@ -2233,7 +2233,7 @@ namespace ChessIT.GeracaoOS.View
                                     }
                                 }
 
-                                notasGeradas.Add(Convert.ToInt32(Controller.MainController.Company.GetNewObjectKey()));
+                                notasGeradas.Add(Convert.ToInt32(Controller.MainController.oCompany.GetNewObjectKey()));
 
                             break;
                             case "LOC":
@@ -2267,7 +2267,7 @@ namespace ChessIT.GeracaoOS.View
 
                                         if (faturaModel.ManBtchNum)
                                         {
-                                            SAPbobsCOM.Documents oDocumentsRef = (SAPbobsCOM.Documents)Controller.MainController.Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                            SAPbobsCOM.Documents oDocumentsRef = (SAPbobsCOM.Documents)Controller.MainController.oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
                                             try
                                             {
                                                 for (int x = 0; x < oDocumentsRef.Lines.BatchNumbers.Count; x++)
@@ -2300,12 +2300,12 @@ namespace ChessIT.GeracaoOS.View
                                     {
                                         string msg = "";
 
-                                        Controller.MainController.Company.GetLastError(out erro, out msg);
+                                        Controller.MainController.oCompany.GetLastError(out erro, out msg);
 
                                         throw new Exception(erro + " - " + msg);
                                     }
 
-                                    notasGeradas.Add(Convert.ToInt32(Controller.MainController.Company.GetNewObjectKey()));
+                                    notasGeradas.Add(Convert.ToInt32(Controller.MainController.oCompany.GetNewObjectKey()));
                                 }
 
                                 bool gerarFAT = false;
@@ -2347,12 +2347,12 @@ namespace ChessIT.GeracaoOS.View
                                     {
                                         string msg = "";
 
-                                        Controller.MainController.Company.GetLastError(out erro, out msg);
+                                        Controller.MainController.oCompany.GetLastError(out erro, out msg);
 
                                         throw new Exception(erro + " - " + msg);
                                     }
 
-                                    notasGeradas.Add(Convert.ToInt32(Controller.MainController.Company.GetNewObjectKey()));
+                                    notasGeradas.Add(Convert.ToInt32(Controller.MainController.oCompany.GetNewObjectKey()));
                                 }
 
 
@@ -2369,7 +2369,7 @@ namespace ChessIT.GeracaoOS.View
                     }
                 }
 
-                Controller.MainController.Company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
+                Controller.MainController.oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
 
                 if (notasTransporteCliente.Count() > 0)
                 {
@@ -2395,7 +2395,7 @@ namespace ChessIT.GeracaoOS.View
                     }
                 }
 
-                Controller.MainController.Application.StatusBar.SetText("Faturas geradas", BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Success);
+                Controller.MainController.oApplication.StatusBar.SetText("Faturas geradas", BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Success);
 
                 Controller.MainController.OpenNotasGeradasView(notasGeradas);
 
@@ -2407,10 +2407,10 @@ namespace ChessIT.GeracaoOS.View
             }
             catch (Exception ex)
             {                
-                if (Controller.MainController.Company.InTransaction)
-                    Controller.MainController.Company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
+                if (Controller.MainController.oCompany.InTransaction)
+                    Controller.MainController.oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
 
-                Controller.MainController.Application.StatusBar.SetText("Erro ao gerar faturas: " + ex.Message, BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Error);
+                Controller.MainController.oApplication.StatusBar.SetText("Erro ao gerar faturas: " + ex.Message, BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Error);
             }
         }
     }
