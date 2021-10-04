@@ -324,7 +324,7 @@ namespace JBC.Coletor.View
                                                         {
                                                             dPeso = Convert.ToDouble(((EditText)Form.Items.Item("edtPeso").Specific).Value);
                                                         }
-                                                            
+                                                        
 
                                                         //qual a percentagem do item no total m3
                                                         double p = (dM3Order * 100) / TotalQuantidadeM3;
@@ -333,7 +333,7 @@ namespace JBC.Coletor.View
                                                         //double dPesoBruto = (dPeso / 100) * p;
 
 
-                                                        double PesoLiquido = (p/100) * dPeso;
+                                                        double PesoLiquido = ((p/100) * (dPeso- Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value)));
                                                             //- Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value);
                                                         //Se[Peso Líquido] > 0,000000 significa que a ordem de serviço já possui o peso da[Tara] e com o[Peso Bruto]
                                                         //inserido no passo(IV)
@@ -352,7 +352,7 @@ namespace JBC.Coletor.View
                                                             oOrder.UserFields.Fields.Item("U_DataEntradaOS").Value = DateTime.Now;
                                                             oOrder.UserFields.Fields.Item("U_HoraEntradaOS").Value = myTime;
 
-                                                            oOrder.UserFields.Fields.Item("U_PesoLiq").Value = PesoLiquido- Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value);
+                                                            oOrder.UserFields.Fields.Item("U_PesoLiq").Value = PesoLiquido;
                                                             oOrder.UserFields.Fields.Item("U_PesoBruto").Value = dPeso;
                                                         }
                                                         //o Se[Peso Líquido] <= [Peso Bruto] significa que a ordem de serviço em questão

@@ -37,3 +37,4 @@ C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.COLETOR\bin\x64\Debug
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.COLETOR\bin\x64\Debug\SrfFiles\FrmCnfIntegraBalanca.srf
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.COLETOR\bin\x64\Debug\SrfFiles\FrmGeraOS.srf
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.COLETOR\bin\x64\Debug\SrfFiles\FrmNotasGeradas.srf
+C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.COLETOR\obj\x64\Debug\JBC.COLETOR.csproj.AssemblyReference.cache
