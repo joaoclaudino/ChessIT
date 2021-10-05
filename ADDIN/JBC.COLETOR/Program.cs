@@ -188,7 +188,7 @@ namespace JBC.Coletor
                     xml = xml.Replace("uid=\"FrmCnfIntegraBalanca\"", string.Format("uid=\"{0}\"", formUID));
 
 #if DEBUG
-                    xml = xml.Replace("from dummy", "");
+                    //xml = xml.Replace("from dummy", "");
 #endif
 
                     oApplication.LoadBatchActions(ref xml);
@@ -513,7 +513,7 @@ namespace JBC.Coletor
                 xml = xml.Replace("uid=\"FrmNotasGeradas\"", string.Format("uid=\"{0}\"", formUID));
 
 #if DEBUG
-                xml = xml.Replace("from dummy", "");
+                //xml = xml.Replace("from dummy", "");
 #endif
 
                 oApplicationS.LoadBatchActions(ref xml);
