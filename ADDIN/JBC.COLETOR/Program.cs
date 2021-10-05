@@ -356,8 +356,8 @@ namespace JBC.Coletor
                             {
                                 string clearedLine = line.Replace("\\", "").Replace(" ", "").Replace("\"", "").Trim();
 
-                                if (clearedLine.Substring(6, 8) == hora)
-                                {
+                                //if (clearedLine.Substring(6, 8) == hora)
+                               // {
                                     linhaEncontrada = true;
 
                                     string peso = clearedLine.Substring(0, 6);
@@ -440,7 +440,7 @@ namespace JBC.Coletor
 
                                     break;
 
-                                }
+                                //}
                             }
 
                             if (!linhaEncontrada)

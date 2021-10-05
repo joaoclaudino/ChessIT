@@ -332,7 +332,7 @@ namespace JBC.Coletor.View
 
                                                         //double dPesoBruto = (dPeso / 100) * p;
 
-
+                                                        double tara = Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value);
                                                         double PesoLiquido = ((p/100) * (dPeso- Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value)));
                                                             //- Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value);
                                                         //Se[Peso Líquido] > 0,000000 significa que a ordem de serviço já possui o peso da[Tara] e com o[Peso Bruto]
@@ -1465,6 +1465,7 @@ namespace JBC.Coletor.View
                                                              or ('{8}' = '7' AND OOAT.""U_DiaColetDom"" = 'Sim'))
                                             and ('{9}' = '' or '{9}' = OOAT.""U_Motorista"")
                                             and ('{10}' = '' or '{10}' = ""@VEICULOS"".""U_Placa"")
+                                            
                                             ", selecionar, cliente, dataDe == "" ? "1990-01-01" : Convert.ToDateTime(dataDe).ToString("yyyy-MM-dd"), dataAte == "" ? "1990-01-01" : Convert.ToDateTime(dataAte).ToString("yyyy-MM-dd"), nrContrato, modeloContrato, centroCusto, nrRota, diaColeta, motorista, placa);
 
             Form.Freeze(true);
@@ -1839,59 +1840,48 @@ namespace JBC.Coletor.View
 
             Program.oApplicationS.StatusBar.SetText("Gerando ordens de serviço", BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Warning);
 
-            if (!Program.oCompanyS.InTransaction)
-                Program.oCompanyS.StartTransaction();
-            try
+            //PEGA TODOS OS SELECIONADOS
+            Grid gridContratos = (Grid)Form.Items.Item("gridContr").Specific;
+            List<int> absIDs = new List<int>();
+            for (int row = 0; row < gridContratos.Rows.Count; row++)
             {
-                
-                Grid gridContratos = (Grid)Form.Items.Item("gridContr").Specific;
+                if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
+                {
+                    if (absIDs.Where(a => a == Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row))).Count() == 0)
+                    {
+                        absIDs.Add(Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)));
+                    }
+                }
+            }
+            bool osGeradas = false;
+            //string sTelasGeradas
+            if (!Program.oCompanyS.InTransaction)
+            Program.oCompanyS.StartTransaction();
+            //para cada absId faz o loop agrupando as linhas do mesmo...
+            foreach (int absID in absIDs)
+            {
+                LogHelper.InfoSuccess(string.Format("Processando OS {0}", absID));
+                //NotasVencidas(absID).Count();
 
-                bool osGeradas = false;
+                if (NotasVencidas(absID).Count() > 0)
+                {
+                    LogHelper.InfoError(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
+                        string.Join(",", NotasVencidas(absID).Select(r => r.Key).ToArray()), NotasVencidas(absID).Select(r => r.Value).First()));
+                    continue;
+                }
 
+                //cabeçalho
+                SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+
+                //linhas
                 for (int row = 0; row < gridContratos.Rows.Count; row++)
                 {
-                    Dictionary<string, string> notasVencidas = new Dictionary<string, string>();
-
-                    SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
-                    try
+                    if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
                     {
-                        if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
+                        if (Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)) == absID)
                         {
-                            int absID = Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row));
                             int agrLineNum = Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("AgrLineNum")).GetText(row));
 
-                            string queryVerificacao = string.Format(@"select ""DocNum"", ""CardName"" from OINV 
-                                                      where ""CardCode"" = (select ""BpCode"" from OOAT where OOAT.""AbsID"" = {0})
-                                                      and ""DocStatus"" = 'O'
-                                                      and exists (select * from INV6 
-                                                                  where INV6.""DocEntry"" = OINV.""DocEntry"" 
-                                                                  and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 30)", absID);
-
-                            SAPbobsCOM.Recordset recordSetVerificacao = null;
-                            try
-                            {
-                                recordSetVerificacao = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-                                recordSetVerificacao.DoQuery(queryVerificacao);
-                                while (!recordSetVerificacao.EoF)
-                                {
-                                    notasVencidas.Add(recordSetVerificacao.Fields.Item(0).Value.ToString(), recordSetVerificacao.Fields.Item(1).Value.ToString());
-
-                                    recordSetVerificacao.MoveNext();
-                                }
-                            }
-                            finally
-                            {
-                                System.Runtime.InteropServices.Marshal.ReleaseComObject(recordSetVerificacao);
-                                GC.Collect();
-                            }        
-                            
-                            if (notasVencidas.Count > 0)
-                            {
-                                Program.oApplicationS.MessageBox(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
-                                    string.Join(",", notasVencidas.Select(r => r.Key).ToArray()), notasVencidas.Select(r => r.Value).First()));
-
-                                continue;
-                            }
 
                             string query = string.Format(@"select OOAT.""BpCode"",                                                                  
                                                                   OOAT.""U_Motorista"",
@@ -1902,7 +1892,15 @@ namespace JBC.Coletor.View
                                                                   COALESCE(""@VEICULOS_DADOS"".""U_Tara"", 0),                                                                  
                                                                   OOAT.""U_Rota"",
                                                                   COALESCE(""@VEICULOS"".""U_UFPlaca"", ''),
-                                                                  (SELECT T0.""ID"" FROM OUSG T0 WHERE T0.""Usage"" = OOAT.""U_Utilizacao"")
+                                                                  (	
+                                                                        select 
+		                                                                    coalesce(OUSG.ID,0)
+	                                                                    from 
+		                                                                    OITM 
+		                                                                    inner join OUSG on OITM.""U_Utilizacao"" =OUSG.""Usage""
+                                                                        where
+                                                                            OITM.""ItemCode"" = OAT1.""ItemCode""
+                                                                    )
                                                             from OOAT
                                                             inner join OAT1 on OAT1.""AgrNo"" = OOAT.""AbsID""                                                            
                                                             left join ""@VEICULOS"" ON ""@VEICULOS"".""U_Placa"" = '{2}'
@@ -1912,117 +1910,320 @@ namespace JBC.Coletor.View
                                                             ", absID, agrLineNum, placaOS);
 
                             SAPbobsCOM.Recordset recordSet = null;
-                            try
+
+                            recordSet = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                            recordSet.DoQuery(query);
+                            if (!recordSet.EoF)
                             {
-                                recordSet = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-                                recordSet.DoQuery(query);
-                                if (!recordSet.EoF)
-                                {
-                                    DateTime docDate = DateTime.Now;
-                                    DateTime docDueDate = dataSaidaOS;
-                                    DateTime taxDate = DateTime.Now;
+                                DateTime docDate = DateTime.Now;
+                                DateTime docDueDate = dataSaidaOS;
+                                DateTime taxDate = DateTime.Now;
 
-                                    string cardCode = recordSet.Fields.Item(0).Value.ToString();                                    
-                                    string motorista = recordSet.Fields.Item(1).Value.ToString();
-                                    string itemCode = recordSet.Fields.Item(2).Value.ToString();
-                                    double quantity = Convert.ToDouble(recordSet.Fields.Item(3).Value);
-                                    double unitPrice = Convert.ToDouble(recordSet.Fields.Item(4).Value);
-                                    double pesoBruto = Convert.ToDouble(recordSet.Fields.Item(5).Value);
-                                    double tara = Convert.ToDouble(recordSet.Fields.Item(6).Value);
-                                    string rota = recordSet.Fields.Item(7).Value.ToString();
-                                    string estPlaca = recordSet.Fields.Item(8).Value.ToString();
-                                    string usage = recordSet.Fields.Item(9).Value.ToString();
+                                string cardCode = recordSet.Fields.Item(0).Value.ToString();
+                                string motorista = recordSet.Fields.Item(1).Value.ToString();
+                                string itemCode = recordSet.Fields.Item(2).Value.ToString();
+                                double quantity = Convert.ToDouble(recordSet.Fields.Item(3).Value);
+                                double unitPrice = Convert.ToDouble(recordSet.Fields.Item(4).Value);
+                                double pesoBruto = Convert.ToDouble(recordSet.Fields.Item(5).Value);
+                                double tara = Convert.ToDouble(recordSet.Fields.Item(6).Value);
+                                string rota = recordSet.Fields.Item(7).Value.ToString();
+                                string estPlaca = recordSet.Fields.Item(8).Value.ToString();
+                                string usage = recordSet.Fields.Item(9).Value.ToString();
 
-                                    int bplID = 3;
-                                    string tpOper = "C-GG";
-                                    string respFat = "Cliente";
-                                    string codTransp = "CLI0001";                                                                        
-                                    string status = "P";
-                                    string situacao = "3";                                    
-                                    string warehouse = "01";
+                                int bplID = 3;
+                                string tpOper = "C-GG";
+                                string respFat = "Cliente";
+                                string codTransp = "CLI0001";
+                                string status = "P";
+                                string situacao = "3";
+                                string warehouse = "01";
 
-                                    documents.CardCode = cardCode;
-                                    documents.DocDate = docDate;
-                                    documents.DocDueDate = docDueDate;
-                                    documents.TaxDate = taxDate;
-                                    documents.BPL_IDAssignedToInvoice = bplID;
+                                documents.CardCode = cardCode;
+                                documents.DocDate = docDate;
+                                documents.DocDueDate = docDueDate;
+                                documents.TaxDate = taxDate;
+                                documents.BPL_IDAssignedToInvoice = bplID;
 
-                                    documents.UserFields.Fields.Item("U_EstPlaca").Value = estPlaca;                                    
-                                    documents.UserFields.Fields.Item("U_TipoOper").Value = tpOper;
-                                    documents.UserFields.Fields.Item("U_RespFat").Value = respFat;
-                                    documents.UserFields.Fields.Item("U_CodTransp").Value = codTransp;
-                                    documents.UserFields.Fields.Item("U_NPlaca").Value = placaOS;
-                                    documents.UserFields.Fields.Item("U_HoraSaidaOS").Value = horaSaidaOS;
-                                    documents.UserFields.Fields.Item("U_Motorista").Value = motorista;
-                                    documents.UserFields.Fields.Item("U_PesoBruto").Value = pesoBruto;
-                                    documents.UserFields.Fields.Item("U_Tara").Value = tara;
-                                    documents.UserFields.Fields.Item("U_Status").Value = status;
-                                    documents.UserFields.Fields.Item("U_Situacao").Value = situacao;
-                                    documents.UserFields.Fields.Item("U_RotaOS").Value = rota;
-                                    documents.UserFields.Fields.Item("U_DiaSemRot").Value = diaColeta;
+                                documents.UserFields.Fields.Item("U_EstPlaca").Value = estPlaca;
+                                documents.UserFields.Fields.Item("U_TipoOper").Value = tpOper;
+                                documents.UserFields.Fields.Item("U_RespFat").Value = respFat;
+                                documents.UserFields.Fields.Item("U_CodTransp").Value = codTransp;
+                                documents.UserFields.Fields.Item("U_NPlaca").Value = placaOS;
+                                documents.UserFields.Fields.Item("U_HoraSaidaOS").Value = horaSaidaOS;
+                                documents.UserFields.Fields.Item("U_Motorista").Value = motorista;
+                                documents.UserFields.Fields.Item("U_PesoBruto").Value = pesoBruto;
+                                documents.UserFields.Fields.Item("U_Tara").Value = tara;
+                                documents.UserFields.Fields.Item("U_Status").Value = status;
+                                documents.UserFields.Fields.Item("U_Situacao").Value = situacao;
+                                documents.UserFields.Fields.Item("U_RotaOS").Value = rota;
+                                documents.UserFields.Fields.Item("U_DiaSemRot").Value = diaColeta;
 
-                                    documents.Lines.ItemCode = itemCode;
-                                    documents.Lines.Usage = usage;
-                                    documents.Lines.Quantity = quantity;
-                                    documents.Lines.WarehouseCode = warehouse;
-                                    documents.Lines.UnitPrice = unitPrice;                                    
-                                    documents.Lines.AgreementNo = absID;
-                                    documents.Lines.AgreementRowNumber = agrLineNum;
-                                    documents.Lines.UserFields.Fields.Item("U_UtilTax").Value = usage;
-
-                                    int result = documents.Add();
-
-                                    if (result != 0)
-                                    {
-                                        int codigoErro;
-                                        string msgErro;
-
-                                        Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
-
-                                        throw new Exception(msgErro);
-                                    }
-
-                                    osGeradas = true;
-                                }
+                                documents.Lines.ItemCode = itemCode;
+                                documents.Lines.Usage = usage;
+                                documents.Lines.Quantity = quantity;
+                                documents.Lines.WarehouseCode = warehouse;
+                                documents.Lines.UnitPrice = unitPrice;
+                                documents.Lines.AgreementNo = absID;
+                                documents.Lines.AgreementRowNumber = agrLineNum;
+                                documents.Lines.UserFields.Fields.Item("U_UtilTax").Value = usage;
+                                documents.Lines.Add();
                             }
-                            finally
-                            {
-                                System.Runtime.InteropServices.Marshal.ReleaseComObject(recordSet);
-                                GC.Collect();
-                            }
+                            Program.LimparObjeto(recordSet);
                         }
                     }
-                    finally
-                    {
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(documents);
-                        GC.Collect();
-                    }
                 }
 
-                Program.oCompanyS.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
+                int result = documents.Add();
 
-                if (osGeradas)
+                if (result != 0)
                 {
-                    Program.oApplicationS.MessageBox("Ordens de serviço geradas", 1, "OK");
+                    int codigoErro;
+                    string msgErro;
 
-                    Form.DataSources.UserDataSources.Item("nrPlacaOS").Value = string.Empty;
-                    Form.DataSources.UserDataSources.Item("dtSaidaOS").Value = string.Empty;
-                    Form.DataSources.UserDataSources.Item("hrSaidaOS").Value = string.Empty;
+                    Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
+                    LogHelper.InfoError(msgErro);
+                    //throw new Exception(msgErro);
+                }
+                else
+                {
+                    LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", absID, Program.oCompanyS.GetNewObjectKey()));
+                }
 
-                    ((Grid)Form.Items.Item("gridContr").Specific).DataTable.Clear();
+                osGeradas = true;
 
-                    string queryFiltro = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"" from dummy";
+                Program.LimparObjeto(documents);
+            }
 
-                    Form.DataSources.DataTables.Item("dtFiltro").ExecuteQuery(queryFiltro);
+            Program.oCompanyS.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
+
+            if (osGeradas)
+            {
+                Program.oApplicationS.MessageBox("Ordens de serviço geradas", 1, "OK");
+
+                Form.DataSources.UserDataSources.Item("nrPlacaOS").Value = string.Empty;
+                Form.DataSources.UserDataSources.Item("dtSaidaOS").Value = string.Empty;
+                Form.DataSources.UserDataSources.Item("hrSaidaOS").Value = string.Empty;
+
+                ((Grid)Form.Items.Item("gridContr").Specific).DataTable.Clear();
+
+                string queryFiltro = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"" from dummy";
+
+                Form.DataSources.DataTables.Item("dtFiltro").ExecuteQuery(queryFiltro);
+            }
+
+            //if (!Program.oCompanyS.InTransaction)
+            //Program.oCompanyS.StartTransaction();
+            //try
+            //{
+
+
+
+
+
+            //    for (int row = 0; row < gridContratos.Rows.Count; row++)
+            //    {
+            //        Dictionary<string, string> notasVencidas = new Dictionary<string, string>();
+
+            //        SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+            //        try
+            //        {
+            //            if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
+            //            {
+            //                int absID = Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row));
+            //                int agrLineNum = Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("AgrLineNum")).GetText(row));
+
+            //                string queryVerificacao = string.Format(@"select ""DocNum"", ""CardName"" from OINV 
+            //                                          where ""CardCode"" = (select ""BpCode"" from OOAT where OOAT.""AbsID"" = {0})
+            //                                          and ""DocStatus"" = 'O'
+            //                                          and exists (select * from INV6 
+            //                                                      where INV6.""DocEntry"" = OINV.""DocEntry"" 
+            //                                                      and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 30)", absID);
+
+            //                SAPbobsCOM.Recordset recordSetVerificacao = null;
+            //                try
+            //                {
+            //                    recordSetVerificacao = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+            //                    recordSetVerificacao.DoQuery(queryVerificacao);
+            //                    while (!recordSetVerificacao.EoF)
+            //                    {
+            //                        notasVencidas.Add(recordSetVerificacao.Fields.Item(0).Value.ToString(), recordSetVerificacao.Fields.Item(1).Value.ToString());
+
+            //                        recordSetVerificacao.MoveNext();
+            //                    }
+            //                }
+            //                finally
+            //                {
+            //                    System.Runtime.InteropServices.Marshal.ReleaseComObject(recordSetVerificacao);
+            //                    GC.Collect();
+            //                }        
+
+            //                if (notasVencidas.Count > 0)
+            //                {
+            //                    Program.oApplicationS.MessageBox(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
+            //                        string.Join(",", notasVencidas.Select(r => r.Key).ToArray()), notasVencidas.Select(r => r.Value).First()));
+
+            //                    continue;
+            //                }
+
+            //                string query = string.Format(@"select OOAT.""BpCode"",                                                                  
+            //                                                      OOAT.""U_Motorista"",
+            //                                                      OAT1.""ItemCode"",
+            //                                                      OAT1.""U_Capacidade"",
+            //                                                      OAT1.""UnitPrice"",
+            //                                                      0,
+            //                                                      COALESCE(""@VEICULOS_DADOS"".""U_Tara"", 0),                                                                  
+            //                                                      OOAT.""U_Rota"",
+            //                                                      COALESCE(""@VEICULOS"".""U_UFPlaca"", ''),
+            //                                                      (SELECT T0.""ID"" FROM OUSG T0 WHERE T0.""Usage"" = OOAT.""U_Utilizacao"")
+            //                                                from OOAT
+            //                                                inner join OAT1 on OAT1.""AgrNo"" = OOAT.""AbsID""                                                            
+            //                                                left join ""@VEICULOS"" ON ""@VEICULOS"".""U_Placa"" = '{2}'
+            //                                                left join ""@VEICULOS_DADOS"" ON ""@VEICULOS_DADOS"".""Code"" = ""@VEICULOS"".""Code""
+            //                                                where OOAT.""AbsID"" = {0}
+            //                                                and OAT1.""AgrLineNum"" = {1}
+            //                                                ", absID, agrLineNum, placaOS);
+
+            //                SAPbobsCOM.Recordset recordSet = null;
+            //                try
+            //                {
+            //                    recordSet = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+            //                    recordSet.DoQuery(query);
+            //                    if (!recordSet.EoF)
+            //                    {
+            //                        DateTime docDate = DateTime.Now;
+            //                        DateTime docDueDate = dataSaidaOS;
+            //                        DateTime taxDate = DateTime.Now;
+
+            //                        string cardCode = recordSet.Fields.Item(0).Value.ToString();                                    
+            //                        string motorista = recordSet.Fields.Item(1).Value.ToString();
+            //                        string itemCode = recordSet.Fields.Item(2).Value.ToString();
+            //                        double quantity = Convert.ToDouble(recordSet.Fields.Item(3).Value);
+            //                        double unitPrice = Convert.ToDouble(recordSet.Fields.Item(4).Value);
+            //                        double pesoBruto = Convert.ToDouble(recordSet.Fields.Item(5).Value);
+            //                        double tara = Convert.ToDouble(recordSet.Fields.Item(6).Value);
+            //                        string rota = recordSet.Fields.Item(7).Value.ToString();
+            //                        string estPlaca = recordSet.Fields.Item(8).Value.ToString();
+            //                        string usage = recordSet.Fields.Item(9).Value.ToString();
+
+            //                        int bplID = 3;
+            //                        string tpOper = "C-GG";
+            //                        string respFat = "Cliente";
+            //                        string codTransp = "CLI0001";                                                                        
+            //                        string status = "P";
+            //                        string situacao = "3";                                    
+            //                        string warehouse = "01";
+
+            //                        documents.CardCode = cardCode;
+            //                        documents.DocDate = docDate;
+            //                        documents.DocDueDate = docDueDate;
+            //                        documents.TaxDate = taxDate;
+            //                        documents.BPL_IDAssignedToInvoice = bplID;
+
+            //                        documents.UserFields.Fields.Item("U_EstPlaca").Value = estPlaca;                                    
+            //                        documents.UserFields.Fields.Item("U_TipoOper").Value = tpOper;
+            //                        documents.UserFields.Fields.Item("U_RespFat").Value = respFat;
+            //                        documents.UserFields.Fields.Item("U_CodTransp").Value = codTransp;
+            //                        documents.UserFields.Fields.Item("U_NPlaca").Value = placaOS;
+            //                        documents.UserFields.Fields.Item("U_HoraSaidaOS").Value = horaSaidaOS;
+            //                        documents.UserFields.Fields.Item("U_Motorista").Value = motorista;
+            //                        documents.UserFields.Fields.Item("U_PesoBruto").Value = pesoBruto;
+            //                        documents.UserFields.Fields.Item("U_Tara").Value = tara;
+            //                        documents.UserFields.Fields.Item("U_Status").Value = status;
+            //                        documents.UserFields.Fields.Item("U_Situacao").Value = situacao;
+            //                        documents.UserFields.Fields.Item("U_RotaOS").Value = rota;
+            //                        documents.UserFields.Fields.Item("U_DiaSemRot").Value = diaColeta;
+
+            //                        documents.Lines.ItemCode = itemCode;
+            //                        documents.Lines.Usage = usage;
+            //                        documents.Lines.Quantity = quantity;
+            //                        documents.Lines.WarehouseCode = warehouse;
+            //                        documents.Lines.UnitPrice = unitPrice;                                    
+            //                        documents.Lines.AgreementNo = absID;
+            //                        documents.Lines.AgreementRowNumber = agrLineNum;
+            //                        documents.Lines.UserFields.Fields.Item("U_UtilTax").Value = usage;
+
+            //                        int result = documents.Add();
+
+            //                        if (result != 0)
+            //                        {
+            //                            int codigoErro;
+            //                            string msgErro;
+
+            //                            Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
+
+            //                            throw new Exception(msgErro);
+            //                        }
+
+            //                        osGeradas = true;
+            //                    }
+            //                }
+            //                finally
+            //                {
+            //                    System.Runtime.InteropServices.Marshal.ReleaseComObject(recordSet);
+            //                    GC.Collect();
+            //                }
+            //            }
+            //        }
+            //        finally
+            //        {
+            //            System.Runtime.InteropServices.Marshal.ReleaseComObject(documents);
+            //            GC.Collect();
+            //        }
+            //    }
+
+            //    Program.oCompanyS.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
+
+            //    if (osGeradas)
+            //    {
+            //        Program.oApplicationS.MessageBox("Ordens de serviço geradas", 1, "OK");
+
+            //        Form.DataSources.UserDataSources.Item("nrPlacaOS").Value = string.Empty;
+            //        Form.DataSources.UserDataSources.Item("dtSaidaOS").Value = string.Empty;
+            //        Form.DataSources.UserDataSources.Item("hrSaidaOS").Value = string.Empty;
+
+            //        ((Grid)Form.Items.Item("gridContr").Specific).DataTable.Clear();
+
+            //        string queryFiltro = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"" from dummy";
+
+            //        Form.DataSources.DataTables.Item("dtFiltro").ExecuteQuery(queryFiltro);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    if (Program.oCompanyS.InTransaction)
+            //        Program.oCompanyS.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
+
+            //    Program.oApplicationS.MessageBox("Erro ao gerar ordens de serviço: " + ex.Message, 1, "OK");
+            //}
+        }
+
+        private Dictionary<string, string> NotasVencidas(int absID)
+        {
+            Dictionary<string, string> notasVencidas = new Dictionary<string, string>();
+            string queryVerificacao = string.Format(@"select ""DocNum"", ""CardName"" from OINV 
+                                                      where ""CardCode"" = (select ""BpCode"" from OOAT where OOAT.""AbsID"" = {0})
+                                                      and ""DocStatus"" = 'O'
+                                                      and exists (select * from INV6 
+                                                                  where INV6.""DocEntry"" = OINV.""DocEntry"" 
+                                                                  and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 30)", absID);
+
+            SAPbobsCOM.Recordset recordSetVerificacao = null;
+            try
+            {
+                recordSetVerificacao = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                recordSetVerificacao.DoQuery(queryVerificacao);
+                while (!recordSetVerificacao.EoF)
+                {
+                    notasVencidas.Add(recordSetVerificacao.Fields.Item(0).Value.ToString(), recordSetVerificacao.Fields.Item(1).Value.ToString());
+
+                    recordSetVerificacao.MoveNext();
                 }
             }
-            catch (Exception ex)
+            finally
             {
-                if (Program.oCompanyS.InTransaction)
-                    Program.oCompanyS.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
-
-                Program.oApplicationS.MessageBox("Erro ao gerar ordens de serviço: " + ex.Message, 1, "OK");
+                Program.LimparObjeto(recordSetVerificacao);
             }
+            return notasVencidas;
         }
 
         private void GerarFatura()
