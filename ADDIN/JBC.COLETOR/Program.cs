@@ -23,6 +23,20 @@ namespace JBC.Coletor
         , Namespace = "JBC"
         , InitMethod = "CheckInit"
         )]
+
+    [ResourceBOM("JBC.Coletor.resources.BOM.DESLOCAMENTO.xml", ResourceType.UserField)]
+    [ResourceBOM("JBC.Coletor.resources.BOM.MOTORISTA.xml", ResourceType.UserField)]
+    [ResourceBOM("JBC.Coletor.resources.BOM.OAT1.xml", ResourceType.UserField)]
+    [ResourceBOM("JBC.Coletor.resources.BOM.OOAT.xml", ResourceType.UserField)]
+    [ResourceBOM("JBC.Coletor.resources.BOM.ORDR.xml", ResourceType.UserField)]
+    [ResourceBOM("JBC.Coletor.resources.BOM.RDR1.xml", ResourceType.UserField)]
+    [ResourceBOM("JBC.Coletor.resources.BOM.ROTA.xml", ResourceType.UserField)]
+    [ResourceBOM("JBC.Coletor.resources.BOM.VEICULOS.xml", ResourceType.UserField)]
+    //[ResourceBOM("JBC.Coletor.resources.BOM.UDO.xml", ResourceType.UDO)]
+    [ResourceBOM("JBC.Coletor.resources.BOM.tabelas.xml", ResourceType.UserTable)]
+
+
+
     class Program
     {
         public SAPbobsCOM.Company oCompany { get; set; }

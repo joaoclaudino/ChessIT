@@ -116,9 +116,6 @@
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="resources\BOM\UDF.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="services\hana\PickingItem.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -138,11 +135,24 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="FormClass\systemform\" />
+    <Folder Include="FormClass\userform\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="xml\Menu.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\BOM\DESLOCAMENTO.xml" />
+    <EmbeddedResource Include="resources\BOM\MOTORISTA.xml" />
+    <EmbeddedResource Include="resources\BOM\OAT1.xml" />
+    <EmbeddedResource Include="resources\BOM\OOAT.xml" />
+    <EmbeddedResource Include="resources\BOM\ORDR.xml" />
+    <EmbeddedResource Include="resources\BOM\RDR1.xml" />
+    <EmbeddedResource Include="resources\BOM\ROTA.xml" />
+    <EmbeddedResource Include="resources\BOM\tabelas.xml" />
+    <EmbeddedResource Include="resources\BOM\UDO.xml" />
+    <EmbeddedResource Include="resources\BOM\VEICULOS.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

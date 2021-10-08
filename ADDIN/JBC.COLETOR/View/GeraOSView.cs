@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JBC.Coletor.Controller;
+
 using JBC.Coletor.Helper;
 using JBC.Coletor.Model;
 using SAPbouiCOM;
@@ -107,7 +108,19 @@ namespace JBC.Coletor.View
                                                         , T0.""CardCode""
                                                         , T0.""CardName"" ""Cliente""
                                                         , T0.""U_NPlaca"" ""Placa""
-                                                        , T0.""U_VolumeM3"" ""m3""
+                                                        ,(
+	                                                        select 
+	                                                            sum(T11.""Quantity"")
+                                                            from
+                                                                ORDR T00
+	                                                            inner join RDR1 T11 on T11.""DocEntry""=T00.""DocEntry""    
+	                                                            inner join OITM T22 on T22.""ItemCode""=T11.""ItemCode""
+	                                                            inner join OITB t33 on t33.""ItmsGrpCod""=T22.""ItmsGrpCod""
+                                                            where 
+	                                                            t33.""ItmsGrpNam""='Resíduos'
+                                                                and ( T00.""DocEntry""  in (T0.""DocEntry"") )
+
+                                                        ) ""m3""
                                                         , T0.""U_Tara"" ""Tara""
                                                         , T0.""U_PesoBruto"" ""Peso Bruto""
                                                         , T0.""U_PesoLiq"" ""Peso Liq.""
@@ -244,6 +257,7 @@ namespace JBC.Coletor.View
                                     }
                                     else if (pVal.ItemUID == "btGerarOS")
                                     {
+                                        //MostrarOSGeradas("50,1,2");
                                         GerarOS();
                                     }
                                     else if (pVal.ItemUID == "btPesqOS")
@@ -548,7 +562,7 @@ namespace JBC.Coletor.View
                                             {
                                                 if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
                                                 {
-                                                    LogHelper.InfoWarning(string.Format("Processando OS {0}", gridPes.DataTable.GetValue(1, i).ToString()));
+                                                    LogHelper.InfoWarning(string.Format("Processando Contrato {0}", gridPes.DataTable.GetValue(1, i).ToString()));
 
                                                     Balanca OBalanca;
                                                     if (((CheckBox)Form.Items.Item("chkBal").Specific).Checked)
@@ -558,6 +572,7 @@ namespace JBC.Coletor.View
                                                         Form.Freeze(false);
                                                         LogHelper.MostraBalanca("", "", Form);
                                                         OBalanca = oBalancaController.OBalanca;
+                                                        ((EditText)Form.Items.Item("edtPeso").Specific).Value = OBalanca.peso;
                                                     }
                                                     else
                                                     {
@@ -574,8 +589,8 @@ namespace JBC.Coletor.View
 
                                                         if (tipoPesagem.Equals("T"))//tara
                                                         {
-                                                            if (Convert.ToDouble(oOrder.UserFields.Fields.Item("U_PesoBruto").Value) > 0)
-                                                            {
+                                                            //if (Convert.ToDouble(oOrder.UserFields.Fields.Item("U_PesoBruto").Value) > 0)
+                                                            //{
                                                                 oOrder.UserFields.Fields.Item("U_Tara").Value = OBalanca.peso;
                                                                 //já tiverem o[Peso Bruto] preenchido > 0,0000, execute cálculo do peso líquido dessas ordens:
                                                                 //ORDR.U_PesoBruto - ORDR.U_Tara => ORDR.U_PesoLiquido.
@@ -583,7 +598,7 @@ namespace JBC.Coletor.View
                                                                 (Convert.ToDouble(oOrder.UserFields.Fields.Item("U_PesoBruto").Value) -
                                                                     Convert.ToDouble(oOrder.UserFields.Fields.Item("U_Tara").Value)).ToString();
 
-                                                            }
+                                                            //}
                                                             
                                                         }
                                                         else if (tipoPesagem.Equals("PB"))//Peso Bruto
@@ -664,10 +679,11 @@ namespace JBC.Coletor.View
 		                                                    SELECT 
 		                                                        T0.""U_Placa"" ""Placa""
                                                                 , T0.""U_UFPlaca"" ""UFPlaca""
-                                                                , T0.""U_PNCode"" AS ""MOTORISTA""
+                                                                , T1.""U_MotoPrinc"" AS ""MOTORISTA""
                                                                 , 1 TARA
                                                             FROM
                                                                 ""@VEICULOS"" T0
+                                                                left join ""@VEICULOS_DADOS"" T1 on T1.""Code""=T0.""Code""
                                                             WHERE
                                                                 T0.""U_Placa"" = '{0}'
                                             ", ((EditText)Form.Items.Item("etPlacaPes").Specific).Value);
@@ -1528,7 +1544,26 @@ namespace JBC.Coletor.View
                         , T0.""CardCode""
                         , T0.""CardName"" ""Cliente""
                         , T0.""U_NPlaca"" ""Placa""
-                        , T0.""U_VolumeM3"" ""m3""
+
+
+
+
+                        ,(
+	                        select 
+	                            sum(T11.""Quantity"")
+                            from
+                                ORDR T00
+	                            inner join RDR1 T11 on T11.""DocEntry""=T00.""DocEntry""    
+	                            inner join OITM T22 on T22.""ItemCode""=T11.""ItemCode""
+	                            inner join OITB t33 on t33.""ItmsGrpCod""=T22.""ItmsGrpCod""
+                            where 
+	                            t33.""ItmsGrpNam""='Resíduos'
+                                and ( T00.""DocEntry""  in (T0.""DocEntry"") )
+
+                        ) ""m3""
+
+
+
                         , T0.""U_Tara"" ""Tara""
                         , T0.""U_PesoBruto"" ""Peso Bruto""
                         , T0.""U_PesoLiq"" ""Peso Liq.""
@@ -1837,9 +1872,25 @@ namespace JBC.Coletor.View
 
                 return;
             }
+            Grid gridPes = (Grid)Form.Items.Item("gridContr").Specific;
+            bool bSelecionado = false;
+            for (int i = 0; i < gridPes.Rows.Count; i++)
+            {
+                if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
+                {
+                    bSelecionado = true;
+                    break;
+                }
+            }
+            if (!bSelecionado)
+            {
+                LogHelper.InfoError(string.Format("Não existe registro selecionado, selecione!!"));
+                return;
+            }
+
 
             Program.oApplicationS.StatusBar.SetText("Gerando ordens de serviço", BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Warning);
-
+            string sOSsGeradas = string.Empty;
             //PEGA TODOS OS SELECIONADOS
             Grid gridContratos = (Grid)Form.Items.Item("gridContr").Specific;
             List<int> absIDs = new List<int>();
@@ -1886,7 +1937,7 @@ namespace JBC.Coletor.View
                             string query = string.Format(@"select OOAT.""BpCode"",                                                                  
                                                                   OOAT.""U_Motorista"",
                                                                   OAT1.""ItemCode"",
-                                                                  OAT1.""U_Capacidade"",
+                                                                  OAT1.""PlanQty"",
                                                                   OAT1.""UnitPrice"",
                                                                   0,
                                                                   COALESCE(""@VEICULOS_DADOS"".""U_Tara"", 0),                                                                  
@@ -1987,6 +2038,15 @@ namespace JBC.Coletor.View
                 else
                 {
                     LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", absID, Program.oCompanyS.GetNewObjectKey()));
+
+                    if (string.IsNullOrEmpty(sOSsGeradas))
+                    {
+                        sOSsGeradas = Program.oCompanyS.GetNewObjectKey();
+                    }
+                    else
+                    {
+                        sOSsGeradas = sOSsGeradas+","+Program.oCompanyS.GetNewObjectKey();
+                    }
                 }
 
                 osGeradas = true;
@@ -2009,6 +2069,15 @@ namespace JBC.Coletor.View
                 string queryFiltro = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"" from dummy";
 
                 Form.DataSources.DataTables.Item("dtFiltro").ExecuteQuery(queryFiltro);
+
+                MostrarOSGeradas(sOSsGeradas);
+
+                ////frmOSsGeradas tela = this.CreateForm<frmOSsGeradas>();
+                ////tela.NGTME = _oForm.DataSources.DBDataSources.Item(JBC_GTME).GetValue("DocEntry", 0);
+                ////tela._oMatrixGTME = _oMatrix;
+                ////tela.oDBDataSource = oDBDataSource;
+                ////tela.oFormFather = _oForm;
+                //tela.Show();
             }
 
             //if (!Program.oCompanyS.InTransaction)
@@ -2195,6 +2264,135 @@ namespace JBC.Coletor.View
 
             //    Program.oApplicationS.MessageBox("Erro ao gerar ordens de serviço: " + ex.Message, 1, "OK");
             //}
+        }
+
+        private static void MostrarOSGeradas(string sOSsGeradas)
+        {
+            SAPbouiCOM.Form oForm;
+            SAPbouiCOM.Item oItem = null;
+            SAPbouiCOM.Button oButton = null;
+            SAPbouiCOM.Matrix oMatrix;
+            SAPbouiCOM.Column oColumn;
+            DataTable dtMatrix1;
+
+
+            SAPbouiCOM.FormCreationParams oCreationParams = null;
+            oCreationParams = ((SAPbouiCOM.FormCreationParams)(Program.oApplicationS.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_FormCreationParams)));
+            oCreationParams.BorderStyle = SAPbouiCOM.BoFormBorderStyle.fbs_Fixed;
+            oCreationParams.UniqueID = "frmOSs";
+            try
+            {
+                oForm = Program.oApplicationS.Forms.AddEx(oCreationParams);
+            }
+            catch (Exception)
+            {
+
+                Program.oApplicationS.Forms.Item("frmOSs").Close();
+                oForm = Program.oApplicationS.Forms.AddEx(oCreationParams);
+
+            }
+
+
+            //setar as propriedades do form
+            oForm.Title = "OS´s Geradas";
+            //posição inicial na tela
+            oForm.Left = 400;
+            oForm.Top = 100;
+
+            //tamanho inicial
+            oForm.ClientHeight = 300;
+            oForm.ClientWidth = 350;
+
+
+
+
+
+
+            oItem = oForm.Items.Add("matrix1", SAPbouiCOM.BoFormItemTypes.it_MATRIX);
+            oItem.Height = Convert.ToInt32(oForm.Height * 0.7);
+            oItem.Width = Convert.ToInt32(oForm.Width * 0.9);
+            oItem.Top = 10;
+
+            oMatrix = (SAPbouiCOM.Matrix)oItem.Specific;
+            oMatrix.Layout = SAPbouiCOM.BoMatrixLayoutType.mlt_Normal;
+            oMatrix.SelectionMode = SAPbouiCOM.BoMatrixSelect.ms_None;
+
+            dtMatrix1 = oForm.DataSources.DataTables.Add("DT_01");
+
+
+            string select = string.Format(@" 
+                                                    select 
+	                                                    T0.""DocEntry""
+                                                        , T0.""DocNum""
+                                                        , T0.""CardCode""
+                                                        , T0.""CardName""
+                                                    from
+                                                        ORDR T0
+                                                    where
+                                                        T0.""DocEntry"" in ({0})
+                                            ", sOSsGeradas);
+
+            dtMatrix1.ExecuteQuery(select);
+
+            //oMatrix.Clear();
+            //oMatrix.AutoResizeColumns();
+            //oMatrix.LoadFromDataSource();
+
+
+
+            int iCountCol = 0;
+            oColumn = oMatrix.Columns.Add('C' + iCountCol.ToString(), SAPbouiCOM.BoFormItemTypes.it_EDIT);
+            oColumn.Editable = false;
+            oColumn.TitleObject.Caption = "#";
+            iCountCol++;
+
+            oMatrix.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_LINKED_BUTTON);
+            oMatrix.Columns.Item(iCountCol).DataBind.Bind("DT_01", "DocEntry");
+            oMatrix.Columns.Item(iCountCol).TitleObject.Caption = "DocEntry";
+            oMatrix.Columns.Item(iCountCol).TitleObject.Sortable = false;
+            oMatrix.Columns.Item(iCountCol).Width = 250;
+            oMatrix.Columns.Item(iCountCol).Editable = false;
+            ((LinkedButton)oMatrix.Columns.Item(iCountCol).ExtendedObject).LinkedObject = BoLinkedObject.lf_Order;
+            iCountCol++;
+
+
+
+            oMatrix.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_EDIT);
+            oMatrix.Columns.Item(iCountCol).DataBind.Bind("DT_01", "DocNum");
+            oMatrix.Columns.Item(iCountCol).TitleObject.Caption = "DocNum";
+            oMatrix.Columns.Item(iCountCol).TitleObject.Sortable = false;
+            oMatrix.Columns.Item(iCountCol).Width = 150;
+            oMatrix.Columns.Item(iCountCol).Editable = false;
+            iCountCol++;
+
+            oMatrix.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_EDIT);
+            oMatrix.Columns.Item(iCountCol).DataBind.Bind("DT_01", "CardCode");
+            oMatrix.Columns.Item(iCountCol).TitleObject.Caption = "CardCode";
+            oMatrix.Columns.Item(iCountCol).TitleObject.Sortable = false;
+            oMatrix.Columns.Item(iCountCol).Width = 150;
+            oMatrix.Columns.Item(iCountCol).Editable = false;
+            iCountCol++;
+
+            oMatrix.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_EDIT);
+            oMatrix.Columns.Item(iCountCol).DataBind.Bind("DT_01", "CardName");
+            oMatrix.Columns.Item(iCountCol).TitleObject.Caption = "CardName";
+            oMatrix.Columns.Item(iCountCol).TitleObject.Sortable = false;
+            oMatrix.Columns.Item(iCountCol).Width = 150;
+            oMatrix.Columns.Item(iCountCol).Editable = false;
+            iCountCol++;
+
+            oMatrix.AutoResizeColumns();
+            oMatrix.LoadFromDataSource();
+
+            oItem = oForm.Items.Add("1", SAPbouiCOM.BoFormItemTypes.it_BUTTON);
+            oItem.Left = 0;
+            oItem.Width = 65;
+            oItem.Top = oMatrix.Item.Height+10;
+            oItem.Height = 19;
+            oButton = ((SAPbouiCOM.Button)(oItem.Specific));
+            oButton.Caption = "Ok";
+
+            oForm.Visible = true;
         }
 
         private Dictionary<string, string> NotasVencidas(int absID)
