@@ -257,7 +257,7 @@ namespace JBC.Coletor.View
                                     }
                                     else if (pVal.ItemUID == "btGerarOS")
                                     {
-                                        //MostrarOSGeradas("50,1,2");
+                                        MostrarOSGeradas("50,1,2", new List<ErroGerOS>() { new ErroGerOS() { absID=1,Erro="asdasd"}, new ErroGerOS() { absID = 22, Erro = "asdasd" } });
                                         GerarOS();
                                     }
                                     else if (pVal.ItemUID == "btPesqOS")
@@ -789,6 +789,30 @@ namespace JBC.Coletor.View
                                 {
                                     //if (Form.DataSources.DataTables.Item("dtOS").Rows.Count > 0)
                                         CarregarPes();
+                                }
+                                if (pVal.ItemUID == "gridContr")
+                                {
+                                    if (pVal.ColUID == "#")
+                                    {
+                                        Grid gridContr = (Grid)Form.Items.Item("gridContr").Specific;
+                                        StaticText lblContratoTot = (StaticText)Form.Items.Item("Item_1").Specific;
+                                        
+                                        int ContratoTot = Convert.ToInt32(lblContratoTot.Caption);
+                                        //int M3Tot = Convert.ToInt32(lblM3Tot.Caption);
+                                        int M3 = 0;
+                                        
+
+                                        if (gridContr.DataTable.GetValue(0, pVal.Row).ToString().Equals("Y"))
+                                        {
+                                            ContratoTot++;
+                                        }
+                                        else
+                                        {
+                                            ContratoTot--;
+                                        }
+
+                                        lblContratoTot.Caption = ContratoTot.ToString();
+                                    }
                                 }
                                 if (pVal.ItemUID == "gridPes")
                                 {
@@ -1436,19 +1460,19 @@ namespace JBC.Coletor.View
 
             string query = string.Format(@"SELECT '{0}' AS ""#"",
                                                       OOAT.""AbsID"" AS ""Nº Interno"",
-                                                      OAT1.""AgrLineNum"",
+                                                      STRING_AGG(OAT1.""AgrLineNum"", ',')as ""AgrLineNum"",
                                                       OOAT.""Number"" as ""Nº CTR"",
                                                       OOAT.""BpName"" as ""Cliente"",
                                                       OOAT.""Descript"" as ""Desc. CTR"",
-                                                      OAT1.""ItemName"" as ""Serviço"",
-                                                      OAT1.""PlanQty"" as ""Coleta Planejada"",
-                                                      OAT1.""PlanQty"" - 0 as ""Coleta Pendente"",
+                                                      STRING_AGG(OAT1.""ItemName"", ',') as ""Serviço"",
+                                                      sum(OAT1.""PlanQty"") as ""Coleta Planejada"",
+                                                      sum(OAT1.""PlanQty"" - 0) as ""Coleta Pendente"",
                                                       (select max(""DocNum"")
                                                        from ORDR 
                                                        where exists (select * 
                                                                      from RDR1 
                                                                      where RDR1.""AgrNo"" = OOAT.""AbsID"" 
-                                                                     and RDR1.""AgrLnNum"" = OAT1.""AgrLineNum""
+                                                                     --and RDR1.""AgrLnNum"" = OAT1.""AgrLineNum""
                                                                      and RDR1.""DocEntry"" = ORDR.""DocEntry"")
                                                        ) as ""Última OS"",
                                                       (select max(""DocDate"")
@@ -1456,7 +1480,7 @@ namespace JBC.Coletor.View
                                                        where exists (select * 
                                                                      from RDR1 
                                                                      where RDR1.""AgrNo"" = OOAT.""AbsID"" 
-                                                                     and RDR1.""AgrLnNum"" = OAT1.""AgrLineNum""
+                                                                     --and RDR1.""AgrLnNum"" = OAT1.""AgrLineNum""
                                                                      and RDR1.""DocEntry"" = ORDR.""DocEntry"")
                                                        ) as ""Data OS""
                                             from OOAT
@@ -1481,6 +1505,15 @@ namespace JBC.Coletor.View
                                                              or ('{8}' = '7' AND OOAT.""U_DiaColetDom"" = 'Sim'))
                                             and ('{9}' = '' or '{9}' = OOAT.""U_Motorista"")
                                             and ('{10}' = '' or '{10}' = ""@VEICULOS"".""U_Placa"")
+                                        group by
+                                                                                              OOAT.""AbsID""
+                                                                                              --, OAT1.""AgrLineNum""
+                                                                                              , OOAT.""Number""
+                                                                                              , OOAT.""BpName""
+                                                                                              , OOAT.""Descript""
+                                                                                              --, OAT1.""PlanQty""
+                                                                                              --, OAT1.""PlanQty""
+
                                             
                                             ", selecionar, cliente, dataDe == "" ? "1990-01-01" : Convert.ToDateTime(dataDe).ToString("yyyy-MM-dd"), dataAte == "" ? "1990-01-01" : Convert.ToDateTime(dataAte).ToString("yyyy-MM-dd"), nrContrato, modeloContrato, centroCusto, nrRota, diaColeta, motorista, placa);
 
@@ -1507,7 +1540,19 @@ namespace JBC.Coletor.View
                 
                 gridContratos.Columns.Item("#").Type = BoGridColumnType.gct_CheckBox;
 
-                ((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).LinkedObjectType = "1250000025";                
+                ((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).LinkedObjectType = "1250000025";
+
+
+                if (((CheckBox)Form.Items.Item("ckSelCtr").Specific).Checked)
+                {
+                    ((StaticText)Form.Items.Item("Item_1").Specific).Caption = Form.DataSources.DataTables.Item("dtContr").Rows.Count.ToString();
+                }
+                else
+                {
+                    ((StaticText)Form.Items.Item("Item_1").Specific).Caption = "0";
+                }
+
+
             }
             catch (Exception ex)
             {
@@ -1898,167 +1943,166 @@ namespace JBC.Coletor.View
             {
                 if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
                 {
-                    if (absIDs.Where(a => a == Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row))).Count() == 0)
-                    {
+                    //if (absIDs.Where(a => a == Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row))).Count() == 0)
+                    //{
                         absIDs.Add(Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)));
-                    }
+                    //}
                 }
             }
             bool osGeradas = false;
+            List<int> absIDsNotasVencidas = new List<int>();
+            List<ErroGerOS> ErroGerOSs = new List<ErroGerOS>();
             //string sTelasGeradas
-            if (!Program.oCompanyS.InTransaction)
-            Program.oCompanyS.StartTransaction();
+            //if (!Program.oCompanyS.InTransaction)
+            //Program.oCompanyS.StartTransaction();
             //para cada absId faz o loop agrupando as linhas do mesmo...
-            foreach (int absID in absIDs)
+            foreach (int absID1 in absIDs)
             {
-                LogHelper.InfoSuccess(string.Format("Processando OS {0}", absID));
-                //NotasVencidas(absID).Count();
-
-                if (NotasVencidas(absID).Count() > 0)
+                try
                 {
-                    LogHelper.InfoError(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
-                        string.Join(",", NotasVencidas(absID).Select(r => r.Key).ToArray()), NotasVencidas(absID).Select(r => r.Value).First()));
-                    continue;
-                }
+                    LogHelper.InfoSuccess(string.Format("Processando OS {0}", absID1));
+                    //NotasVencidas(absID).Count();
 
-                //cabeçalho
-                SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
-
-                //linhas
-                for (int row = 0; row < gridContratos.Rows.Count; row++)
-                {
-                    if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
+                    if (NotasVencidas(absID1).Count() > 0)
                     {
-                        if (Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)) == absID)
+                        LogHelper.InfoError(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
+                            string.Join(",", NotasVencidas(absID1).Select(r => r.Key).ToArray()), NotasVencidas(absID1).Select(r => r.Value).First()));
+                        absIDsNotasVencidas.Add(absID1);
+                        continue;
+                    }
+
+                    //cabeçalho
+                    //SAPbobsCOM.Documents documents;//= (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+
+                    //linhas
+                    for (int row = 0; row < gridContratos.Rows.Count; row++)
+                    {
+                        if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
                         {
-                            int agrLineNum = Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("AgrLineNum")).GetText(row));
-
-
-                            string query = string.Format(@"select OOAT.""BpCode"",                                                                  
-                                                                  OOAT.""U_Motorista"",
-                                                                  OAT1.""ItemCode"",
-                                                                  OAT1.""PlanQty"",
-                                                                  OAT1.""UnitPrice"",
-                                                                  0,
-                                                                  COALESCE(""@VEICULOS_DADOS"".""U_Tara"", 0),                                                                  
-                                                                  OOAT.""U_Rota"",
-                                                                  COALESCE(""@VEICULOS"".""U_UFPlaca"", ''),
-                                                                  (	
-                                                                        select 
-		                                                                    coalesce(OUSG.ID,0)
-	                                                                    from 
-		                                                                    OITM 
-		                                                                    inner join OUSG on OITM.""U_Utilizacao"" =OUSG.""Usage""
-                                                                        where
-                                                                            OITM.""ItemCode"" = OAT1.""ItemCode""
-                                                                    )
-                                                            from OOAT
-                                                            inner join OAT1 on OAT1.""AgrNo"" = OOAT.""AbsID""                                                            
-                                                            left join ""@VEICULOS"" ON ""@VEICULOS"".""U_Placa"" = '{2}'
-                                                            left join ""@VEICULOS_DADOS"" ON ""@VEICULOS_DADOS"".""Code"" = ""@VEICULOS"".""Code""
-                                                            where OOAT.""AbsID"" = {0}
-                                                            and OAT1.""AgrLineNum"" = {1}
-                                                            ", absID, agrLineNum, placaOS);
-
-                            SAPbobsCOM.Recordset recordSet = null;
-
-                            recordSet = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-                            recordSet.DoQuery(query);
-                            if (!recordSet.EoF)
+                            if (Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)) == absID1)
                             {
-                                DateTime docDate = DateTime.Now;
-                                DateTime docDueDate = dataSaidaOS;
-                                DateTime taxDate = DateTime.Now;
+                                SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                SAPbobsCOM.Recordset recordSet = ConsultaContratoGeracao(placaOS, gridContratos, absID1, row);
+                                while (!recordSet.EoF)
+                                {
+                                    MontaOS(placaOS, dataSaidaOS, horaSaidaOS, diaColeta, absID1, documents, recordSet);
+                                    recordSet.MoveNext();
+                                }
+                                Program.LimparObjeto(recordSet);
+                                int result = documents.Add();
 
-                                string cardCode = recordSet.Fields.Item(0).Value.ToString();
-                                string motorista = recordSet.Fields.Item(1).Value.ToString();
-                                string itemCode = recordSet.Fields.Item(2).Value.ToString();
-                                double quantity = Convert.ToDouble(recordSet.Fields.Item(3).Value);
-                                double unitPrice = Convert.ToDouble(recordSet.Fields.Item(4).Value);
-                                double pesoBruto = Convert.ToDouble(recordSet.Fields.Item(5).Value);
-                                double tara = Convert.ToDouble(recordSet.Fields.Item(6).Value);
-                                string rota = recordSet.Fields.Item(7).Value.ToString();
-                                string estPlaca = recordSet.Fields.Item(8).Value.ToString();
-                                string usage = recordSet.Fields.Item(9).Value.ToString();
+                                if (result != 0)
+                                {
+                                    int codigoErro;
+                                    string msgErro;
 
-                                int bplID = 3;
-                                string tpOper = "C-GG";
-                                string respFat = "Cliente";
-                                string codTransp = "CLI0001";
-                                string status = "P";
-                                string situacao = "3";
-                                string warehouse = "01";
+                                    Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
+                                    LogHelper.InfoError(msgErro);
+                                    ErroGerOSs.Add( new ErroGerOS() { absID= absID1,Erro= msgErro } );
+                                    //throw new Exception(msgErro);
+                                }
+                                else
+                                {
+                                    osGeradas = true;
+                                    
+                                    LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", absID1, Program.oCompanyS.GetNewObjectKey()));
 
-                                documents.CardCode = cardCode;
-                                documents.DocDate = docDate;
-                                documents.DocDueDate = docDueDate;
-                                documents.TaxDate = taxDate;
-                                documents.BPL_IDAssignedToInvoice = bplID;
-
-                                documents.UserFields.Fields.Item("U_EstPlaca").Value = estPlaca;
-                                documents.UserFields.Fields.Item("U_TipoOper").Value = tpOper;
-                                documents.UserFields.Fields.Item("U_RespFat").Value = respFat;
-                                documents.UserFields.Fields.Item("U_CodTransp").Value = codTransp;
-                                documents.UserFields.Fields.Item("U_NPlaca").Value = placaOS;
-                                documents.UserFields.Fields.Item("U_HoraSaidaOS").Value = horaSaidaOS;
-                                documents.UserFields.Fields.Item("U_Motorista").Value = motorista;
-                                documents.UserFields.Fields.Item("U_PesoBruto").Value = pesoBruto;
-                                documents.UserFields.Fields.Item("U_Tara").Value = tara;
-                                documents.UserFields.Fields.Item("U_Status").Value = status;
-                                documents.UserFields.Fields.Item("U_Situacao").Value = situacao;
-                                documents.UserFields.Fields.Item("U_RotaOS").Value = rota;
-                                documents.UserFields.Fields.Item("U_DiaSemRot").Value = diaColeta;
-
-                                documents.Lines.ItemCode = itemCode;
-                                documents.Lines.Usage = usage;
-                                documents.Lines.Quantity = quantity;
-                                documents.Lines.WarehouseCode = warehouse;
-                                documents.Lines.UnitPrice = unitPrice;
-                                documents.Lines.AgreementNo = absID;
-                                documents.Lines.AgreementRowNumber = agrLineNum;
-                                documents.Lines.UserFields.Fields.Item("U_UtilTax").Value = usage;
-                                documents.Lines.Add();
+                                    if (string.IsNullOrEmpty(sOSsGeradas))
+                                    {
+                                        sOSsGeradas = Program.oCompanyS.GetNewObjectKey();
+                                    }
+                                    else
+                                    {
+                                        sOSsGeradas = sOSsGeradas + "," + Program.oCompanyS.GetNewObjectKey();
+                                    }
+                                }
+                                Program.LimparObjeto(documents);
+                                break;
                             }
-                            Program.LimparObjeto(recordSet);
                         }
                     }
                 }
-
-                int result = documents.Add();
-
-                if (result != 0)
+                catch (Exception ex )
                 {
-                    int codigoErro;
-                    string msgErro;
-
-                    Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
-                    LogHelper.InfoError(msgErro);
-                    //throw new Exception(msgErro);
+                    LogHelper.InfoError(string.Format("Erro Processando OS {0}: {1}", absID1,ex.Message));
+                    ErroGerOSs.Add(new ErroGerOS() { absID = absID1, Erro = ex.Message });
                 }
-                else
-                {
-                    LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", absID, Program.oCompanyS.GetNewObjectKey()));
-
-                    if (string.IsNullOrEmpty(sOSsGeradas))
-                    {
-                        sOSsGeradas = Program.oCompanyS.GetNewObjectKey();
-                    }
-                    else
-                    {
-                        sOSsGeradas = sOSsGeradas+","+Program.oCompanyS.GetNewObjectKey();
-                    }
-                }
-
-                osGeradas = true;
-
-                Program.LimparObjeto(documents);
             }
 
-            Program.oCompanyS.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
+            if (absIDsNotasVencidas.Count>0)
+            {
+                foreach (int absID1 in absIDsNotasVencidas)
+                {
+                    for (int row = 0; row < gridContratos.Rows.Count; row++)
+                    {
+                        if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
+                        {
+                            if (Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)) == absID1)
+                            {
+                                if (Program.oApplicationS.MessageBox(
+                                        string.Format("Notas {0} do cliente {1} em aberto. Deseja Gerar a OS?.",
+                                        string.Join(",", NotasVencidas(absID1).Select(r => r.Key).ToArray()), NotasVencidas(absID1).Select(r => r.Value).First())
+
+                                    , 1, "Sim", "Não") == 1)
+                                {
+                                    try
+                                    {
+
+                                        SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                        SAPbobsCOM.Recordset recordSet = ConsultaContratoGeracao(placaOS, gridContratos, absID1, row);
+                                        while (!recordSet.EoF)
+                                        {
+                                            MontaOS(placaOS, dataSaidaOS, horaSaidaOS, diaColeta, absID1, documents, recordSet);
+                                            recordSet.MoveNext();
+                                        }
+                                        Program.LimparObjeto(recordSet);
+                                        int result = documents.Add();
+
+                                        if (result != 0)
+                                        {
+                                            int codigoErro;
+                                            string msgErro;
+
+                                            Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
+                                            LogHelper.InfoError(msgErro);
+                                            ErroGerOSs.Add(new ErroGerOS() { absID = absID1, Erro = msgErro });
+                                            //throw new Exception(msgErro);
+                                        }
+                                        else
+                                        {
+                                            osGeradas = true;
+                                            LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", absID1, Program.oCompanyS.GetNewObjectKey()));
+
+                                            if (string.IsNullOrEmpty(sOSsGeradas))
+                                            {
+                                                sOSsGeradas = Program.oCompanyS.GetNewObjectKey();
+                                            }
+                                            else
+                                            {
+                                                sOSsGeradas = sOSsGeradas + "," + Program.oCompanyS.GetNewObjectKey();
+                                            }
+                                        }
+                                        Program.LimparObjeto(documents);
+
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        LogHelper.InfoError(string.Format("Erro Processando OS {0}: {1}", absID1, ex.Message));
+                                        ErroGerOSs.Add(new ErroGerOS() { absID = absID1, Erro = ex.Message });
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            //Program.oCompanyS.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
 
             if (osGeradas)
             {
-                Program.oApplicationS.MessageBox("Ordens de serviço geradas", 1, "OK");
+               // Program.oApplicationS.MessageBox("Ordens de serviço geradas", 1, "OK");
 
                 Form.DataSources.UserDataSources.Item("nrPlacaOS").Value = string.Empty;
                 Form.DataSources.UserDataSources.Item("dtSaidaOS").Value = string.Empty;
@@ -2070,7 +2114,7 @@ namespace JBC.Coletor.View
 
                 Form.DataSources.DataTables.Item("dtFiltro").ExecuteQuery(queryFiltro);
 
-                MostrarOSGeradas(sOSsGeradas);
+                MostrarOSGeradas(sOSsGeradas, ErroGerOSs);
 
                 ////frmOSsGeradas tela = this.CreateForm<frmOSsGeradas>();
                 ////tela.NGTME = _oForm.DataSources.DBDataSources.Item(JBC_GTME).GetValue("DocEntry", 0);
@@ -2266,14 +2310,111 @@ namespace JBC.Coletor.View
             //}
         }
 
-        private static void MostrarOSGeradas(string sOSsGeradas)
+        private static void MontaOS(string placaOS, DateTime dataSaidaOS, string horaSaidaOS, string diaColeta, int absID, SAPbobsCOM.Documents documents, SAPbobsCOM.Recordset recordSet)
+        {
+            DateTime docDate = DateTime.Now;
+            DateTime docDueDate = dataSaidaOS;
+            DateTime taxDate = DateTime.Now;
+
+            string cardCode = recordSet.Fields.Item(0).Value.ToString();
+            string motorista = recordSet.Fields.Item(1).Value.ToString();
+            string itemCode = recordSet.Fields.Item(2).Value.ToString();
+            double quantity = Convert.ToDouble(recordSet.Fields.Item(3).Value);
+            double unitPrice = Convert.ToDouble(recordSet.Fields.Item(4).Value);
+            double pesoBruto = Convert.ToDouble(recordSet.Fields.Item(5).Value);
+            double tara = Convert.ToDouble(recordSet.Fields.Item(6).Value);
+            string rota = recordSet.Fields.Item(7).Value.ToString();
+            string estPlaca = recordSet.Fields.Item(8).Value.ToString();
+            string usage = recordSet.Fields.Item(9).Value.ToString();
+            int AgrLineNum = Convert.ToInt32(recordSet.Fields.Item(10).Value.ToString());
+
+            int bplID = 3;
+            string tpOper = "C-GG";
+            string respFat = "Cliente";
+            string codTransp = "CLI0001";
+            string status = "P";
+            string situacao = "3";
+            string warehouse = "01";
+
+            documents.CardCode = cardCode;
+            documents.DocDate = docDate;
+            documents.DocDueDate = docDueDate;
+            documents.TaxDate = taxDate;
+            documents.BPL_IDAssignedToInvoice = bplID;
+
+            documents.UserFields.Fields.Item("U_EstPlaca").Value = estPlaca;
+            documents.UserFields.Fields.Item("U_TipoOper").Value = tpOper;
+            documents.UserFields.Fields.Item("U_RespFat").Value = respFat;
+            documents.UserFields.Fields.Item("U_CodTransp").Value = codTransp;
+            documents.UserFields.Fields.Item("U_NPlaca").Value = placaOS;
+            documents.UserFields.Fields.Item("U_HoraSaidaOS").Value = horaSaidaOS;
+            documents.UserFields.Fields.Item("U_Motorista").Value = motorista;
+            documents.UserFields.Fields.Item("U_PesoBruto").Value = pesoBruto;
+            documents.UserFields.Fields.Item("U_Tara").Value = tara;
+            documents.UserFields.Fields.Item("U_Status").Value = status;
+            documents.UserFields.Fields.Item("U_Situacao").Value = situacao;
+            documents.UserFields.Fields.Item("U_RotaOS").Value = rota;
+            documents.UserFields.Fields.Item("U_DiaSemRot").Value = diaColeta;
+
+            documents.Lines.ItemCode = itemCode;
+            documents.Lines.Usage = usage;
+            documents.Lines.Quantity = quantity;
+            documents.Lines.WarehouseCode = warehouse;
+            documents.Lines.UnitPrice = unitPrice;
+            documents.Lines.AgreementNo = absID;
+            documents.Lines.AgreementRowNumber = AgrLineNum;
+            documents.Lines.UserFields.Fields.Item("U_UtilTax").Value = usage;
+            documents.Lines.Add();
+        }
+
+        private static SAPbobsCOM.Recordset ConsultaContratoGeracao(string placaOS, Grid gridContratos, int absID, int row)
+        {
+            string agrLineNums = (((EditTextColumn)gridContratos.Columns.Item("AgrLineNum")).GetText(row));
+            string query = string.Format(@"select OOAT.""BpCode"",                                                                  
+                                                                      OOAT.""U_Motorista"",
+                                                                      OAT1.""ItemCode"",
+                                                                      OAT1.""PlanQty"",
+                                                                      OAT1.""UnitPrice"",
+                                                                      0,
+                                                                      COALESCE(""@VEICULOS_DADOS"".""U_Tara"", 0),                                                                  
+                                                                      OOAT.""U_Rota"",
+                                                                      COALESCE(""@VEICULOS"".""U_UFPlaca"", ''),
+                                                                      (	
+                                                                            select 
+		                                                                        coalesce(OUSG.ID,0)
+	                                                                        from 
+		                                                                        OITM 
+		                                                                        inner join OUSG on OITM.""U_Utilizacao"" =OUSG.""Usage""
+                                                                            where
+                                                                                OITM.""ItemCode"" = OAT1.""ItemCode""
+                                                                        )
+                                                                        ,OAT1.""AgrLineNum""
+                                                                from OOAT
+                                                                inner join OAT1 on OAT1.""AgrNo"" = OOAT.""AbsID""                                                            
+                                                                left join ""@VEICULOS"" ON ""@VEICULOS"".""U_Placa"" = '{2}'
+                                                                left join ""@VEICULOS_DADOS"" ON ""@VEICULOS_DADOS"".""Code"" = ""@VEICULOS"".""Code""
+                                                                where OOAT.""AbsID"" = {0}
+                                                                and OAT1.""AgrLineNum"" in ({1})
+                                                                ", absID, agrLineNums, placaOS);
+
+            SAPbobsCOM.Recordset recordSet = null;
+
+            recordSet = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+            recordSet.DoQuery(query);
+            return recordSet;
+        }
+
+        private static void MostrarOSGeradas(string sOSsGeradas, List<ErroGerOS> ErroGerOSs)
         {
             SAPbouiCOM.Form oForm;
             SAPbouiCOM.Item oItem = null;
             SAPbouiCOM.Button oButton = null;
             SAPbouiCOM.Matrix oMatrix;
+            SAPbouiCOM.Matrix oMatrix2;
+
             SAPbouiCOM.Column oColumn;
             DataTable dtMatrix1;
+            DataTable dtMatrix2;
 
 
             SAPbouiCOM.FormCreationParams oCreationParams = null;
@@ -2300,8 +2441,8 @@ namespace JBC.Coletor.View
             oForm.Top = 100;
 
             //tamanho inicial
-            oForm.ClientHeight = 300;
-            oForm.ClientWidth = 350;
+            oForm.ClientHeight = 400;
+            oForm.ClientWidth = 600;
 
 
 
@@ -2309,8 +2450,8 @@ namespace JBC.Coletor.View
 
 
             oItem = oForm.Items.Add("matrix1", SAPbouiCOM.BoFormItemTypes.it_MATRIX);
-            oItem.Height = Convert.ToInt32(oForm.Height * 0.7);
-            oItem.Width = Convert.ToInt32(oForm.Width * 0.9);
+            oItem.Height = Convert.ToInt32(300);
+            oItem.Width = Convert.ToInt32(360);
             oItem.Top = 10;
 
             oMatrix = (SAPbouiCOM.Matrix)oItem.Specific;
@@ -2333,12 +2474,6 @@ namespace JBC.Coletor.View
                                             ", sOSsGeradas);
 
             dtMatrix1.ExecuteQuery(select);
-
-            //oMatrix.Clear();
-            //oMatrix.AutoResizeColumns();
-            //oMatrix.LoadFromDataSource();
-
-
 
             int iCountCol = 0;
             oColumn = oMatrix.Columns.Add('C' + iCountCol.ToString(), SAPbouiCOM.BoFormItemTypes.it_EDIT);
@@ -2392,6 +2527,68 @@ namespace JBC.Coletor.View
             oButton = ((SAPbouiCOM.Button)(oItem.Specific));
             oButton.Caption = "Ok";
 
+            oItem = oForm.Items.Add("QTD", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+            oItem.Left = 0;
+            oItem.Width = 150;
+            oItem.Top = oMatrix.Item.Height + 10;
+            oItem.Height = 19;
+            ((SAPbouiCOM.StaticText)(oItem.Specific)).Caption = string.Format("Total de OS Geradas: {0}", dtMatrix1.Rows.Count);
+
+            oItem = oForm.Items.Add("matrix2", SAPbouiCOM.BoFormItemTypes.it_MATRIX);
+            oItem.Height = Convert.ToInt32(300);
+            oItem.Width = Convert.ToInt32(330);
+            oItem.Top = 10;
+            oItem.Left = 350;
+
+            oMatrix2 = (SAPbouiCOM.Matrix)oItem.Specific;
+            oMatrix2.Layout = SAPbouiCOM.BoMatrixLayoutType.mlt_Normal;
+            oMatrix2.SelectionMode = SAPbouiCOM.BoMatrixSelect.ms_None;
+
+            dtMatrix2 = oForm.DataSources.DataTables.Add("DT_02");
+            select = string.Empty;
+            foreach (ErroGerOS erroGerOS in ErroGerOSs)
+            {
+                if (!string.IsNullOrEmpty(select))
+                {
+                    select= select+" union all ";
+                }
+                select = select + string.Format(@" 
+                                                    select 
+	                                                    {0} ""DocEntry""
+                                                        , '{1}' as ""MSG""
+                                                    from
+                                                        dummy
+                                                    
+                                                    ", erroGerOS.absID, erroGerOS.Erro);
+            }
+            select = select + "order by 1;";
+            dtMatrix2.ExecuteQuery(select);
+
+            iCountCol = 0;
+            oColumn = oMatrix2.Columns.Add('C' + iCountCol.ToString(), SAPbouiCOM.BoFormItemTypes.it_EDIT);
+            oColumn.Editable = false;
+            oColumn.TitleObject.Caption = "#";
+            iCountCol++;
+
+            oMatrix2.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_LINKED_BUTTON);
+            oMatrix2.Columns.Item(iCountCol).DataBind.Bind("DT_01", "DocEntry");
+            oMatrix2.Columns.Item(iCountCol).TitleObject.Caption = "DocEntry";
+            oMatrix2.Columns.Item(iCountCol).TitleObject.Sortable = false;
+            oMatrix2.Columns.Item(iCountCol).Width = 250;
+            oMatrix2.Columns.Item(iCountCol).Editable = false;
+            ((LinkedButton)oMatrix2.Columns.Item(iCountCol).ExtendedObject).LinkedObject = BoLinkedObject.lf_ServiceContract;
+            iCountCol++;
+
+
+
+            oMatrix2.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_EDIT);
+            oMatrix2.Columns.Item(iCountCol).DataBind.Bind("DT_01", "MSG");
+            oMatrix2.Columns.Item(iCountCol).TitleObject.Caption = "MSG";
+            oMatrix2.Columns.Item(iCountCol).TitleObject.Sortable = false;
+            oMatrix2.Columns.Item(iCountCol).Width = 150;
+            oMatrix2.Columns.Item(iCountCol).Editable = false;
+            iCountCol++;
+
             oForm.Visible = true;
         }
 
@@ -2403,7 +2600,7 @@ namespace JBC.Coletor.View
                                                       and ""DocStatus"" = 'O'
                                                       and exists (select * from INV6 
                                                                   where INV6.""DocEntry"" = OINV.""DocEntry"" 
-                                                                  and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 30)", absID);
+                                                                  and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 5)", absID);
 
             SAPbobsCOM.Recordset recordSetVerificacao = null;
             try

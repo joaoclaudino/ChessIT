@@ -35,6 +35,23 @@ namespace JBC.Coletor.Helper
         public static void MostraBalanca(string peso, string hora, Form pForm)
         {
 
+            try
+            {
+                SAPbouiCOM.Item oItem = null;
+                SAPbouiCOM.StaticText oStaticText = null;
+
+                oItem = pForm.Items.Add("lblBalanca", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                oItem.Left = 600;
+                oItem.Width = 148;
+                oItem.Top = 600;
+                oItem.Height = 14;
+            }
+            catch (Exception)
+            {
+
+                //throw;
+            }
+
             StaticText lblBalanca = (StaticText)pForm.Items.Item("lblBalanca").Specific;
 
             int greenColor = Color.Green.R | (Color.Green.G << 8) | (Color.Green.B << 16);

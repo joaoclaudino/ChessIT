@@ -1,5 +1,6 @@
 ﻿using Castle.Core.Logging;
 using JBC.Coletor.Controller;
+using JBC.Coletor.Helper;
 using JBC.Framework.Attribute;
 using JBC.Framework.DAO;
 using SAPbouiCOM;
@@ -290,204 +291,99 @@ namespace JBC.Coletor
             //Pedido de Venda (OS)
             if (pVal.EventType == BoEventTypes.et_CLICK && pVal.FormTypeEx == "139" && pVal.ItemUID == "btCapPeso" && !pVal.BeforeAction)
             {
-                bool sucesso = false;
-                string mensagem = "";
-
+                Form form = oApplication.Forms.Item(pVal.FormUID);
                 oApplication.StatusBar.SetText("Lendo peso...", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Warning);
+                BalancaController oBalancaController = new BalancaController(form);
+                //oBalancaController.OBalanca
+                //StaticText lblBalanca = (StaticText)form.Items.Item("lblBalanca").Specific;
+                //lblBalanca.Item.Visible = true;
+                form.Freeze(false);
+                LogHelper.MostraBalanca("", "", form);
+                //LogHelper.MostraBalanca(OBalanca.peso, hora, this.pForm);
 
-                ProgressBar progressBar = oApplication.StatusBar.CreateProgressBar("Lendo peso...", 100, false);
+                double dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
 
-                string ip = "";
-                string porta = "";
-                string diretorio = "";
-                string nomeArquivo = "";
+              
 
-                try
-                {
-                    SAPbobsCOM.Recordset recordSet = null;
-                    try
-                    {
-                        string query = @"SELECT * FROM ""@INTCFG"" ";
-
-                        recordSet = (SAPbobsCOM.Recordset)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-                        recordSet.DoQuery(query);
-
-                        if (!recordSet.EoF)
-                        {
-                            ip = recordSet.Fields.Item("U_IP").Value.ToString();
-                            porta = recordSet.Fields.Item("U_Porta").Value.ToString();
-                            diretorio = recordSet.Fields.Item("U_Diretorio").Value.ToString();
-                            nomeArquivo = recordSet.Fields.Item("U_NomeArquivo").Value.ToString();
-                        }
-                        else throw new Exception("Dados para conexão não configurados");
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception("Erro ao buscar dados de conexão: " + ex.Message);
-                    }
-                    finally
-                    {
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(recordSet);
-                        GC.Collect();
-                    }
-
-                    progressBar.Value = 10;
-
-                    Form form = oApplication.Forms.Item(pVal.FormUID);
+                //    Form form = oApplication.Forms.Item(pVal.FormUID);
 
                     Matrix matrix = (Matrix)form.Items.Item("38").Specific;
 
                     string parametroPesagem = ((ComboBox)form.Items.Item("cbParPeso").Specific).Selected.Value;
 
-                    string hora = DateTime.Now.ToString("HH:mm:ss");
 
-                    progressBar.Value = 40;
 
-                    string caminho = System.IO.Path.Combine(diretorio, nomeArquivo);
+                    string passo = "0";
 
                     try
                     {
-                        string arquivo = Helper.ApiHelper.GetArquivo(ip, porta, caminho);
 
-                        if (arquivo == "ARQUIVO NÃO ENCONTRADO")
+                        string um = "";
+                        try
                         {
-                            throw new Exception("Falha na comunicaçao com a balança capital: arquivo não encontrado");
+                            um = ((EditText)matrix.Columns.Item("212").Cells.Item(1).Specific).String.ToUpper();
+                        }
+                        catch { }
+
+                        passo = "1";
+                        string sPesoBruto = ((EditText)form.Items.Item("U_PesoBruto").Specific).String;
+                        string sTara = ((EditText)form.Items.Item("U_Tara").Specific).String;
+
+                        passo = "2";
+                        double pesoBruto = double.Parse((sPesoBruto.Contains(",") ? sPesoBruto.Replace(".", "").Replace(",", ".") : sPesoBruto), System.Globalization.CultureInfo.InvariantCulture); ;
+                        double tara = double.Parse((sTara.Contains(",") ? sTara.Replace(".", "").Replace(",", ".") : sTara), System.Globalization.CultureInfo.InvariantCulture); ;
+
+                        passo = "3";
+                        if (parametroPesagem.Equals("0"))
+                        {
+                            passo = "4";
+                            pesoBruto = double.Parse((oBalancaController.OBalanca.peso.Contains(",") ? oBalancaController.OBalanca.peso.Replace(".", "").Replace(",", ".") : oBalancaController.OBalanca.peso), System.Globalization.CultureInfo.InvariantCulture);
+                            ((EditText)form.Items.Item("U_PesoBruto").Specific).String = pesoBruto.ToString();
                         }
                         else
                         {
-                            progressBar.Value = 80;
-
-                            StringBuilder sb = new StringBuilder(arquivo);
-
-                            bool linhaEncontrada = false;
-
-                            string[] lines = arquivo.Split(
-                                new[] { @"\r\n\" },
-                                StringSplitOptions.RemoveEmptyEntries
-                            );
-
-                            foreach (string line in lines)
-                            {
-                                string clearedLine = line.Replace("\\", "").Replace(" ", "").Replace("\"", "").Trim();
-
-                                //if (clearedLine.Substring(6, 8) == hora)
-                               // {
-                                    linhaEncontrada = true;
-
-                                    string peso = clearedLine.Substring(0, 6);
-
-                                    if (peso.Equals(string.Empty))
-                                        throw new Exception("Não há peso tara definido para OS em questão");
-
-                                    string passo = "0";
-
-                                    try
-                                    {
-
-                                        string um = "";
-
-                                        try
-                                        {
-                                            um = ((EditText)matrix.Columns.Item("212").Cells.Item(1).Specific).String.ToUpper();
-                                        }
-                                        catch { }
-
-                                        passo = "1";
-
-                                        string sPesoBruto = ((EditText)form.Items.Item("U_PesoBruto").Specific).String;
-                                        string sTara = ((EditText)form.Items.Item("U_Tara").Specific).String;
-
-                                        passo = "2";
-
-                                        double pesoBruto = double.Parse((sPesoBruto.Contains(",") ? sPesoBruto.Replace(".", "").Replace(",", ".") : sPesoBruto), System.Globalization.CultureInfo.InvariantCulture); ;
-                                        double tara = double.Parse((sTara.Contains(",") ? sTara.Replace(".", "").Replace(",", ".") : sTara), System.Globalization.CultureInfo.InvariantCulture); ;
-
-                                        passo = "3";
-
-                                        if (parametroPesagem.Equals("0"))
-                                        {
-                                            passo = "4";
-
-                                            pesoBruto = double.Parse((peso.Contains(",") ? peso.Replace(".", "").Replace(",", ".") : peso), System.Globalization.CultureInfo.InvariantCulture);
-
-                                            ((EditText)form.Items.Item("U_PesoBruto").Specific).String = pesoBruto.ToString();
-                                        }
-                                        else
-                                        {
-                                            passo = "5";
-
-                                            tara = double.Parse((peso.Contains(",") ? peso.Replace(".", "").Replace(",", ".") : peso), System.Globalization.CultureInfo.InvariantCulture);
-
-                                            ((EditText)form.Items.Item("U_Tara").Specific).String = tara.ToString();
-                                        }
-
-                                        passo = "6";
-
-                                        if (tara > 0)
-                                        {
-                                            passo = "7";
-
-                                            double pesoLiquido = pesoBruto - tara;
-
-                                            ((EditText)form.Items.Item("U_PesoLiq").Specific).String = pesoLiquido.ToString();
-
-                                            if (um == "TONELADAS")
-                                            {
-                                                passo = "8";
-
-                                                ((EditText)matrix.Columns.Item("11").Cells.Item(1).Specific).String = (pesoLiquido / 1000).ToString();
-                                            }
-                                        }
-
-                                        passo = "9";
-
-                                        ((EditText)form.Items.Item("U_HoraEntradaOS").Specific).String = hora;
-                                        ((ComboBox)form.Items.Item("U_Situacao").Specific).Select("11");
-                                        ((ComboBox)form.Items.Item("U_Status").Specific).Select("P");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        throw new Exception("Erro ao preencher campos em tela (etapa " + passo + ") [ " + peso + "] :" + ex.Message);
-                                    }
-
-                                    sucesso = true;
-
-                                    break;
-
-                                //}
-                            }
-
-                            if (!linhaEncontrada)
-                                throw new Exception("Não há peso registrado na balança para o horário " + hora);
+                            passo = "5";
+                            tara = double.Parse((oBalancaController.OBalanca.peso.Contains(",") ? oBalancaController.OBalanca.peso.Replace(".", "").Replace(",", ".") : oBalancaController.OBalanca.peso), System.Globalization.CultureInfo.InvariantCulture);
+                            ((EditText)form.Items.Item("U_Tara").Specific).String = tara.ToString();
                         }
+
+                        passo = "6";
+                        if (tara > 0)
+                        {
+                            passo = "7";
+                            double pesoLiquido = pesoBruto - tara;
+                            ((EditText)form.Items.Item("U_PesoLiq").Specific).String = pesoLiquido.ToString();
+                            if (um == "TONELADAS")
+                            {
+                                passo = "8";
+                                ((EditText)matrix.Columns.Item("11").Cells.Item(1).Specific).String = (pesoLiquido / 1000).ToString();
+                            }
+                        }
+
+                        passo = "9";
+                        ((EditText)form.Items.Item("U_HoraEntradaOS").Specific).String = DateTime.Now.ToString("HH:mm");
+                        ((EditText)form.Items.Item("U_DataEntradaOS").Specific).String = DateTime.Now.ToString("dd/MM/yyyy");
+                        ((ComboBox)form.Items.Item("U_Situacao").Specific).Select("11");
+                        ((ComboBox)form.Items.Item("U_Status").Specific).Select("P");
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception("Falha na comunicaçao com a balança capital: " + ex.Message);
+                        throw new Exception("Erro ao preencher campos em tela (etapa " + passo + ") [ " + oBalancaController.OBalanca.peso + "] :" + ex.Message);
                     }
 
-                    progressBar.Value = 100;
+                    //sucesso = true;
 
-                }
-                catch (Exception ex)
-                {
-                    mensagem = ex.Message;
-                }
-                finally
-                {
-                    progressBar.Stop();
-                    System.Runtime.InteropServices.Marshal.ReleaseComObject(progressBar);
-                    GC.Collect();
-                }
+                    //break;
 
-                if (sucesso)
-                {
-                    oApplication.StatusBar.SetText("Operação completada com êxito", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Success);
-                }
-                else
-                {
-                    oApplication.StatusBar.SetText(mensagem);
-                }
+
+                //if (sucesso)
+                //{
+                //    oApplication.StatusBar.SetText("Operação completada com êxito", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Success);
+                //}
+                //else
+                //{
+                //    oApplication.StatusBar.SetText(mensagem);
+                //}
             }
         }
 

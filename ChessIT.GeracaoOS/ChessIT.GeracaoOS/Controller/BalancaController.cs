@@ -97,7 +97,7 @@ namespace ChessIT.GeracaoOS.Controller
                 }
 
                 if (!linhaEncontrada)
-                    LogHelper.InfoError("Não há peso registrado na balança para o horário " + hora);
+                    LogHelper.InfoError("Não há peso registrado nas linhas do arquivo " );
             }
 
         }
