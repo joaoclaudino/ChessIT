@@ -16,7 +16,7 @@ namespace JBC.Coletor.Model
         public string peso;
 
 
-        public string pesoHora;
+        //public string pesoHora;
 
         public int iTentativas;
     }

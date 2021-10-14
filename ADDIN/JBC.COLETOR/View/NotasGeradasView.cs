@@ -61,7 +61,7 @@ namespace JBC.Coletor.View
 
                         ((EditTextColumn)gridOS.Columns.Item("Nº Nota")).LinkedObjectType = "13";
                     }
-                    catch (Exception ex)
+                    catch //(Exception ex)
                     {
                         System.IO.File.WriteAllText("Sql.sql", query);
                     }

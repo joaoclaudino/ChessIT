@@ -38,7 +38,7 @@ namespace JBC.Coletor.Helper
             try
             {
                 SAPbouiCOM.Item oItem = null;
-                SAPbouiCOM.StaticText oStaticText = null;
+                //SAPbouiCOM.StaticText oStaticText = null;
 
                 oItem = pForm.Items.Add("lblBalanca", SAPbouiCOM.BoFormItemTypes.it_STATIC);
                 oItem.Left = 600;

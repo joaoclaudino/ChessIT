@@ -257,7 +257,7 @@ namespace JBC.Coletor.View
                                     }
                                     else if (pVal.ItemUID == "btGerarOS")
                                     {
-                                        MostrarOSGeradas("50,1,2", new List<ErroGerOS>() { new ErroGerOS() { absID=1,Erro="asdasd"}, new ErroGerOS() { absID = 22, Erro = "asdasd" } });
+                                       // MostrarOSGeradas("50,1,2", new List<ErroGerOS>() { new ErroGerOS() { absID=1,Erro="asdasd"}, new ErroGerOS() { absID = 22, Erro = "asdasd" } });
                                         GerarOS();
                                     }
                                     else if (pVal.ItemUID == "btPesqOS")
@@ -717,8 +717,9 @@ namespace JBC.Coletor.View
                                                     //}
                                                     oOrder.UserFields.Fields.Item("U_NPlaca").Value = recordSetPlaca.Fields.Item("Placa").Value.ToString();
                                                     oOrder.UserFields.Fields.Item("U_EstPlaca").Value = recordSetPlaca.Fields.Item("UFPlaca").Value.ToString();
-                                                    oOrder.UserFields.Fields.Item("U_CodTransp").Value = recordSetPlaca.Fields.Item("MOTORISTA").Value.ToString();
+                                                    //oOrder.UserFields.Fields.Item("U_CodTransp").Value = recordSetPlaca.Fields.Item("MOTORISTA").Value.ToString();
                                                     oOrder.UserFields.Fields.Item("U_Tara").Value = recordSetPlaca.Fields.Item("TARA").Value.ToString();
+                                                    oOrder.TaxExtension.Carrier = recordSetPlaca.Fields.Item("MOTORISTA").Value.ToString();
                                                     bModificou = true;
                                                     //for (int ii = 0; ii < oOrder.Lines.Count; ii++)
                                                     //{
@@ -799,7 +800,7 @@ namespace JBC.Coletor.View
                                         
                                         int ContratoTot = Convert.ToInt32(lblContratoTot.Caption);
                                         //int M3Tot = Convert.ToInt32(lblM3Tot.Caption);
-                                        int M3 = 0;
+                                        //int M3 = 0;
                                         
 
                                         if (gridContr.DataTable.GetValue(0, pVal.Row).ToString().Equals("Y"))
@@ -1423,10 +1424,14 @@ namespace JBC.Coletor.View
                     recordSetVerificacao.MoveNext();
                 }
             }
+            catch
+            {
+
+            }
             finally
             {
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(recordSetVerificacao);
-                GC.Collect();
+                //System.Runtime.InteropServices.Marshal.ReleaseComObject(recordSetVerificacao);
+                //GC.Collect();
             }
 
             return M3;
@@ -1960,7 +1965,7 @@ namespace JBC.Coletor.View
             {
                 try
                 {
-                    LogHelper.InfoSuccess(string.Format("Processando OS {0}", absID1));
+                    LogHelper.InfoSuccess(string.Format("Processando Contrato {0}", absID1));
                     //NotasVencidas(absID).Count();
 
                     if (NotasVencidas(absID1).Count() > 0)
@@ -2093,7 +2098,7 @@ namespace JBC.Coletor.View
                                 }
                             }
                         }
-                        break;
+                        //break;
                     }
                 }
             }
@@ -2310,7 +2315,8 @@ namespace JBC.Coletor.View
             //}
         }
 
-        private static void MontaOS(string placaOS, DateTime dataSaidaOS, string horaSaidaOS, string diaColeta, int absID, SAPbobsCOM.Documents documents, SAPbobsCOM.Recordset recordSet)
+        private static void MontaOS(string placaOS, DateTime dataSaidaOS, string horaSaidaOS, string diaColeta
+            , int absID, SAPbobsCOM.Documents documents, SAPbobsCOM.Recordset recordSet)
         {
             DateTime docDate = DateTime.Now;
             DateTime docDueDate = dataSaidaOS;
@@ -2390,7 +2396,12 @@ namespace JBC.Coletor.View
                                                                         )
                                                                         ,OAT1.""AgrLineNum""
                                                                 from OOAT
-                                                                inner join OAT1 on OAT1.""AgrNo"" = OOAT.""AbsID""                                                            
+                                                                inner join OAT1 on OAT1.""AgrNo"" = OOAT.""AbsID""        
+
+                                                                inner join OITM T22 on T22.""ItemCode""=OAT1.""ItemCode""   
+                                                                inner join OITB t33 on t33.""ItmsGrpCod"" = T22.""ItmsGrpCod"" and t33.""ItmsGrpNam"" = 'Resíduos'
+
+
                                                                 left join ""@VEICULOS"" ON ""@VEICULOS"".""U_Placa"" = '{2}'
                                                                 left join ""@VEICULOS_DADOS"" ON ""@VEICULOS_DADOS"".""Code"" = ""@VEICULOS"".""Code""
                                                                 where OOAT.""AbsID"" = {0}
@@ -2441,8 +2452,8 @@ namespace JBC.Coletor.View
             oForm.Top = 100;
 
             //tamanho inicial
-            oForm.ClientHeight = 400;
-            oForm.ClientWidth = 600;
+            oForm.ClientHeight = 380;
+            oForm.ClientWidth = 700;
 
 
 
@@ -2460,7 +2471,10 @@ namespace JBC.Coletor.View
 
             dtMatrix1 = oForm.DataSources.DataTables.Add("DT_01");
 
-
+            if (string.IsNullOrEmpty(sOSsGeradas))
+            {
+                sOSsGeradas = "0";
+            }
             string select = string.Format(@" 
                                                     select 
 	                                                    T0.""DocEntry""
@@ -2546,49 +2560,54 @@ namespace JBC.Coletor.View
 
             dtMatrix2 = oForm.DataSources.DataTables.Add("DT_02");
             select = string.Empty;
-            foreach (ErroGerOS erroGerOS in ErroGerOSs)
+            if (ErroGerOSs.Count()>0)
             {
-                if (!string.IsNullOrEmpty(select))
+                foreach (ErroGerOS erroGerOS in ErroGerOSs)
                 {
-                    select= select+" union all ";
-                }
-                select = select + string.Format(@" 
-                                                    select 
-	                                                    {0} ""DocEntry""
-                                                        , '{1}' as ""MSG""
-                                                    from
-                                                        dummy
+                    if (!string.IsNullOrEmpty(select))
+                    {
+                        select= select+" union all ";
+                    }
+                    select = select + string.Format(@" 
+                                                        select 
+	                                                        {0} ""DocEntry""
+                                                            , '{1}' as ""MSG""
+                                                        from
+                                                            dummy
                                                     
-                                                    ", erroGerOS.absID, erroGerOS.Erro);
+                                                        ", erroGerOS.absID, erroGerOS.Erro.Replace("'","''"));
+                }
+                select = select + "order by 1;";
+                dtMatrix2.ExecuteQuery(select);
+
+                iCountCol = 0;
+                oColumn = oMatrix2.Columns.Add('C' + iCountCol.ToString(), SAPbouiCOM.BoFormItemTypes.it_EDIT);
+                oColumn.Editable = false;
+                oColumn.TitleObject.Caption = "#";
+                iCountCol++;
+
+                oMatrix2.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_LINKED_BUTTON);
+                oMatrix2.Columns.Item(iCountCol).DataBind.Bind("DT_02", "DocEntry");
+                oMatrix2.Columns.Item(iCountCol).TitleObject.Caption = "DocEntry";
+                oMatrix2.Columns.Item(iCountCol).TitleObject.Sortable = false;
+                oMatrix2.Columns.Item(iCountCol).Width = 250;
+                oMatrix2.Columns.Item(iCountCol).Editable = false;
+                ((LinkedButton)oMatrix2.Columns.Item(iCountCol).ExtendedObject).LinkedObject = BoLinkedObject.lf_ServiceContract;
+                iCountCol++;
+
+
+
+                oMatrix2.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_EDIT);
+                oMatrix2.Columns.Item(iCountCol).DataBind.Bind("DT_02", "MSG");
+                oMatrix2.Columns.Item(iCountCol).TitleObject.Caption = "MSG";
+                oMatrix2.Columns.Item(iCountCol).TitleObject.Sortable = false;
+                oMatrix2.Columns.Item(iCountCol).Width = 150;
+                oMatrix2.Columns.Item(iCountCol).Editable = false;
+                iCountCol++;
+
+                oMatrix2.AutoResizeColumns();
+                oMatrix2.LoadFromDataSource();
             }
-            select = select + "order by 1;";
-            dtMatrix2.ExecuteQuery(select);
-
-            iCountCol = 0;
-            oColumn = oMatrix2.Columns.Add('C' + iCountCol.ToString(), SAPbouiCOM.BoFormItemTypes.it_EDIT);
-            oColumn.Editable = false;
-            oColumn.TitleObject.Caption = "#";
-            iCountCol++;
-
-            oMatrix2.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_LINKED_BUTTON);
-            oMatrix2.Columns.Item(iCountCol).DataBind.Bind("DT_01", "DocEntry");
-            oMatrix2.Columns.Item(iCountCol).TitleObject.Caption = "DocEntry";
-            oMatrix2.Columns.Item(iCountCol).TitleObject.Sortable = false;
-            oMatrix2.Columns.Item(iCountCol).Width = 250;
-            oMatrix2.Columns.Item(iCountCol).Editable = false;
-            ((LinkedButton)oMatrix2.Columns.Item(iCountCol).ExtendedObject).LinkedObject = BoLinkedObject.lf_ServiceContract;
-            iCountCol++;
-
-
-
-            oMatrix2.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_EDIT);
-            oMatrix2.Columns.Item(iCountCol).DataBind.Bind("DT_01", "MSG");
-            oMatrix2.Columns.Item(iCountCol).TitleObject.Caption = "MSG";
-            oMatrix2.Columns.Item(iCountCol).TitleObject.Sortable = false;
-            oMatrix2.Columns.Item(iCountCol).Width = 150;
-            oMatrix2.Columns.Item(iCountCol).Editable = false;
-            iCountCol++;
-
             oForm.Visible = true;
         }
 
@@ -2600,7 +2619,7 @@ namespace JBC.Coletor.View
                                                       and ""DocStatus"" = 'O'
                                                       and exists (select * from INV6 
                                                                   where INV6.""DocEntry"" = OINV.""DocEntry"" 
-                                                                  and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 5)", absID);
+                                                                  and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 30)", absID);
 
             SAPbobsCOM.Recordset recordSetVerificacao = null;
             try
