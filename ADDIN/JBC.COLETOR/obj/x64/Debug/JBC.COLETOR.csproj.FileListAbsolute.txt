@@ -19,3 +19,4 @@ C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.COLETOR\obj\x64\Debug
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.COLETOR\obj\x64\Debug\JBC.COLETOR.csproj.CopyComplete
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.COLETOR\obj\x64\Debug\JBC.Coletor.dll
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.COLETOR\obj\x64\Debug\JBC.Coletor.pdb
+C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\JBC.COLETOR\obj\x64\Debug\JBC.COLETOR.csproj.AssemblyReference.cache

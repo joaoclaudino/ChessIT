@@ -297,6 +297,10 @@ namespace JBC.Coletor.View
                                     {
                                         LogHelper.InfoError("Selecione o Tipo de Rateio");
                                     }
+                                    else if (Convert.ToDouble(((EditText)Form.Items.Item("edtPeso").Specific).Value)<=0)
+                                    {
+                                        LogHelper.InfoError("Informe um peso válido!!");
+                                    }
                                     else
                                     {
                                         string tiporateio = ((ComboBox)Form.Items.Item("cbTpRateio").Specific).Selected.Value;
@@ -306,6 +310,25 @@ namespace JBC.Coletor.View
                                             double TotalQuantidadeM3 = VolumeM3TotalSelecionados();
                                             //dou
                                             Grid gridPes = (Grid)Form.Items.Item("gridPes").Specific;
+
+                                            double dPeso=0;// = Convert.ToDouble(oBalancaController.OBalanca.peso);
+                                            //if (((CheckBox)Form.Items.Item("chkBal").Specific).Checked)
+                                            //{
+
+                                            //    BalancaController oBalancaController = new BalancaController(Form);
+
+                                            //    StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
+                                            //    lblBalanca.Item.Visible = true;
+                                            //    Form.Freeze(false);
+                                            //    LogHelper.MostraBalanca("", "", Form);
+
+                                            //    dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
+
+                                            //}
+                                            //else
+                                            //{
+                                                dPeso = Convert.ToDouble(((EditText)Form.Items.Item("edtPeso").Specific).Value);
+                                            //}
                                             for (int i = 0; i < gridPes.Rows.Count; i++)
                                             {
                                                 if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
@@ -319,30 +342,8 @@ namespace JBC.Coletor.View
 
                                                         LogHelper.InfoWarning(string.Format("Processando OS {0}", gridPes.DataTable.GetValue(1, i).ToString()));
 
-
-                                                        double dPeso;// = Convert.ToDouble(oBalancaController.OBalanca.peso);
-                                                        if (((CheckBox)Form.Items.Item("chkBal").Specific).Checked)
-                                                        {
-
-                                                            BalancaController oBalancaController = new BalancaController(Form);
-
-                                                            StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
-                                                            lblBalanca.Item.Visible = true;
-                                                            Form.Freeze(false);
-                                                            LogHelper.MostraBalanca("", "", Form);
-
-                                                            dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
-                                                            
-                                                        }
-                                                        else
-                                                        {
-                                                            dPeso = Convert.ToDouble(((EditText)Form.Items.Item("edtPeso").Specific).Value);
-                                                        }
-                                                        
-
                                                         //qual a percentagem do item no total m3
                                                         double p = (dM3Order * 100) / TotalQuantidadeM3;
-
 
                                                         //double dPesoBruto = (dPeso / 100) * p;
 
@@ -433,20 +434,20 @@ namespace JBC.Coletor.View
                                                         //double dM3Order = Convert.ToDouble(oOrder.UserFields.Fields.Item("U_VolumeM3").Value);
                                                         LogHelper.InfoWarning(string.Format("Processando OS {0}", gridPes.DataTable.GetValue(1, i).ToString()));
                                                         double dPeso;
-                                                        if (((CheckBox)Form.Items.Item("chkBal").Specific).Checked)
-                                                        {
-                                                            BalancaController oBalancaController = new BalancaController(Form);
+                                                        //if (((CheckBox)Form.Items.Item("chkBal").Specific).Checked)
+                                                        //{
+                                                        //    BalancaController oBalancaController = new BalancaController(Form);
 
-                                                            StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
-                                                            lblBalanca.Item.Visible = true;
-                                                            Form.Freeze(false);
-                                                            LogHelper.MostraBalanca("", "", Form);
-                                                            dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
-                                                        }
-                                                        else
-                                                        {
+                                                        //    StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
+                                                        //    lblBalanca.Item.Visible = true;
+                                                        //    Form.Freeze(false);
+                                                        //    LogHelper.MostraBalanca("", "", Form);
+                                                        //    dPeso = Convert.ToDouble(oBalancaController.OBalanca.peso);
+                                                        //}
+                                                        //else
+                                                        //{
                                                             dPeso = Convert.ToDouble(((EditText)Form.Items.Item("edtPeso").Specific).Value);
-                                                        }
+                                                        //}
         
 
                                                         //PASSO 1 – Encontrar o peso previsto da ordem de serviço para o cliente.
@@ -611,14 +612,10 @@ namespace JBC.Coletor.View
                                                             oOrder.UserFields.Fields.Item("U_PesoBruto").Value = Convert.ToDouble(OBalanca.peso);
                                                         }
 
-
-
-
-
                                                         if (oOrder.Update() == 0)
                                                         {
                                                             Program.oApplicationS.StatusBar.SetText(
-                                                                string.Format("OS Nº {0} Tara Atualizada!!", oOrder.DocEntry)
+                                                                string.Format("OS Nº {0} Atualizada!!", oOrder.DocEntry)
                                                                 , BoMessageTime.bmt_Short
                                                                 , BoStatusBarMessageType.smt_Success
                                                             );
@@ -649,7 +646,7 @@ namespace JBC.Coletor.View
                                             }
                                             lblBalanca.Item.Visible = false;
                                             LogHelper.InfoWarning("Pessagem concluída!!!");
-                                            CarregarPes();
+                                            //CarregarPes();
 
                                             //string arquivo = Helper.ApiHelper.GetArquivo(ip, porta, caminho);
 
@@ -679,6 +676,8 @@ namespace JBC.Coletor.View
 		                                                    SELECT 
 		                                                        T0.""U_Placa"" ""Placa""
                                                                 , T0.""U_UFPlaca"" ""UFPlaca""
+                                                                , T0.""U_PNCode"" AS ""TRANSP""
+
                                                                 , T1.""U_MotoPrinc"" AS ""MOTORISTA""
                                                                 , 1 TARA
                                                             FROM
@@ -717,9 +716,9 @@ namespace JBC.Coletor.View
                                                     //}
                                                     oOrder.UserFields.Fields.Item("U_NPlaca").Value = recordSetPlaca.Fields.Item("Placa").Value.ToString();
                                                     oOrder.UserFields.Fields.Item("U_EstPlaca").Value = recordSetPlaca.Fields.Item("UFPlaca").Value.ToString();
-                                                    //oOrder.UserFields.Fields.Item("U_CodTransp").Value = recordSetPlaca.Fields.Item("MOTORISTA").Value.ToString();
+                                                    oOrder.UserFields.Fields.Item("U_Motorista").Value = recordSetPlaca.Fields.Item("MOTORISTA").Value.ToString();
                                                     oOrder.UserFields.Fields.Item("U_Tara").Value = recordSetPlaca.Fields.Item("TARA").Value.ToString();
-                                                    oOrder.TaxExtension.Carrier = recordSetPlaca.Fields.Item("MOTORISTA").Value.ToString();
+                                                    oOrder.TaxExtension.Carrier = recordSetPlaca.Fields.Item("TRANSP").Value.ToString();
                                                     bModificou = true;
                                                     //for (int ii = 0; ii < oOrder.Lines.Count; ii++)
                                                     //{
@@ -1632,6 +1631,7 @@ namespace JBC.Coletor.View
                         and('{2}' = '' or '{2}' = T0.""U_NPlaca"")
                         and('{3}' = '' or '{3}' = (select max(OOAT.""U_Rota"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = T0.""DocEntry""))
                         and('{4}' = '[Selecionar]' or '{4}' = T0.""U_DiaSemRot"")
+                    order by T0.""DocNum"" DESC
 
             ",
                                             selecionar,
@@ -2592,7 +2592,7 @@ namespace JBC.Coletor.View
                 oMatrix2.Columns.Item(iCountCol).TitleObject.Sortable = false;
                 oMatrix2.Columns.Item(iCountCol).Width = 250;
                 oMatrix2.Columns.Item(iCountCol).Editable = false;
-                ((LinkedButton)oMatrix2.Columns.Item(iCountCol).ExtendedObject).LinkedObject = BoLinkedObject.lf_ServiceContract;
+                //((LinkedButton)oMatrix2.Columns.Item(iCountCol).ExtendedObject).LinkedObject = BoLinkedObject.lf_ContractTemplete;
                 iCountCol++;
 
 
@@ -2619,7 +2619,7 @@ namespace JBC.Coletor.View
                                                       and ""DocStatus"" = 'O'
                                                       and exists (select * from INV6 
                                                                   where INV6.""DocEntry"" = OINV.""DocEntry"" 
-                                                                  and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 30)", absID);
+                                                                  and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 15)", absID);
 
             SAPbobsCOM.Recordset recordSetVerificacao = null;
             try

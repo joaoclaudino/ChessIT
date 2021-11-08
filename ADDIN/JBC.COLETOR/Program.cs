@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 //using System.Windows.Forms;
+using Application = System.Windows.Forms.Application;
 
 namespace JBC.Coletor
 {
@@ -53,11 +54,63 @@ namespace JBC.Coletor
         {
 
         }
+        private void AddMenuItems()
+        {
+            SAPbouiCOM.Menus oMenus = null;
+            SAPbouiCOM.MenuItem oMenuItem = null;
 
+            //int i = 0;
+            //int iAddAfter = 0;
+            //string sXML = null;
+            string sPath = null;
+
+            oMenus = oApplication.Menus;
+
+            SAPbouiCOM.MenuCreationParams oMenuCreationParams = null;
+            oMenuCreationParams = (SAPbouiCOM.MenuCreationParams)(oApplication.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_MenuCreationParams));
+
+            oMenuItem = oApplication.Menus.Item("43520");
+
+            sPath = Application.StartupPath;
+            //sPath = sPath.Remove(sPath.Length-9,0);
+
+            oMenuCreationParams.Type = BoMenuType.mt_POPUP;
+            oMenuCreationParams.UniqueID = "CHESSIT";
+            oMenuCreationParams.String = "CHESS - IT";
+            oMenuCreationParams.Enabled = true;
+            //oMenuCreationParams.Image = sPath + @"\\UI.bmp";
+            oMenuCreationParams.Position = 99;
+
+
+            oMenus = oMenuItem.SubMenus;
+
+            try
+            {
+                oMenus.AddEx(oMenuCreationParams);
+
+                oMenuItem = oApplication.Menus.Item("CHESSIT");
+                oMenus = oMenuItem.SubMenus;
+
+                oMenuCreationParams.Type = BoMenuType.mt_STRING;
+                oMenuCreationParams.UniqueID = "CHESSITC";
+                oMenuCreationParams.String = "Configurações";
+                oMenus.AddEx(oMenuCreationParams);
+
+                oMenuCreationParams.Type = BoMenuType.mt_STRING;
+                oMenuCreationParams.UniqueID = "CHESSITG";
+                oMenuCreationParams.String = "Gestão de OS";
+                oMenus.AddEx(oMenuCreationParams);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.Message);
+            }
+        }
         public void CheckInit()
         {
             oCompanyS = oCompany;
             oApplicationS = oApplication;
+            AddMenuItems();
             Form sboForm = oApplication.Forms.GetFormByTypeAndCount(169, 1);
 
             sboForm.Freeze(true);
