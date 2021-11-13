@@ -1,4 +1,4 @@
-
+set schema "CUTOVER_0211";
 	
 DROP PROCEDURE "spcJBCPlaca";
 

@@ -213,13 +213,21 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ChessIT.GeracaoOS\ChessIT.GeracaoOS\ChessIT.GeracaoOS.csproj">
-      <Project>{460225ae-7b75-49a5-940f-3f0299265cca}</Project>
-      <Name>ChessIT.GeracaoOS</Name>
+    <ProjectReference Include="..\..\..\Addon-CEP\JBC.CEP.csproj">
+      <Project>{6b685bfe-319e-4056-8650-f5d129c29a0e}</Project>
+      <Name>JBC.CEP</Name>
     </ProjectReference>
-    <ProjectReference Include="..\JBC.COLETOR\JBC.COLETOR.csproj">
-      <Project>{511696fb-29ec-4294-91bc-c57fc360aa70}</Project>
-      <Name>JBC.COLETOR</Name>
+    <ProjectReference Include="..\..\..\Addon-ConsultaCNPJ\JBC.ConsultaCNPJ.csproj">
+      <Project>{134bebcf-0c7c-4db4-aa58-e6479bc7bf13}</Project>
+      <Name>JBC.ConsultaCNPJ</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\JBC.Service\JBC.Service.csproj">
+      <Project>{47cc7cc9-51ed-4288-82c3-86b17dc4d61c}</Project>
+      <Name>JBC.Service</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Chess.IT.Services\Chess.IT.Services.csproj">
+      <Project>{b10719c6-3e55-42f9-8504-f220ceb5189f}</Project>
+      <Name>Chess.IT.Services</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
