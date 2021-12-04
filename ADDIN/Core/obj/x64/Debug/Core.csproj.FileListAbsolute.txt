@@ -42,10 +42,3 @@ C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\Core\obj\x64\Debug\JBC.ex
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\Core\bin\x64\Debug\xml\Menu.xml
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\Core\bin\x64\Debug\Chess.IT.Services.dll
 C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\Core\bin\x64\Debug\Chess.IT.Services.pdb
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\Core\bin\x64\Debug\JBC.CEP.dll
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\Core\bin\x64\Debug\JBC.ConsultaCNPJ.dll
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\Core\bin\x64\Debug\JBC.Service.dll
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\Core\bin\x64\Debug\Newtonsoft.Json.dll
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\Core\bin\x64\Debug\JBC.CEP.pdb
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\Core\bin\x64\Debug\JBC.ConsultaCNPJ.pdb
-C:\Users\kuricaambiental_02\source\repos\ChessIT\ADDIN\Core\bin\x64\Debug\JBC.Service.pdb

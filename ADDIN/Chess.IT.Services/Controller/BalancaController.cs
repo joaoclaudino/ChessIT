@@ -127,6 +127,7 @@ namespace Chess.IT.Services.Controller
         private async Task<string> HttpGetResponse(string ip, string porta, string caminho)
         {
             string url = string.Format("http://{0}:{1}/arquivo?caminho={2}", ip, porta, caminho.Replace(@"\", "%5C"));
+            //string url = string.Format(@"http://10.120.25.50/arquivo/Peso.txt", ip, porta, caminho.Replace(@"\", "%5C"));
 
             WebRequest request = WebRequest.Create(url);
 

@@ -213,18 +213,6 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Addon-CEP\JBC.CEP.csproj">
-      <Project>{6b685bfe-319e-4056-8650-f5d129c29a0e}</Project>
-      <Name>JBC.CEP</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Addon-ConsultaCNPJ\JBC.ConsultaCNPJ.csproj">
-      <Project>{134bebcf-0c7c-4db4-aa58-e6479bc7bf13}</Project>
-      <Name>JBC.ConsultaCNPJ</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\JBC.Service\JBC.Service.csproj">
-      <Project>{47cc7cc9-51ed-4288-82c3-86b17dc4d61c}</Project>
-      <Name>JBC.Service</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Chess.IT.Services\Chess.IT.Services.csproj">
       <Project>{b10719c6-3e55-42f9-8504-f220ceb5189f}</Project>
       <Name>Chess.IT.Services</Name>

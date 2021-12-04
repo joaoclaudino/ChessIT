@@ -559,6 +559,7 @@ namespace Chess.IT.Services.View
                                         {
 
                                             StaticText lblBalanca = (StaticText)Form.Items.Item("lblBalanca").Specific;
+                                            BalancaController oBalancaController = new BalancaController(Form);
                                             for (int i = 0; i < gridPes.Rows.Count; i++)
                                             {
                                                 if (gridPes.DataTable.GetValue(0, i).ToString().Equals("Y"))
@@ -568,7 +569,7 @@ namespace Chess.IT.Services.View
                                                     Balanca OBalanca;
                                                     if (((CheckBox)Form.Items.Item("chkBal").Specific).Checked)
                                                     {
-                                                        BalancaController oBalancaController = new BalancaController(Form);
+                                                        
                                                         lblBalanca.Item.Visible = true;
                                                         Form.Freeze(false);
                                                         LogHelper.MostraBalanca("", "", Form);
@@ -805,7 +806,12 @@ namespace Chess.IT.Services.View
                                 if (pVal.ItemUID == "ckSelTPes")
                                 {
                                     //if (Form.DataSources.DataTables.Item("dtOS").Rows.Count > 0)
-                                        CarregarPes();
+                                    Program.oApplicationS.StatusBar.SetText(
+                                        "Selecionando OS..."
+                                        , BoMessageTime.bmt_Short
+                                        , BoStatusBarMessageType.smt_Warning
+                                    );
+                                    CarregarPes();
                                 }
                                 if (pVal.ItemUID == "gridContr")
                                 {
@@ -1590,11 +1596,11 @@ namespace Chess.IT.Services.View
         private void CarregarPes()
         {
 
-            Program.oApplicationS.StatusBar.SetText(
-                "Consulta Pessagem Iniciada..."
-                , BoMessageTime.bmt_Short
-                , BoStatusBarMessageType.smt_Warning
-            );
+            //Program.oApplicationS.StatusBar.SetText(
+            //    "Consulta Pessagem Iniciada..."
+            //    , BoMessageTime.bmt_Short
+            //    , BoStatusBarMessageType.smt_Warning
+            //);
 
             string selecionar = ((CheckBox)Form.Items.Item("ckSelTPes").Specific).Checked ? "Y" : "N";
             string cliente = ((EditText)Form.Items.Item("etCliente").Specific).String;
@@ -2038,11 +2044,12 @@ namespace Chess.IT.Services.View
             //para cada absId faz o loop agrupando as linhas do mesmo...
             foreach (int absID1 in absIDs)
             {
+                int iNumber = 0;
                 try
                 {
                     LogHelper.InfoSuccess(string.Format("Processando Contrato {0}", absID1));
                     //NotasVencidas(absID).Count();
-
+                    
                     if (NotasVencidas(absID1).Count() > 0)
                     {
                         LogHelper.InfoError(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
@@ -2062,7 +2069,9 @@ namespace Chess.IT.Services.View
                             if (Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)) == absID1)
                             {
                                 SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                
                                 SAPbobsCOM.Recordset recordSet = ConsultaContratoGeracao(placaOS, gridContratos, absID1, row);
+                                iNumber = Convert.ToInt32(recordSet.Fields.Item(11).Value.ToString());
                                 while (!recordSet.EoF)
                                 {
                                     MontaOS(placaOS, dataSaidaOS, horaSaidaOS, diaColeta, absID1, documents, recordSet);
@@ -2077,15 +2086,25 @@ namespace Chess.IT.Services.View
                                     string msgErro;
 
                                     Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
-                                    LogHelper.InfoError(msgErro);
-                                    ErroGerOSs.Add( new ErroGerOS() { absID= absID1,Erro= msgErro } );
+
+                                    if (msgErro.Contains("RDR1.AgrNo"))
+                                    {
+                                        msgErro = "Data Térmido do Contrato expirou!!!";
+                                        LogHelper.InfoError(msgErro);
+                                    }
+                                    else
+                                    {
+                                        LogHelper.InfoError(msgErro);
+                                    }
+                                   // Convert.ToInt32(recordSet.Fields.Item(11).Value.ToString());
+                                    ErroGerOSs.Add( new ErroGerOS() { absID= iNumber, Erro= msgErro } );
                                     //throw new Exception(msgErro);
                                 }
                                 else
                                 {
                                     osGeradas = true;
                                     
-                                    LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", absID1, Program.oCompanyS.GetNewObjectKey()));
+                                    LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", iNumber, Program.oCompanyS.GetNewObjectKey()));
 
                                     if (string.IsNullOrEmpty(sOSsGeradas))
                                     {
@@ -2104,8 +2123,10 @@ namespace Chess.IT.Services.View
                 }
                 catch (Exception ex )
                 {
-                    LogHelper.InfoError(string.Format("Erro Processando OS {0}: {1}", absID1,ex.Message));
-                    ErroGerOSs.Add(new ErroGerOS() { absID = absID1, Erro = ex.Message });
+                    string msgErro = string.Format("{0} - {0}", ex.Message, ex.StackTrace);
+                    LogHelper.InfoError(string.Format("Erro Processando OS {0}: {1}", absID1, msgErro));
+                    
+                    ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = msgErro });
                 }
             }
 
@@ -2115,6 +2136,7 @@ namespace Chess.IT.Services.View
                 {
                     for (int row = 0; row < gridContratos.Rows.Count; row++)
                     {
+                        int iNumber = 0;
                         if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
                         {
                             if (Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)) == absID1)
@@ -2130,6 +2152,7 @@ namespace Chess.IT.Services.View
 
                                         SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
                                         SAPbobsCOM.Recordset recordSet = ConsultaContratoGeracao(placaOS, gridContratos, absID1, row);
+                                        iNumber = Convert.ToInt32(recordSet.Fields.Item(11).Value.ToString());
                                         while (!recordSet.EoF)
                                         {
                                             MontaOS(placaOS, dataSaidaOS, horaSaidaOS, diaColeta, absID1, documents, recordSet);
@@ -2144,14 +2167,25 @@ namespace Chess.IT.Services.View
                                             string msgErro;
 
                                             Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
-                                            LogHelper.InfoError(msgErro);
-                                            ErroGerOSs.Add(new ErroGerOS() { absID = absID1, Erro = msgErro });
+
+                                            if (msgErro.Contains("RDR1.AgrNo"))
+                                            {
+                                                msgErro = "Data Térmido do Contrato expirou!!!";
+                                                LogHelper.InfoError(msgErro);
+                                            }
+                                            else
+                                            {
+                                                LogHelper.InfoError(msgErro);
+                                            }
+
+                                            
+                                            ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = msgErro });
                                             //throw new Exception(msgErro);
                                         }
                                         else
                                         {
                                             osGeradas = true;
-                                            LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", absID1, Program.oCompanyS.GetNewObjectKey()));
+                                            LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", iNumber, Program.oCompanyS.GetNewObjectKey()));
 
                                             if (string.IsNullOrEmpty(sOSsGeradas))
                                             {
@@ -2167,8 +2201,9 @@ namespace Chess.IT.Services.View
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogHelper.InfoError(string.Format("Erro Processando OS {0}: {1}", absID1, ex.Message));
-                                        ErroGerOSs.Add(new ErroGerOS() { absID = absID1, Erro = ex.Message });
+                                        string msgErro = string.Format("{0} - {0}", ex.Message, ex.StackTrace);
+                                        LogHelper.InfoError(string.Format("Erro Processando OS {0}: {1}", iNumber, msgErro));
+                                        ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = msgErro });
                                     }
                                 }
                             }
@@ -2443,7 +2478,7 @@ namespace Chess.IT.Services.View
             documents.Lines.WarehouseCode = warehouse;
             documents.Lines.UnitPrice = unitPrice;
             documents.Lines.AgreementNo = absID;
-            //documents.Lines.AgreementRowNumber = AgrLineNum;
+            documents.Lines.AgreementRowNumber = AgrLineNum;
             documents.Lines.UserFields.Fields.Item("U_UtilTax").Value = usage;
             
             documents.Lines.Add();
@@ -2471,6 +2506,7 @@ namespace Chess.IT.Services.View
                                                                                 OITM.""ItemCode"" = OAT1.""ItemCode""
                                                                         )
                                                                         ,OAT1.""AgrLineNum""
+                                                                        ,OOAT.""Number""
                                                                 from OOAT
                                                                 inner join OAT1 on OAT1.""AgrNo"" = OOAT.""AbsID""        
 
@@ -2646,7 +2682,7 @@ namespace Chess.IT.Services.View
                     }
                     select = select + string.Format(@" 
                                                         select 
-	                                                        {0} ""DocEntry""
+	                                                        {0} ""Number""
                                                             , '{1}' as ""MSG""
                                                         from
                                                             dummy
@@ -2663,8 +2699,8 @@ namespace Chess.IT.Services.View
                 iCountCol++;
 
                 oMatrix2.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_LINKED_BUTTON);
-                oMatrix2.Columns.Item(iCountCol).DataBind.Bind("DT_02", "DocEntry");
-                oMatrix2.Columns.Item(iCountCol).TitleObject.Caption = "DocEntry";
+                oMatrix2.Columns.Item(iCountCol).DataBind.Bind("DT_02", "Number");
+                oMatrix2.Columns.Item(iCountCol).TitleObject.Caption = "Number";
                 oMatrix2.Columns.Item(iCountCol).TitleObject.Sortable = false;
                 oMatrix2.Columns.Item(iCountCol).Width = 250;
                 oMatrix2.Columns.Item(iCountCol).Editable = false;
