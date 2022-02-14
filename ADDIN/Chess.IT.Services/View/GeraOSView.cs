@@ -274,7 +274,7 @@ namespace Chess.IT.Services.View
                                     }
                                     else if (pVal.ItemUID == "gridOS")
                                     {
-                                        if (pVal.ColUID != "#")
+                                        if ((pVal.ColUID != "#") && (pVal.ColUID != "Esboço"))
                                         {
                                             Grid gridOS = (Grid)Form.Items.Item("gridOS").Specific;
                                             ((CheckBoxColumn)gridOS.Columns.Item("#")).Check(pVal.Row, !((CheckBoxColumn)gridOS.Columns.Item("#")).IsChecked(pVal.Row));
@@ -923,7 +923,18 @@ namespace Chess.IT.Services.View
                                 if (pVal.ItemUID.Equals("etCliente"))
                                 {
                                     if (((EditText)Form.Items.Item("etCliente").Specific).String == string.Empty)
+                                    {
                                         Form.DataSources.DataTables.Item("dtFiltro").SetValue("NomeCliente", 0, "");
+
+                                        ((StaticText)Form.Items.Item("Item_6").Specific).Item.Visible = false;
+                                        ComboBox CbEndereco = (ComboBox)Form.Items.Item("Item_8").Specific;
+                                        CbEndereco.Item.Visible = false;
+                                    }
+                                    else
+                                    {
+                                        CarregaEnderecos(((EditText)Form.Items.Item("etCliente").Specific).String);
+
+                                    }
                                 }
 
                                 if (pVal.ItemUID.Equals("etMotora"))
@@ -983,10 +994,13 @@ namespace Chess.IT.Services.View
 
                                     if (chooseFromListEvent.SelectedObjects != null)
                                     {
+                                        
+
                                         if (pVal.ItemUID.Equals("etCliente"))
                                         {
                                             Form.DataSources.DataTables.Item("dtFiltro").SetValue("CodCliente", 0, chooseFromListEvent.SelectedObjects.GetValue("CardCode", 0).ToString());
                                             Form.DataSources.DataTables.Item("dtFiltro").SetValue("NomeCliente", 0, chooseFromListEvent.SelectedObjects.GetValue("CardName", 0).ToString());
+                                            CarregaEnderecos(chooseFromListEvent.SelectedObjects.GetValue("CardCode", 0).ToString());
                                         }
                                         else if (pVal.ItemUID.Equals("etNrCtr"))
                                         {
@@ -1030,10 +1044,16 @@ namespace Chess.IT.Services.View
                                             catch (Exception)
                                             {
 
-                                               // throw;
+                                                // throw;
                                             }
-                                            
+
                                         }
+                                    }
+                                    else
+                                    {
+                                        ((StaticText)Form.Items.Item("Item_6").Specific).Item.Visible = false;
+                                        ComboBox CbEndereco = (ComboBox)Form.Items.Item("Item_8").Specific;
+                                        CbEndereco.Item.Visible = false;
                                     }
                                 }
                             }
@@ -1213,6 +1233,54 @@ namespace Chess.IT.Services.View
                 Program.oApplicationS.StatusBar.SetText(exception.Message);
             }
         }
+
+        private void CarregaEnderecos(string sCardCode)
+        {
+            ((StaticText)Form.Items.Item("Item_6").Specific).Item.Visible = true;
+            ComboBox CbEndereco = (ComboBox)Form.Items.Item("Item_8").Specific;
+            CbEndereco.Item.Visible = true;
+
+            while (CbEndereco.ValidValues.Count > 0)
+            {
+                CbEndereco.ValidValues.Remove(0, SAPbouiCOM.BoSearchKey.psk_Index);
+            }
+            CbEndereco.ValidValues.Add("0", "Selecione");
+
+            string SQL = string.Format(@"
+                            select 
+                            	T0.""Address""
+	                            ,coalesce(T0.""AddrType"",'')
+	                            ||  ' ' ||  coalesce(T0.""Street"" ,'')
+	                            || ' ,'  || coalesce(T0.""StreetNo"" ,'')
+	                            || ' - ' || coalesce(T0.""Block"",'')
+	                            || ' - ' || coalesce(T0.""City"" ,'')
+	                            || ' - ' || coalesce(T0.""State"",'')
+	                            || ' - ' || coalesce(T0.""ZipCode"",'')	as ""Endereco""
+                            from CRD1 T0	
+                            Where 
+	                            T0.""CardCode""='{0}'
+                                            ", sCardCode);
+
+            SAPbobsCOM.Recordset recordSetEndereco= null;
+            recordSetEndereco = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+            recordSetEndereco.DoQuery(SQL);
+            while (!recordSetEndereco.EoF)
+            {
+                CbEndereco.ValidValues.Add(recordSetEndereco.Fields.Item(0).Value.ToString(), recordSetEndereco.Fields.Item(1).Value.ToString());
+                recordSetEndereco.MoveNext();
+            }
+            //if (CbEndereco.ValidValues.Count>0)
+            //{
+
+            //}
+            //CbEndereco.Select(0, BoSearchKey.psk_Index);
+            //if (recordSetEndereco.RecordCount > 0)
+            //{
+            //    M3 = Convert.ToInt32(recordSetVerificacao.Fields.Item(0).Value.ToString());
+            //    recordSetEndereco.MoveNext();
+            //}
+        }
+
         private double PesoEstimadoTotalSelecionados()
         {
             string sDocEntrys = DoscEntrys();
@@ -1485,6 +1553,9 @@ namespace Chess.IT.Services.View
 
             string placa = "";
 
+            ComboBox cbEndereco = ((ComboBox)Form.Items.Item("Item_8").Specific);
+            string endereco = cbEndereco.Selected==null ? "0" : cbEndereco.Selected.Value;
+
             string query = string.Format(@"SELECT '{0}' AS ""#"",
                                                       OOAT.""AbsID"" AS ""Nº Interno"",
                                                       STRING_AGG(OAT1.""AgrLineNum"", ',')as ""AgrLineNum"",
@@ -1516,6 +1587,7 @@ namespace Chess.IT.Services.View
                                             left join ""@VEICULOS"" on ""@ROTAS"".""U_Veiculo"" = ""@VEICULOS"".""U_Placa""
                                             where OOAT.""BpType"" = 'C'
                                             and OOAT.""Status"" = 'A'
+                                            and OOAT.""Cancelled"" <> 'Y'
                                             and ('{1}' = '' or '{1}' = OOAT.""BpCode"")
                                             and (cast('{2}' as date) = cast('1990-01-01' as date) or cast(OOAT.""StartDate"" as date) >= '{2}')
                                             and (cast('{3}' as date) = cast('1990-01-01' as date) or cast(OOAT.""StartDate"" as date) <= '{3}') 
@@ -1532,6 +1604,17 @@ namespace Chess.IT.Services.View
                                                              or ('{8}' = '7' AND OOAT.""U_DiaColetDom"" = 'Sim'))
                                             and ('{9}' = '' or '{9}' = OOAT.""U_Motorista"")
                                             and ('{10}' = '' or '{10}' = ""@VEICULOS"".""U_Placa"")
+                                            and ('0'='0' or 
+					                                            exists(
+																		select 1
+																		from ORDR 
+																		where exists (select * 
+																		                 from RDR1 
+																		                 where RDR1.""AgrNo"" = OOAT.""AbsID"" 
+																		             and RDR1.""DocEntry"" = ORDR.""DocEntry"")
+																		         and ORDR.""ShipToCode""='0'
+					                                            )
+                                            )
                                         group by
                                                                                               OOAT.""AbsID""
                                                                                               --, OAT1.""AgrLineNum""
@@ -1542,7 +1625,9 @@ namespace Chess.IT.Services.View
                                                                                               --, OAT1.""PlanQty""
 
                                             
-                                            ", selecionar, cliente, dataDe == "" ? "1990-01-01" : Convert.ToDateTime(dataDe).ToString("yyyy-MM-dd"), dataAte == "" ? "1990-01-01" : Convert.ToDateTime(dataAte).ToString("yyyy-MM-dd"), nrContrato, modeloContrato, centroCusto, nrRota, diaColeta, motorista, placa);
+                                            ", selecionar, cliente, dataDe == "" ? "1990-01-01" : Convert.ToDateTime(dataDe).ToString("yyyy-MM-dd")
+                                            , dataAte == "" ? "1990-01-01" : Convert.ToDateTime(dataAte).ToString("yyyy-MM-dd"), nrContrato, modeloContrato
+                                            , centroCusto, nrRota, diaColeta, motorista, placa, endereco);
 
             Form.Freeze(true);
             try
@@ -1608,6 +1693,8 @@ namespace Chess.IT.Services.View
             string nrRota = ((EditText)Form.Items.Item("etNrRota").Specific).String;
             string diaColeta = ((ComboBox)Form.Items.Item("cbDiaCol").Specific).Selected.Description;
             string nrSerie = ((EditText)Form.Items.Item("Item_5").Specific).String;
+            ComboBox cbEndereco = ((ComboBox)Form.Items.Item("Item_8").Specific);
+            string endereco = cbEndereco.Selected == null ? "0" : cbEndereco.Selected.Value;
 
             string query = string.Format(@"
                     select 
@@ -1677,6 +1764,7 @@ namespace Chess.IT.Services.View
 
                                             and T5.""DistNumber"" = '{5}'
                         ))
+                        and ('{6}'='0' or ""ShipToCode""='{6}')
                     order by T0.""DocNum"" DESC
 
             ",
@@ -1685,7 +1773,8 @@ namespace Chess.IT.Services.View
                                             placa,
                                             nrRota,
                                             diaColeta,
-                                            nrSerie);
+                                            nrSerie,
+                                            endereco);
 
             //and ORDR.""U_Situacao"" IN(4, 10)
 
@@ -1812,11 +1901,17 @@ namespace Chess.IT.Services.View
                         
             string respFat = ((ComboBox)Form.Items.Item("cbRespFat").Specific).Selected.Description;
 
-            string agrupamento = ((ComboBox)Form.Items.Item("cbAgrOS").Specific).Selected.Value;            
+            string agrupamento = ((ComboBox)Form.Items.Item("cbAgrOS").Specific).Selected.Value;
+
+            ComboBox cbEndereco = ((ComboBox)Form.Items.Item("Item_8").Specific);
+            string endereco = cbEndereco.Selected == null ? "0" : cbEndereco.Selected.Value;
+
+
 
             string query = string.Format(@"SELECT '{0}' AS ""#"",
                                                       ORDR.""DocEntry"" AS ""Nº Interno"",
                                                       ORDR.""DocNum"" AS ""Nº OS"",
+                                                      'N' AS ""Esboço"",
                                                       ORDR.""DocDate"" AS ""Dt Saída"",
                                                       ORDR.""U_RespFat"" AS ""Resp. Faturamento"",
                                                       ORDR.""CardCode"" AS ""Cód. Cliente"",
@@ -1839,6 +1934,7 @@ namespace Chess.IT.Services.View
                                                            when 'P' then 'Pendente'
                                                            when 'F' then 'Faturado'
                                                       end as ""Status""
+                                                    ,ORDR.""U_TipoOper"" as ""TipoOper""
                                             from ORDR
                                             left join ""@VEICULOS"" ON ""@VEICULOS"".""U_Placa"" = ORDR.""U_NPlaca""
                                             left join OCRD TRANSP ON TRANSP.""CardCode"" = ORDR.""U_CodTransp""
@@ -1859,7 +1955,10 @@ namespace Chess.IT.Services.View
                                             and ('{11}' = '[Selecionar]' or '{11}' = ORDR.""U_DiaSemRot"")
                                             and ('{12}' = '' or '{12}' = (select max(OOAT.""U_Motorista"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = ORDR.""DocEntry""))
                                             and ('{13}' = '' or '{13}' = ORDR.""U_TipoOper"")
-                                            and ('{14}' = '[Selecionar]' or '{14}' = ORDR.""U_RespFat"")",                                            
+                                            and ('{14}' = '[Selecionar]' or '{14}' = ORDR.""U_RespFat"")
+                                            and ('{15}'='0' or ""ShipToCode""='{15}')
+
+",                                            
                                             selecionar, 
                                             cliente,
                                             dataDe == "" ? "1990-01-01" : Convert.ToDateTime(dataDe).ToString("yyyy-MM-dd"), 
@@ -1874,7 +1973,8 @@ namespace Chess.IT.Services.View
                                             diaColeta,
                                             motorista,
                                             tipoOperacao,
-                                            respFat);
+                                            respFat,
+                                            endereco);
 
             //and ORDR.""U_Situacao"" IN(4, 10)
 
@@ -1917,7 +2017,10 @@ namespace Chess.IT.Services.View
                 gridOS.Columns.Item("Situação").Editable = false;
                 gridOS.Columns.Item("Status").Editable = false;
 
+                gridOS.Columns.Item("TipoOper").Editable = false;
+
                 gridOS.Columns.Item("#").Type = BoGridColumnType.gct_CheckBox;
+                gridOS.Columns.Item("Esboço").Type = BoGridColumnType.gct_CheckBox;
 
                 ((EditTextColumn)gridOS.Columns.Item("Nº Interno")).LinkedObjectType = "17";
             }
@@ -2036,7 +2139,7 @@ namespace Chess.IT.Services.View
                 }
             }
             bool osGeradas = false;
-            List<int> absIDsNotasVencidas = new List<int>();
+            //List<int> absIDsNotasVencidas = new List<int>();
             List<ErroGerOS> ErroGerOSs = new List<ErroGerOS>();
             //string sTelasGeradas
             //if (!Program.oCompanyS.InTransaction)
@@ -2050,13 +2153,13 @@ namespace Chess.IT.Services.View
                     LogHelper.InfoSuccess(string.Format("Processando Contrato {0}", absID1));
                     //NotasVencidas(absID).Count();
                     
-                    if (NotasVencidas(absID1).Count() > 0)
-                    {
-                        LogHelper.InfoError(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
-                            string.Join(",", NotasVencidas(absID1).Select(r => r.Key).ToArray()), NotasVencidas(absID1).Select(r => r.Value).First()));
-                        absIDsNotasVencidas.Add(absID1);
-                        continue;
-                    }
+                    //if (NotasVencidas(absID1).Count() > 0)
+                    //{
+                    //    LogHelper.InfoError(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
+                    //        string.Join(",", NotasVencidas(absID1).Select(r => r.Key).ToArray()), NotasVencidas(absID1).Select(r => r.Value).First()));
+                    //    absIDsNotasVencidas.Add(absID1);
+                    //    continue;
+                    //}
 
                     //cabeçalho
                     //SAPbobsCOM.Documents documents;//= (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
@@ -2130,88 +2233,88 @@ namespace Chess.IT.Services.View
                 }
             }
 
-            if (absIDsNotasVencidas.Count>0)
-            {
-                foreach (int absID1 in absIDsNotasVencidas)
-                {
-                    for (int row = 0; row < gridContratos.Rows.Count; row++)
-                    {
-                        int iNumber = 0;
-                        if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
-                        {
-                            if (Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)) == absID1)
-                            {
-                                if (Program.oApplicationS.MessageBox(
-                                        string.Format("Notas {0} do cliente {1} em aberto. Deseja Gerar a OS?.",
-                                        string.Join(",", NotasVencidas(absID1).Select(r => r.Key).ToArray()), NotasVencidas(absID1).Select(r => r.Value).First())
+            //if (absIDsNotasVencidas.Count>0)
+            //{
+            //    foreach (int absID1 in absIDsNotasVencidas)
+            //    {
+            //        for (int row = 0; row < gridContratos.Rows.Count; row++)
+            //        {
+            //            int iNumber = 0;
+            //            if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
+            //            {
+            //                if (Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)) == absID1)
+            //                {
+            //                    if (Program.oApplicationS.MessageBox(
+            //                            string.Format("Notas {0} do cliente {1} em aberto. Deseja Gerar a OS?.",
+            //                            string.Join(",", NotasVencidas(absID1).Select(r => r.Key).ToArray()), NotasVencidas(absID1).Select(r => r.Value).First())
 
-                                    , 1, "Sim", "Não") == 1)
-                                {
-                                    try
-                                    {
+            //                        , 1, "Sim", "Não") == 1)
+            //                    {
+            //                        try
+            //                        {
 
-                                        SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
-                                        SAPbobsCOM.Recordset recordSet = ConsultaContratoGeracao(placaOS, gridContratos, absID1, row);
-                                        iNumber = Convert.ToInt32(recordSet.Fields.Item(11).Value.ToString());
-                                        while (!recordSet.EoF)
-                                        {
-                                            MontaOS(placaOS, dataSaidaOS, horaSaidaOS, diaColeta, absID1, documents, recordSet);
-                                            recordSet.MoveNext();
-                                        }
-                                        Program.LimparObjeto(recordSet);
-                                        int result = documents.Add();
+            //                            SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+            //                            SAPbobsCOM.Recordset recordSet = ConsultaContratoGeracao(placaOS, gridContratos, absID1, row);
+            //                            iNumber = Convert.ToInt32(recordSet.Fields.Item(11).Value.ToString());
+            //                            while (!recordSet.EoF)
+            //                            {
+            //                                MontaOS(placaOS, dataSaidaOS, horaSaidaOS, diaColeta, absID1, documents, recordSet);
+            //                                recordSet.MoveNext();
+            //                            }
+            //                            Program.LimparObjeto(recordSet);
+            //                            int result = documents.Add();
 
-                                        if (result != 0)
-                                        {
-                                            int codigoErro;
-                                            string msgErro;
+            //                            if (result != 0)
+            //                            {
+            //                                int codigoErro;
+            //                                string msgErro;
 
-                                            Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
+            //                                Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
 
-                                            if (msgErro.Contains("RDR1.AgrNo"))
-                                            {
-                                                msgErro = "Data Térmido do Contrato expirou!!!";
-                                                LogHelper.InfoError(msgErro);
-                                            }
-                                            else
-                                            {
-                                                LogHelper.InfoError(msgErro);
-                                            }
+            //                                if (msgErro.Contains("RDR1.AgrNo"))
+            //                                {
+            //                                    msgErro = "Data Térmido do Contrato expirou!!!";
+            //                                    LogHelper.InfoError(msgErro);
+            //                                }
+            //                                else
+            //                                {
+            //                                    LogHelper.InfoError(msgErro);
+            //                                }
 
                                             
-                                            ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = msgErro });
-                                            //throw new Exception(msgErro);
-                                        }
-                                        else
-                                        {
-                                            osGeradas = true;
-                                            LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", iNumber, Program.oCompanyS.GetNewObjectKey()));
+            //                                ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = msgErro });
+            //                                //throw new Exception(msgErro);
+            //                            }
+            //                            else
+            //                            {
+            //                                osGeradas = true;
+            //                                LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", iNumber, Program.oCompanyS.GetNewObjectKey()));
 
-                                            if (string.IsNullOrEmpty(sOSsGeradas))
-                                            {
-                                                sOSsGeradas = Program.oCompanyS.GetNewObjectKey();
-                                            }
-                                            else
-                                            {
-                                                sOSsGeradas = sOSsGeradas + "," + Program.oCompanyS.GetNewObjectKey();
-                                            }
-                                        }
-                                        Program.LimparObjeto(documents);
+            //                                if (string.IsNullOrEmpty(sOSsGeradas))
+            //                                {
+            //                                    sOSsGeradas = Program.oCompanyS.GetNewObjectKey();
+            //                                }
+            //                                else
+            //                                {
+            //                                    sOSsGeradas = sOSsGeradas + "," + Program.oCompanyS.GetNewObjectKey();
+            //                                }
+            //                            }
+            //                            Program.LimparObjeto(documents);
 
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        string msgErro = string.Format("{0} - {0}", ex.Message, ex.StackTrace);
-                                        LogHelper.InfoError(string.Format("Erro Processando OS {0}: {1}", iNumber, msgErro));
-                                        ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = msgErro });
-                                    }
-                                }
-                            }
-                        }
-                        //break;
-                    }
-                }
-            }
+            //                        }
+            //                        catch (Exception ex)
+            //                        {
+            //                            string msgErro = string.Format("{0} - {0}", ex.Message, ex.StackTrace);
+            //                            LogHelper.InfoError(string.Format("Erro Processando OS {0}: {1}", iNumber, msgErro));
+            //                            ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = msgErro });
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //            //break;
+            //        }
+            //    }
+            //}
 
             //Program.oCompanyS.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
 
@@ -2723,34 +2826,34 @@ namespace Chess.IT.Services.View
             oForm.Visible = true;
         }
 
-        private Dictionary<string, string> NotasVencidas(int absID)
-        {
-            Dictionary<string, string> notasVencidas = new Dictionary<string, string>();
-            string queryVerificacao = string.Format(@"select ""DocNum"", ""CardName"" from OINV 
-                                                      where ""CardCode"" = (select ""BpCode"" from OOAT where OOAT.""AbsID"" = {0})
-                                                      and ""DocStatus"" = 'O'
-                                                      and exists (select * from INV6 
-                                                                  where INV6.""DocEntry"" = OINV.""DocEntry"" 
-                                                                  and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 15)", absID);
+        //private Dictionary<string, string> NotasVencidas(int absID)
+        //{
+        //    Dictionary<string, string> notasVencidas = new Dictionary<string, string>();
+        //    string queryVerificacao = string.Format(@"select ""DocNum"", ""CardName"" from OINV 
+        //                                              where ""CardCode"" = (select ""BpCode"" from OOAT where OOAT.""AbsID"" = {0})
+        //                                              and ""DocStatus"" = 'O'
+        //                                              and exists (select * from INV6 
+        //                                                          where INV6.""DocEntry"" = OINV.""DocEntry"" 
+        //                                                          and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 15)", absID);
 
-            SAPbobsCOM.Recordset recordSetVerificacao = null;
-            try
-            {
-                recordSetVerificacao = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-                recordSetVerificacao.DoQuery(queryVerificacao);
-                while (!recordSetVerificacao.EoF)
-                {
-                    notasVencidas.Add(recordSetVerificacao.Fields.Item(0).Value.ToString(), recordSetVerificacao.Fields.Item(1).Value.ToString());
+        //    SAPbobsCOM.Recordset recordSetVerificacao = null;
+        //    try
+        //    {
+        //        recordSetVerificacao = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+        //        recordSetVerificacao.DoQuery(queryVerificacao);
+        //        while (!recordSetVerificacao.EoF)
+        //        {
+        //            notasVencidas.Add(recordSetVerificacao.Fields.Item(0).Value.ToString(), recordSetVerificacao.Fields.Item(1).Value.ToString());
 
-                    recordSetVerificacao.MoveNext();
-                }
-            }
-            finally
-            {
-                Program.LimparObjeto(recordSetVerificacao);
-            }
-            return notasVencidas;
-        }
+        //            recordSetVerificacao.MoveNext();
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        Program.LimparObjeto(recordSetVerificacao);
+        //    }
+        //    return notasVencidas;
+        //}
 
         private void GerarFatura()
         {
@@ -2795,6 +2898,8 @@ namespace Chess.IT.Services.View
                                                                 , coalesce(T2.""U_IR_CSLL"", '') CSLL
                                                                 , coalesce(T2.""U_IR_IRPJ"", '') IRPJ
                                                                 , coalesce(T2.""U_IR_INSS"", '') INSS
+                                                                ,RDR1.""Usage""
+                                                                ,RDR1.""TaxCode""
                                                             from ORDR
                                                             inner join RDR1 on RDR1.""DocEntry"" = ORDR.""DocEntry""
                                                             inner join OITM on OITM.""ItemCode"" = RDR1.""ItemCode""    
@@ -2810,6 +2915,10 @@ namespace Chess.IT.Services.View
                             recordSet.DoQuery(query);
                             while (!recordSet.EoF)
                             {
+                                if (string.IsNullOrEmpty(recordSet.Fields.Item(1).Value.ToString()))
+                                {
+                                    LogHelper.InfoError("Tipo de Operação Não Definido!!");
+                                }
                                 Model.FaturaModel faturaModel = new Model.FaturaModel();
 
                                 faturaModel.BaseEntry = docEntry;
@@ -2828,6 +2937,9 @@ namespace Chess.IT.Services.View
                                 faturaModel.CSLL = recordSet.Fields.Item(11).Value.ToString();
                                 faturaModel.IRPJ = recordSet.Fields.Item(12).Value.ToString();
                                 faturaModel.INSS = recordSet.Fields.Item(13).Value.ToString();
+                                faturaModel.Usage = recordSet.Fields.Item(14).Value.ToString();
+                                faturaModel.TaxCode = recordSet.Fields.Item(15).Value.ToString();
+                                faturaModel.Draft = ((CheckBoxColumn)gridOS.Columns.Item("Esboço")).IsChecked(row);
 
                                 faturaList.Add(faturaModel);
 
@@ -2852,12 +2964,30 @@ namespace Chess.IT.Services.View
                 List<int> notasTransporteCliente = new List<int>();
                 Dictionary<int, int> notasTransporteTransportadora = new Dictionary<int, int>();
 
-                List<int> notasGeradas = new List<int>();
+                //List<int>[] notasGeradas = new List<int>[2];
+                Dictionary<int, int> notasGeradas = new Dictionary<int, int>();
 
                 foreach (var faturaGroup in faturaGroupList)
                 {
-                    SAPbobsCOM.Documents documentNFSE = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
-                    SAPbobsCOM.Documents documentFAT = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
+                    //if (((CheckBoxColumn)gridOS.Columns.Item("Esboço")).IsChecked(row))
+                    //{
+
+                    //}
+                    SAPbobsCOM.Documents documentNFSE;
+                    SAPbobsCOM.Documents documentFAT;
+                    if (faturaGroup.First().Draft)
+                    {
+                        documentNFSE = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oDrafts);
+                        documentFAT = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oDrafts);
+                        documentNFSE.DocObjectCode = SAPbobsCOM.BoObjectTypes.oInvoices;
+                        documentFAT.DocObjectCode = SAPbobsCOM.BoObjectTypes.oInvoices;
+                    }
+                    else
+                    {
+                        documentNFSE = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
+                        documentFAT = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
+                    }
+
                     try
                     {
                         int erro = 0;
@@ -2882,7 +3012,8 @@ namespace Chess.IT.Services.View
                                     documentNFSE.Lines.ItemCode = faturaModel.ItemCode;
                                     documentNFSE.Lines.Quantity = faturaModel.Quantity;
                                     documentNFSE.Lines.Price = faturaModel.Price;
-                                    //documentNFSE.Lines.Usage = "14";
+                                    documentNFSE.Lines.Usage = faturaModel.Usage;
+                                    documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
                                     //documentNFSE.Lines.TaxCode = "V_DIF100";
                                     documentNFSE.Lines.BaseEntry = faturaModel.BaseEntry;
                                     documentNFSE.Lines.BaseType = 17;
@@ -2903,8 +3034,13 @@ namespace Chess.IT.Services.View
 
                                     throw new Exception(erro + " - " + msg);
                                 }
-
-                                notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                if (faturaGroup.First().Draft){
+                                    notasGeradas.Add(0, Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                }
+                                else{
+                                    notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()), 0);
+                                }
+                                    
 
                                 break;
                             case "C-TRT":
@@ -2933,7 +3069,8 @@ namespace Chess.IT.Services.View
                                         documentNFSE.Lines.BaseEntry = faturaModel.BaseEntry;
                                         documentNFSE.Lines.BaseType = 17;
                                         documentNFSE.Lines.BaseLine = 0;
-
+                                        documentNFSE.Lines.Usage = faturaModel.Usage;
+                                        documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
                                         ImpostoRetido(documentNFSE, faturaModel);
 
                                         notasTransporteCliente.Add(faturaModel.BaseEntry);
@@ -2950,9 +3087,11 @@ namespace Chess.IT.Services.View
                                         }
 
                                         documentNFSE.Lines.ItemCode = faturaModel.ItemCode;
+                                        documentNFSE.Lines.Usage = faturaModel.Usage;
+                                        documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
                                         documentNFSE.Lines.Quantity = faturaModel.Quantity;
                                         documentNFSE.Lines.Price = faturaModel.Price;
-
+                                        
                                         ImpostoRetido(documentNFSE, faturaModel);
                                     }
 
@@ -2980,9 +3119,16 @@ namespace Chess.IT.Services.View
                                     }
                                 }
 
-                                notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                if (faturaGroup.First().Draft)
+                                {
+                                    notasGeradas.Add(0, Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                }
+                                else
+                                {
+                                    notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()), 0);
+                                }
 
-                            break;
+                                break;
                             case "LOC":
                                 documentNFSE.CardCode = faturaGroup.First().CardCode;
                                 documentNFSE.DocDate = DateTime.Now;
@@ -3011,7 +3157,8 @@ namespace Chess.IT.Services.View
                                         documentNFSE.Lines.BaseEntry = faturaModel.BaseEntry;
                                         documentNFSE.Lines.BaseType = 17;
                                         documentNFSE.Lines.BaseLine = faturaModel.LineNum;
-
+                                        documentNFSE.Lines.Usage = faturaModel.Usage;
+                                        documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
                                         ImpostoRetido(documentNFSE, faturaModel);
 
                                         if (faturaModel.ManBtchNum)
@@ -3054,7 +3201,14 @@ namespace Chess.IT.Services.View
                                         throw new Exception(erro + " - " + msg);
                                     }
 
-                                    notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                    if (faturaGroup.First().Draft)
+                                    {
+                                        notasGeradas.Add(0, Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                    }
+                                    else
+                                    {
+                                        notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()), 0);
+                                    }
                                 }
 
                                 bool gerarFAT = false;
@@ -3083,7 +3237,8 @@ namespace Chess.IT.Services.View
                                         documentFAT.Lines.BaseEntry = faturaModel.BaseEntry;
                                         documentFAT.Lines.BaseType = 17;
                                         documentFAT.Lines.BaseLine = faturaModel.LineNum;
-
+                                        documentFAT.Lines.Usage = faturaModel.Usage;
+                                        documentFAT.Lines.TaxCode = faturaModel.TaxCode;
                                         ImpostoRetido(documentFAT, faturaModel);
                                     }
                                 }
@@ -3103,7 +3258,14 @@ namespace Chess.IT.Services.View
                                         throw new Exception(erro + " - " + msg);
                                     }
 
-                                    notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                    if (faturaGroup.First().Draft)
+                                    {
+                                        notasGeradas.Add(0, Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                    }
+                                    else
+                                    {
+                                        notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()), 0);
+                                    }
                                 }
 
 

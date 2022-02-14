@@ -34,6 +34,12 @@ namespace Chess.IT.Services.Model
         public string IRPJ { get; set; }
         public string INSS { get; set; }
 
+        public string Usage { get; set; }
+        public string TaxCode { get; set; }
+        public bool Draft { get; set; }
+
+
+
 
     }
 }

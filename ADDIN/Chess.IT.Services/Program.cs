@@ -463,9 +463,9 @@ namespace Chess.IT.Services
             }
         }
 
-        public static List<int> m_NotasGeradas = new List<int>();
+        public static Dictionary<int, int> m_NotasGeradas = new Dictionary<int, int>();
 
-        public static void OpenNotasGeradasView(List<int> notas)
+        public static void OpenNotasGeradasView(Dictionary<int, int> notas)
         {
             try
             {

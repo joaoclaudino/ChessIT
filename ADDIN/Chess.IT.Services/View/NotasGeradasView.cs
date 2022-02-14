@@ -14,9 +14,9 @@ namespace Chess.IT.Services.View
 
         //bool Loaded;
 
-        List<int> m_Notas = new List<int>();
+        Dictionary<int, int> m_Notas = new Dictionary<int, int>();
 
-        public NotasGeradasView(Form form, List<int> notas)
+        public NotasGeradasView(Form form, Dictionary<int, int> notas)
         {
             this.Form = form;
 
@@ -40,12 +40,20 @@ namespace Chess.IT.Services.View
             if (m_Notas.Count > 0)
             {
                 string query = "";
-                
-                foreach (int nota in m_Notas)
+
+                //foreach (int nota in m_Notas)
+                //{
+                //    query += "select " + nota + " as \"Nº Nota\"" + " from dummy union all ";
+                //}
+
+                foreach (KeyValuePair<int, int> nota in m_Notas)
                 {
-                    query += "select " + nota + " as \"Nº Nota\"" + " from dummy union all ";
+                    query += string.Format(@" select {0} as ""Nº Nota"", {1} as ""Nº Esboço"" from dummy union all", nota.Key, nota.Value);
+                    //update = string.Format(@"UPDATE RDR1 
+                    //                         SET ""U_NumFat"" = {0}
+                    //                         where ""U_DocEntry"" = {1}", nota.Key, nota.Value);
                 }
-                
+
                 if (query != string.Empty)
                 {
                     query = query.Substring(0, query.Length - 10);
@@ -60,8 +68,14 @@ namespace Chess.IT.Services.View
                         gridOS.Columns.Item("Nº Nota").Editable = false;
 
                         ((EditTextColumn)gridOS.Columns.Item("Nº Nota")).LinkedObjectType = "13";
+
+
+                        gridOS.Columns.Item("Nº Nota").Editable = false;
+                        gridOS.Columns.Item("Nº Esboço").Editable = false;
+
+                        ((EditTextColumn)gridOS.Columns.Item("Nº Esboço")).LinkedObjectType = "112";
                     }
-                    catch //(Exception ex)
+                    catch (Exception ex)
                     {
                         System.IO.File.WriteAllText("Sql.sql", query);
                     }
