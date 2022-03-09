@@ -31,6 +31,11 @@ namespace Chess.IT.Services.View
             Form.EnableMenu("1286", false);
 
 
+            //Form.DataSources.UserDataSources.Add("DtOSI", SAPbouiCOM.BoDataType.dt_DATE, 0);
+            //Form.DataSources.UserDataSources.Add("DtOSF", SAPbouiCOM.BoDataType.dt_DATE, 0);
+
+            //((EditText)Form.Items.Item("etDtOSI").Specific).DataBind.SetBound(true, "", "DtOSI");
+            //((EditText)Form.Items.Item("etDtOSF").Specific).DataBind.SetBound(true, "", "DtOSF");
 
             Program.oApplicationS.ItemEvent += HandleItemEvent;
         }
@@ -297,6 +302,10 @@ namespace Chess.IT.Services.View
                                     {
                                         LogHelper.InfoError("Selecione o Tipo de Rateio");
                                     }
+                                    else if (string.IsNullOrEmpty(((EditText)Form.Items.Item("edtPeso").Specific).Value) )
+                                    {
+                                        LogHelper.InfoError("Informe um peso válido!!");
+                                    }
                                     else if (Convert.ToDouble(((EditText)Form.Items.Item("edtPeso").Specific).Value)<=0)
                                     {
                                         LogHelper.InfoError("Informe um peso válido!!");
@@ -542,6 +551,14 @@ namespace Chess.IT.Services.View
                                     {
                                         LogHelper.InfoError("Selecione o Tipo de Pessagem");
                                     }
+                                    else if 
+                                        (
+                                        (!((CheckBox)Form.Items.Item("chkBal").Specific).Checked)
+                                        && string.IsNullOrEmpty(((EditText)Form.Items.Item("edtPeso").Specific).Value)
+                                        )
+                                    {
+                                        LogHelper.InfoError("Informe o peso manualmente!!");
+                                    }
                                     else
                                     {
                                         //verifica se tem algo selecionado
@@ -658,6 +675,7 @@ namespace Chess.IT.Services.View
                                             //{
                                             //    throw new Exception("Falha na comunicaçao com a balança capital: arquivo não encontrado");
                                             //}
+                                            CarregarPes();
                                         }
                                         else
                                         {
@@ -1079,7 +1097,20 @@ namespace Chess.IT.Services.View
                                 if (!Loaded)
                                 {
                                     try
-                                    {                                        
+                                    {
+                                        Form.DataSources.UserDataSources.Add("DtOSI", SAPbouiCOM.BoDataType.dt_DATE, 0);
+                                        Form.DataSources.UserDataSources.Add("DtOSF", SAPbouiCOM.BoDataType.dt_DATE, 0);
+
+                                        ((EditText)Form.Items.Item("etDtOSI").Specific).DataBind.SetBound(true, "", "DtOSI");
+                                        ((EditText)Form.Items.Item("etDtOSF").Specific).DataBind.SetBound(true, "", "DtOSF");
+                                    }
+                                    catch 
+                                    {
+                                    }
+                                    try
+                                    {
+    
+
                                         Form.Items.Item("fldCtr").Click();
 
                                         ((ComboBox)Form.Items.Item("cbModCtr").Specific).ValidValues.Add("", "[Selecionar]");
@@ -1945,7 +1976,7 @@ namespace Chess.IT.Services.View
                                             and ('{1}' = '' or '{1}' = ORDR.""CardCode"")
                                             and (cast('{2}' as date) = cast('1990-01-01' as date) or cast(ORDR.""DocDate"" as date) >= '{2}')
                                             and (cast('{3}' as date) = cast('1990-01-01' as date) or cast(ORDR.""DocDate"" as date) <= '{3}') 
-                                            and ('{4}' = '' or '{4}' = ORDR.""DocEntry"")
+                                            and ('{4}' = '' or '{4}' = ORDR.""DocNum"")
                                             and ('{5}' = '' or '{5}' = ORDR.""U_Situacao"")
                                             and ('{6}' = '' or '{6}' = ORDR.""U_NPlaca"")
                                             and ('{7}' = '' or '{7}' = (select max(OOAT.""U_Rota"") from RDR1 inner join OOAT on OOAT.""AbsID"" = RDR1.""AgrNo"" where RDR1.""DocEntry"" = ORDR.""DocEntry""))
@@ -1957,6 +1988,7 @@ namespace Chess.IT.Services.View
                                             and ('{13}' = '' or '{13}' = ORDR.""U_TipoOper"")
                                             and ('{14}' = '[Selecionar]' or '{14}' = ORDR.""U_RespFat"")
                                             and ('{15}'='0' or ""ShipToCode""='{15}')
+                                            and ('{16}'='[Selecionar]' or ORDR.""U_Status""='{16}')
 
 ",                                            
                                             selecionar, 
@@ -1974,7 +2006,9 @@ namespace Chess.IT.Services.View
                                             motorista,
                                             tipoOperacao,
                                             respFat,
-                                            endereco);
+                                            endereco,
+                                            statusOS
+                                            );
 
             //and ORDR.""U_Situacao"" IN(4, 10)
 
@@ -2550,7 +2584,7 @@ namespace Chess.IT.Services.View
             int bplID = 3;
             string tpOper = "C-GG";
             string respFat = "Cliente";
-            string codTransp = "CLI0001";
+            string codTransp = "FOR00001";
             string status = "P";
             string situacao = "3";
             string warehouse = "01";
@@ -2560,6 +2594,7 @@ namespace Chess.IT.Services.View
             documents.DocDueDate = docDueDate;
             documents.TaxDate = taxDate;
             documents.BPL_IDAssignedToInvoice = bplID;
+            documents.TaxExtension.Carrier = codTransp;
 
             documents.UserFields.Fields.Item("U_EstPlaca").Value = estPlaca;
             documents.UserFields.Fields.Item("U_TipoOper").Value = tpOper;
@@ -2900,6 +2935,7 @@ namespace Chess.IT.Services.View
                                                                 , coalesce(T2.""U_IR_INSS"", '') INSS
                                                                 ,RDR1.""Usage""
                                                                 ,RDR1.""TaxCode""
+                                                                ,ORDR.""GroupNum""
                                                             from ORDR
                                                             inner join RDR1 on RDR1.""DocEntry"" = ORDR.""DocEntry""
                                                             inner join OITM on OITM.""ItemCode"" = RDR1.""ItemCode""    
@@ -2940,7 +2976,7 @@ namespace Chess.IT.Services.View
                                 faturaModel.Usage = recordSet.Fields.Item(14).Value.ToString();
                                 faturaModel.TaxCode = recordSet.Fields.Item(15).Value.ToString();
                                 faturaModel.Draft = ((CheckBoxColumn)gridOS.Columns.Item("Esboço")).IsChecked(row);
-
+                                faturaModel.GroupNum = recordSet.Fields.Item(16).Value.ToString();
                                 faturaList.Add(faturaModel);
 
                                 recordSet.MoveNext();
@@ -2965,7 +3001,8 @@ namespace Chess.IT.Services.View
                 Dictionary<int, int> notasTransporteTransportadora = new Dictionary<int, int>();
 
                 //List<int>[] notasGeradas = new List<int>[2];
-                Dictionary<int, int> notasGeradas = new Dictionary<int, int>();
+                //Dictionary<int, int> notasGeradas = new Dictionary<int, int>();
+                List<NotaGerada> notasGeradas = new List<NotaGerada>();
 
                 foreach (var faturaGroup in faturaGroupList)
                 {
@@ -2998,8 +3035,9 @@ namespace Chess.IT.Services.View
                                 documentNFSE.CardCode = faturaGroup.First().CardCode;
                                 documentNFSE.DocDate = DateTime.Now;
                                 documentNFSE.TaxDate = DateTime.Now;
-                                documentNFSE.DocDueDate = DateTime.Now;
+                                //documentNFSE.DocDueDate = DateTime.Now;
                                 documentNFSE.BPL_IDAssignedToInvoice = 3;
+                                documentNFSE.GroupNumber= Convert.ToInt32( faturaGroup.First().GroupNum);
 
                                 foreach (Model.FaturaModel faturaModel in faturaGroup)
                                 {
@@ -3022,7 +3060,7 @@ namespace Chess.IT.Services.View
 
                                 }
 
-                                documentNFSE.SequenceCode = 33;
+                                documentNFSE.SequenceCode = 28;
 
                                 erro = documentNFSE.Add();
 
@@ -3035,10 +3073,10 @@ namespace Chess.IT.Services.View
                                     throw new Exception(erro + " - " + msg);
                                 }
                                 if (faturaGroup.First().Draft){
-                                    notasGeradas.Add(0, Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                    notasGeradas.Add(  new NotaGerada() {NF= "0",Esboco= Program.oCompanyS.GetNewObjectKey() } );
                                 }
                                 else{
-                                    notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()), 0);
+                                    notasGeradas.Add(new NotaGerada() { NF = Program.oCompanyS.GetNewObjectKey(),Esboco="0" });
                                 }
                                     
 
@@ -3048,10 +3086,10 @@ namespace Chess.IT.Services.View
                                 documentNFSE.CardCode = faturaGroup.First().CardCode;
                                 documentNFSE.DocDate = DateTime.Now;
                                 documentNFSE.TaxDate = DateTime.Now;
-                                documentNFSE.DocDueDate = DateTime.Now.AddDays(1);
+                                //documentNFSE.DocDueDate = DateTime.Now.AddDays(1);
                                 documentNFSE.BPL_IDAssignedToInvoice = 3;
-
-                                documentNFSE.SequenceCode = 33;
+                                documentNFSE.GroupNumber = Convert.ToInt32(faturaGroup.First().GroupNum);
+                                documentNFSE.SequenceCode = 28;
 
                                 if (tipoFaturamento == "0")
                                 {
@@ -3121,11 +3159,11 @@ namespace Chess.IT.Services.View
 
                                 if (faturaGroup.First().Draft)
                                 {
-                                    notasGeradas.Add(0, Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                    notasGeradas.Add(new NotaGerada() { NF = "0", Esboco = Program.oCompanyS.GetNewObjectKey() });
                                 }
                                 else
                                 {
-                                    notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()), 0);
+                                    notasGeradas.Add(new NotaGerada() { NF = Program.oCompanyS.GetNewObjectKey(), Esboco = "0" });
                                 }
 
                                 break;
@@ -3133,9 +3171,9 @@ namespace Chess.IT.Services.View
                                 documentNFSE.CardCode = faturaGroup.First().CardCode;
                                 documentNFSE.DocDate = DateTime.Now;
                                 documentNFSE.TaxDate = DateTime.Now;
-                                documentNFSE.DocDueDate = DateTime.Now.AddDays(1);
+                                //documentNFSE.DocDueDate = DateTime.Now.AddDays(1);
                                 documentNFSE.BPL_IDAssignedToInvoice = 3;
-
+                                documentNFSE.GroupNumber = Convert.ToInt32(faturaGroup.First().GroupNum);
                                 bool gerarNFSE = false;
                                                                 
 
@@ -3186,7 +3224,7 @@ namespace Chess.IT.Services.View
                                     }
                                 }
 
-                                documentNFSE.SequenceCode = 33;
+                                documentNFSE.SequenceCode = 28;
 
                                 if (gerarNFSE)
                                 {
@@ -3203,11 +3241,11 @@ namespace Chess.IT.Services.View
 
                                     if (faturaGroup.First().Draft)
                                     {
-                                        notasGeradas.Add(0, Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                        notasGeradas.Add(new NotaGerada() { NF = "0", Esboco = Program.oCompanyS.GetNewObjectKey() });
                                     }
                                     else
                                     {
-                                        notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()), 0);
+                                        notasGeradas.Add(new NotaGerada() { NF = Program.oCompanyS.GetNewObjectKey(), Esboco = "0" });
                                     }
                                 }
 
@@ -3216,8 +3254,9 @@ namespace Chess.IT.Services.View
                                 documentFAT.CardCode = faturaGroup.First().CardCode;
                                 documentFAT.DocDate = DateTime.Now;
                                 documentFAT.TaxDate = DateTime.Now;
-                                documentFAT.DocDueDate = DateTime.Now.AddDays(1);
+                                //documentFAT.DocDueDate = DateTime.Now.AddDays(1);
                                 documentFAT.BPL_IDAssignedToInvoice = 3;
+                                documentFAT.GroupNumber = Convert.ToInt32(faturaGroup.First().GroupNum);
 
                                 foreach (Model.FaturaModel faturaModel in faturaGroup)
                                 {
@@ -3243,7 +3282,7 @@ namespace Chess.IT.Services.View
                                     }
                                 }
 
-                                documentFAT.SequenceCode = 36;
+                                documentFAT.SequenceCode = 28;
 
                                 if (gerarFAT)
                                 {
@@ -3260,11 +3299,11 @@ namespace Chess.IT.Services.View
 
                                     if (faturaGroup.First().Draft)
                                     {
-                                        notasGeradas.Add(0, Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()));
+                                        notasGeradas.Add(new NotaGerada() { NF = "0", Esboco = Program.oCompanyS.GetNewObjectKey() });
                                     }
                                     else
                                     {
-                                        notasGeradas.Add(Convert.ToInt32(Program.oCompanyS.GetNewObjectKey()), 0);
+                                        notasGeradas.Add(new NotaGerada() { NF = Program.oCompanyS.GetNewObjectKey(), Esboco = "0" });
                                     }
                                 }
 

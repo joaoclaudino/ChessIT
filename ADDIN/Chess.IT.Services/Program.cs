@@ -1,6 +1,7 @@
 using Castle.Core.Logging;
 using Chess.IT.Services.Controller;
 using Chess.IT.Services.Helper;
+using Chess.IT.Services.Model;
 using JBC.Framework.Attribute;
 using JBC.Framework.DAO;
 using SAPbouiCOM;
@@ -36,7 +37,7 @@ namespace Chess.IT.Services
     [ResourceBOM("Chess.IT.Services.resources.BOM.VEICULOS.xml", ResourceType.UserField)]
     //[ResourceBOM("Chess.IT.Services.resources.BOM.UDO.xml", ResourceType.UDO)]
     [ResourceBOM("Chess.IT.Services.resources.BOM.tabelas.xml", ResourceType.UserTable)]
-
+    [ResourceBOM("Chess.IT.Services.resources.BOM.UDT.xml", ResourceType.UserTable)]
 
 
     class Program
@@ -112,12 +113,12 @@ namespace Chess.IT.Services
             oApplicationS = oApplication;
 
 
-            SAPbobsCOM.Documents oOrder;
-            oOrder = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
-            if (oOrder.GetByKey(1))
-            {
-                oOrder.SaveXML(@"c:\order.xml");
-            }
+            //SAPbobsCOM.Documents oOrder;
+            //oOrder = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+            //if (oOrder.GetByKey(1))
+            //{
+            //    oOrder.SaveXML(@"c:\order.xml");
+            //}
 
 
                 AddMenuItems();
@@ -463,9 +464,9 @@ namespace Chess.IT.Services
             }
         }
 
-        public static Dictionary<int, int> m_NotasGeradas = new Dictionary<int, int>();
+        public static List<NotaGerada> m_NotasGeradas = new List<NotaGerada>();
 
-        public static void OpenNotasGeradasView(Dictionary<int, int> notas)
+        public static void OpenNotasGeradasView(List<NotaGerada> notas)
         {
             try
             {

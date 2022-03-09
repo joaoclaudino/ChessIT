@@ -6,6 +6,42 @@
     </AdmInfo>
     <UserFieldsMD>
       <row>
+        <Name>Carteira</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>Carteira:</Description>
+        <TableName>OOAT</TableName>
+        <FieldID>20</FieldID>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>Utilizacao</Name>
+        <Type>db_Alpha</Type>
+        <Size>30</Size>
+        <Description>Utilizacao:</Description>
+        <TableName>OOAT</TableName>
+        <FieldID>21</FieldID>
+        <EditSize>30</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
         <Name>MesesContrato</Name>
         <Type>db_Numeric</Type>
         <Size>6</Size>
@@ -63,13 +99,127 @@
     </AdmInfo>
     <UserFieldsMD>
       <row>
-        <Name>Carteira</Name>
+        <Name>IR_ISS</Name>
         <Type>db_Alpha</Type>
         <Size>10</Size>
-        <Description>Carteira:</Description>
+        <Description>IR_ISS</Description>
         <SubType>st_None</SubType>
         <TableName>OOAT</TableName>
-        <FieldID>1</FieldID>
+        <FieldID>22</FieldID>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>IR_PIS</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>IR_PIS</Description>
+        <SubType>st_None</SubType>
+        <TableName>OOAT</TableName>
+        <FieldID>23</FieldID>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>IR_COFINS</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>IR_COFINS</Description>
+        <SubType>st_None</SubType>
+        <TableName>OOAT</TableName>
+        <FieldID>24</FieldID>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>IR_CSLL</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>IR_CSLL</Description>
+        <SubType>st_None</SubType>
+        <TableName>OOAT</TableName>
+        <FieldID>25</FieldID>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>IR_IRPJ</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>IR_IRPJ</Description>
+        <SubType>st_None</SubType>
+        <TableName>OOAT</TableName>
+        <FieldID>26</FieldID>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>IR_INSS</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>IR_INSS</Description>
+        <SubType>st_None</SubType>
+        <TableName>OOAT</TableName>
+        <FieldID>27</FieldID>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>IR_INSS_RED_BC</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>IR_INSS_RED_BC</Description>
+        <SubType>st_None</SubType>
+        <TableName>OOAT</TableName>
+        <FieldID>28</FieldID>
         <EditSize>10</EditSize>
         <Mandatory>tNO</Mandatory>
       </row>
@@ -117,6 +267,10 @@
       <row>
         <Value>RSU</Value>
         <Description>Sólido Urbano</Description>
+      </row>
+      <row>
+        <Value>RT</Value>
+        <Description>Recebimento - Transportador</Description>
       </row>
     </ValidValuesMD>
   </BO>
@@ -440,25 +594,6 @@
         <TableName>OOAT</TableName>
         <FieldID>15</FieldID>
         <EditSize>10</EditSize>
-        <Mandatory>tNO</Mandatory>
-      </row>
-    </UserFieldsMD>
-  </BO>
-  <BO>
-    <AdmInfo>
-      <Object>152</Object>
-      <Version>2</Version>
-    </AdmInfo>
-    <UserFieldsMD>
-      <row>
-        <Name>Utilizacao</Name>
-        <Type>db_Alpha</Type>
-        <Size>30</Size>
-        <Description>Utilizacao:</Description>
-        <SubType>st_None</SubType>
-        <TableName>OOAT</TableName>
-        <FieldID>18</FieldID>
-        <EditSize>30</EditSize>
         <Mandatory>tNO</Mandatory>
       </row>
     </UserFieldsMD>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using Chess.IT.Services.Model;
 using SAPbouiCOM;
 
 namespace Chess.IT.Services.View
@@ -14,9 +15,9 @@ namespace Chess.IT.Services.View
 
         //bool Loaded;
 
-        Dictionary<int, int> m_Notas = new Dictionary<int, int>();
+        List<NotaGerada> m_Notas =new  List<NotaGerada>();
 
-        public NotasGeradasView(Form form, Dictionary<int, int> notas)
+        public NotasGeradasView(Form form, List<NotaGerada> notas)
         {
             this.Form = form;
 
@@ -46,9 +47,9 @@ namespace Chess.IT.Services.View
                 //    query += "select " + nota + " as \"Nº Nota\"" + " from dummy union all ";
                 //}
 
-                foreach (KeyValuePair<int, int> nota in m_Notas)
+                foreach (NotaGerada nota in m_Notas)
                 {
-                    query += string.Format(@" select {0} as ""Nº Nota"", {1} as ""Nº Esboço"" from dummy union all", nota.Key, nota.Value);
+                    query += string.Format(@" select {0} as ""Nº Nota"", {1} as ""Nº Esboço"" from dummy union all", nota.NF, nota.Esboco);
                     //update = string.Format(@"UPDATE RDR1 
                     //                         SET ""U_NumFat"" = {0}
                     //                         where ""U_DocEntry"" = {1}", nota.Key, nota.Value);

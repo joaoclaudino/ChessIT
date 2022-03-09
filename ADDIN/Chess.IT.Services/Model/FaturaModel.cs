@@ -38,6 +38,9 @@ namespace Chess.IT.Services.Model
         public string TaxCode { get; set; }
         public bool Draft { get; set; }
 
+        public string GroupNum { get; set; }
+        
+
 
 
 

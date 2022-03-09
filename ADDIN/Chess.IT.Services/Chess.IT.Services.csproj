@@ -108,6 +108,7 @@
     <Compile Include="Model\FaturaGroupModel.cs" />
     <Compile Include="Model\FaturaModel.cs" />
     <Compile Include="Controller\MainController.cs" />
+    <Compile Include="Model\NotaGerada.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\JBCCOLETORService.cs" />
@@ -154,6 +155,9 @@
     <EmbeddedResource Include="resources\BOM\tabelas.xml" />
     <EmbeddedResource Include="resources\BOM\UDO.xml" />
     <EmbeddedResource Include="resources\BOM\VEICULOS.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\BOM\UDT.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
