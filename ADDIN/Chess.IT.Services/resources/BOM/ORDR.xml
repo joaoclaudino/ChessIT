@@ -1,5 +1,44 @@
 <BOM>
-  <BO>
+	<BO>
+		<AdmInfo>
+			<Object>152</Object>
+			<Version>2</Version>
+		</AdmInfo>
+		<UserFieldsMD>
+			<row>
+				<Name>JBC_DTCERTI</Name>
+				<Type>db_Date</Type>
+				<Size>8</Size>
+				<Description>Data Certificado</Description>
+				<LinkedTable></LinkedTable>
+				<DefaultValue></DefaultValue>
+				<TableName>ORDR</TableName>
+				<FieldID>4</FieldID>
+				<EditSize>8</EditSize>
+				<Mandatory>tNO</Mandatory>
+			</row>
+		</UserFieldsMD>
+	</BO>	
+	<BO>
+		<AdmInfo>
+			<Object>152</Object>
+			<Version>2</Version>
+		</AdmInfo>
+		<UserFieldsMD>
+			<row>
+				<Name>JBC_CERTI</Name>
+				<Type>db_Alpha</Type>
+				<Size>15</Size>
+				<Description>Certificado</Description>
+				<SubType>st_None</SubType>
+				<TableName>ORDR</TableName>
+				<FieldID>15</FieldID>
+				<EditSize>15</EditSize>
+				<Mandatory>tNO</Mandatory>
+			</row>
+		</UserFieldsMD>
+	</BO>
+	<BO>
     <AdmInfo>
       <Object>152</Object>
       <Version>2</Version>

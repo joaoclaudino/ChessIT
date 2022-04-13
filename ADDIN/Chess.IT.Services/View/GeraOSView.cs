@@ -2941,7 +2941,8 @@ namespace Chess.IT.Services.View
                                                             inner join OITM on OITM.""ItemCode"" = RDR1.""ItemCode""    
                                                             left JOIN OOAT T2 ON RDR1.""AgrNo"" = T2.""AbsID""
                                                             where ORDR.""DocEntry"" = {0}
-                                                            and (RDR1.""LineNum"" = 0 OR {1} = '2')
+                                                            and OITM.""ItmsGrpCod""=120
+                                                            
                                                             ", docEntry, tipoFaturamento);
 
                         SAPbobsCOM.Recordset recordSet = null;
@@ -3029,16 +3030,74 @@ namespace Chess.IT.Services.View
                     {
                         int erro = 0;
 
-                        switch (faturaGroup.Key.Valor2)
-                        {
-                            case "C-GG":
-                                documentNFSE.CardCode = faturaGroup.First().CardCode;
-                                documentNFSE.DocDate = DateTime.Now;
-                                documentNFSE.TaxDate = DateTime.Now;
-                                //documentNFSE.DocDueDate = DateTime.Now;
-                                documentNFSE.BPL_IDAssignedToInvoice = 3;
-                                documentNFSE.GroupNumber= Convert.ToInt32( faturaGroup.First().GroupNum);
+                        //switch (faturaGroup.Key.Valor2)
+                        //{
+                        if (faturaGroup.Key.Valor2.Equals("C-GG") 
+                            | faturaGroup.Key.Valor2.Equals("C-PJG")
+                            | faturaGroup.Key.Valor2.Equals("C-PF")
+                            ) {
+                            documentNFSE.CardCode = faturaGroup.First().CardCode;
+                            documentNFSE.DocDate = DateTime.Now;
+                            documentNFSE.TaxDate = DateTime.Now;
+                            //documentNFSE.DocDueDate = DateTime.Now;
+                            documentNFSE.BPL_IDAssignedToInvoice = 3;
+                            documentNFSE.GroupNumber = Convert.ToInt32(faturaGroup.First().GroupNum);
 
+                            foreach (Model.FaturaModel faturaModel in faturaGroup)
+                            {
+                                if (documentNFSE.Lines.ItemCode != string.Empty)
+                                {
+                                    documentNFSE.Lines.Add();
+                                    documentNFSE.Lines.SetCurrentLine(documentNFSE.Lines.Count - 1);
+                                }
+
+                                documentNFSE.Lines.ItemCode = faturaModel.ItemCode;
+                                documentNFSE.Lines.Quantity = faturaModel.Quantity;
+                                documentNFSE.Lines.Price = faturaModel.Price;
+                                documentNFSE.Lines.Usage = faturaModel.Usage;
+                                documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
+                                //documentNFSE.Lines.TaxCode = "V_DIF100";
+                                documentNFSE.Lines.BaseEntry = faturaModel.BaseEntry;
+                                documentNFSE.Lines.BaseType = 17;
+                                documentNFSE.Lines.BaseLine = faturaModel.LineNum;
+                                ImpostoRetido(documentNFSE, faturaModel);
+
+                            }
+
+                            documentNFSE.SequenceCode = 28;
+
+                            erro = documentNFSE.Add();
+
+                            if (erro != 0)
+                            {
+                                string msg = "";
+
+                                Program.oCompanyS.GetLastError(out erro, out msg);
+
+                                throw new Exception(erro + " - " + msg);
+                            }
+                            if (faturaGroup.First().Draft) {
+                                notasGeradas.Add(new NotaGerada() { NF = "0", Esboco = Program.oCompanyS.GetNewObjectKey() });
+                            }
+                            else {
+                                notasGeradas.Add(new NotaGerada() { NF = Program.oCompanyS.GetNewObjectKey(), Esboco = "0" });
+                            }
+
+
+                            break;
+                        }
+                        else if (faturaGroup.Key.Valor2.Equals("C-TRT")){
+
+                            documentNFSE.CardCode = faturaGroup.First().CardCode;
+                            documentNFSE.DocDate = DateTime.Now;
+                            documentNFSE.TaxDate = DateTime.Now;
+                            //documentNFSE.DocDueDate = DateTime.Now.AddDays(1);
+                            documentNFSE.BPL_IDAssignedToInvoice = 3;
+                            documentNFSE.GroupNumber = Convert.ToInt32(faturaGroup.First().GroupNum);
+                            documentNFSE.SequenceCode = 28;
+
+                            if (tipoFaturamento == "0")
+                            {
                                 foreach (Model.FaturaModel faturaModel in faturaGroup)
                                 {
                                     if (documentNFSE.Lines.ItemCode != string.Empty)
@@ -3050,18 +3109,131 @@ namespace Chess.IT.Services.View
                                     documentNFSE.Lines.ItemCode = faturaModel.ItemCode;
                                     documentNFSE.Lines.Quantity = faturaModel.Quantity;
                                     documentNFSE.Lines.Price = faturaModel.Price;
-                                    documentNFSE.Lines.Usage = faturaModel.Usage;
-                                    documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
-                                    //documentNFSE.Lines.TaxCode = "V_DIF100";
                                     documentNFSE.Lines.BaseEntry = faturaModel.BaseEntry;
                                     documentNFSE.Lines.BaseType = 17;
-                                    documentNFSE.Lines.BaseLine = 0;
+                                    documentNFSE.Lines.BaseLine = faturaModel.LineNum;
+                                    documentNFSE.Lines.Usage = faturaModel.Usage;
+                                    documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
                                     ImpostoRetido(documentNFSE, faturaModel);
 
+                                    notasTransporteCliente.Add(faturaModel.BaseEntry);
+                                }
+                            }
+                            else
+                            {
+                                foreach (Model.FaturaModel faturaModel in faturaGroup)
+                                {
+                                    if (documentNFSE.Lines.ItemCode != string.Empty)
+                                    {
+                                        documentNFSE.Lines.Add();
+                                        documentNFSE.Lines.SetCurrentLine(documentNFSE.Lines.Count - 1);
+                                    }
+
+                                    documentNFSE.Lines.ItemCode = faturaModel.ItemCode;
+                                    documentNFSE.Lines.Usage = faturaModel.Usage;
+                                    documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
+                                    documentNFSE.Lines.Quantity = faturaModel.Quantity;
+                                    documentNFSE.Lines.Price = faturaModel.Price;
+
+                                    ImpostoRetido(documentNFSE, faturaModel);
                                 }
 
-                                documentNFSE.SequenceCode = 28;
+                                documentNFSE.Comments = string.Join(",", faturaGroup.ToList().Select(r => r.BaseEntry).ToArray());
+                            }
 
+                            erro = documentNFSE.Add();
+
+                            if (erro != 0)
+                            {
+                                string msg = "";
+
+                                Program.oCompanyS.GetLastError(out erro, out msg);
+
+                                throw new Exception(erro + " - " + msg);
+                            }
+
+                            if (tipoFaturamento == "1")
+                            {
+                                int nota = Convert.ToInt32(Program.oCompanyS.GetNewObjectKey());
+
+                                foreach (Model.FaturaModel faturaModel in faturaGroup)
+                                {
+                                    notasTransporteTransportadora.Add(faturaModel.BaseEntry, nota);
+                                }
+                            }
+
+                            if (faturaGroup.First().Draft)
+                            {
+                                notasGeradas.Add(new NotaGerada() { NF = "0", Esboco = Program.oCompanyS.GetNewObjectKey() });
+                            }
+                            else
+                            {
+                                notasGeradas.Add(new NotaGerada() { NF = Program.oCompanyS.GetNewObjectKey(), Esboco = "0" });
+                            }
+
+                            break;
+                        }
+                        else if (faturaGroup.Key.Valor2.Equals("LOC")) {
+                            documentNFSE.CardCode = faturaGroup.First().CardCode;
+                            documentNFSE.DocDate = DateTime.Now;
+                            documentNFSE.TaxDate = DateTime.Now;
+                            //documentNFSE.DocDueDate = DateTime.Now.AddDays(1);
+                            documentNFSE.BPL_IDAssignedToInvoice = 3;
+                            documentNFSE.GroupNumber = Convert.ToInt32(faturaGroup.First().GroupNum);
+                            bool gerarNFSE = false;
+
+
+                            foreach (Model.FaturaModel faturaModel in faturaGroup)
+                            {
+                                if (faturaModel.ItmsGrpCod == "120")
+                                {
+                                    gerarNFSE = true;
+
+                                    if (documentNFSE.Lines.ItemCode != string.Empty)
+                                    {
+                                        documentNFSE.Lines.Add();
+                                        documentNFSE.Lines.SetCurrentLine(documentNFSE.Lines.Count - 1);
+                                    }
+
+                                    documentNFSE.Lines.ItemCode = faturaModel.ItemCode;
+                                    documentNFSE.Lines.Quantity = faturaModel.Quantity;
+                                    documentNFSE.Lines.Price = faturaModel.Price;
+                                    documentNFSE.Lines.BaseEntry = faturaModel.BaseEntry;
+                                    documentNFSE.Lines.BaseType = 17;
+                                    documentNFSE.Lines.BaseLine = faturaModel.LineNum;
+                                    documentNFSE.Lines.Usage = faturaModel.Usage;
+                                    documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
+                                    ImpostoRetido(documentNFSE, faturaModel);
+
+                                    if (faturaModel.ManBtchNum)
+                                    {
+                                        SAPbobsCOM.Documents oDocumentsRef = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                        try
+                                        {
+                                            for (int x = 0; x < oDocumentsRef.Lines.BatchNumbers.Count; x++)
+                                            {
+                                                if (x > 0)
+                                                    documentNFSE.Lines.BatchNumbers.Add();
+
+                                                oDocumentsRef.Lines.BatchNumbers.SetCurrentLine(x);
+
+                                                documentNFSE.Lines.BatchNumbers.BatchNumber = oDocumentsRef.Lines.BatchNumbers.BatchNumber;
+                                                documentNFSE.Lines.BatchNumbers.Quantity = oDocumentsRef.Lines.BatchNumbers.Quantity;
+                                            }
+                                        }
+                                        finally
+                                        {
+                                            System.Runtime.InteropServices.Marshal.ReleaseComObject(oDocumentsRef);
+                                            GC.Collect();
+                                        }
+                                    }
+                                }
+                            }
+
+                            documentNFSE.SequenceCode = 28;
+
+                            if (gerarNFSE)
+                            {
                                 erro = documentNFSE.Add();
 
                                 if (erro != 0)
@@ -3071,90 +3243,6 @@ namespace Chess.IT.Services.View
                                     Program.oCompanyS.GetLastError(out erro, out msg);
 
                                     throw new Exception(erro + " - " + msg);
-                                }
-                                if (faturaGroup.First().Draft){
-                                    notasGeradas.Add(  new NotaGerada() {NF= "0",Esboco= Program.oCompanyS.GetNewObjectKey() } );
-                                }
-                                else{
-                                    notasGeradas.Add(new NotaGerada() { NF = Program.oCompanyS.GetNewObjectKey(),Esboco="0" });
-                                }
-                                    
-
-                                break;
-                            case "C-TRT":
-
-                                documentNFSE.CardCode = faturaGroup.First().CardCode;
-                                documentNFSE.DocDate = DateTime.Now;
-                                documentNFSE.TaxDate = DateTime.Now;
-                                //documentNFSE.DocDueDate = DateTime.Now.AddDays(1);
-                                documentNFSE.BPL_IDAssignedToInvoice = 3;
-                                documentNFSE.GroupNumber = Convert.ToInt32(faturaGroup.First().GroupNum);
-                                documentNFSE.SequenceCode = 28;
-
-                                if (tipoFaturamento == "0")
-                                {
-                                    foreach (Model.FaturaModel faturaModel in faturaGroup)
-                                    {
-                                        if (documentNFSE.Lines.ItemCode != string.Empty)
-                                        {
-                                            documentNFSE.Lines.Add();
-                                            documentNFSE.Lines.SetCurrentLine(documentNFSE.Lines.Count - 1);
-                                        }
-
-                                        documentNFSE.Lines.ItemCode = faturaModel.ItemCode;
-                                        documentNFSE.Lines.Quantity = faturaModel.Quantity;
-                                        documentNFSE.Lines.Price = faturaModel.Price;
-                                        documentNFSE.Lines.BaseEntry = faturaModel.BaseEntry;
-                                        documentNFSE.Lines.BaseType = 17;
-                                        documentNFSE.Lines.BaseLine = 0;
-                                        documentNFSE.Lines.Usage = faturaModel.Usage;
-                                        documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
-                                        ImpostoRetido(documentNFSE, faturaModel);
-
-                                        notasTransporteCliente.Add(faturaModel.BaseEntry);
-                                    }                                    
-                                }
-                                else
-                                {
-                                    foreach (Model.FaturaModel faturaModel in faturaGroup)
-                                    {
-                                        if (documentNFSE.Lines.ItemCode != string.Empty)
-                                        {
-                                            documentNFSE.Lines.Add();
-                                            documentNFSE.Lines.SetCurrentLine(documentNFSE.Lines.Count - 1);
-                                        }
-
-                                        documentNFSE.Lines.ItemCode = faturaModel.ItemCode;
-                                        documentNFSE.Lines.Usage = faturaModel.Usage;
-                                        documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
-                                        documentNFSE.Lines.Quantity = faturaModel.Quantity;
-                                        documentNFSE.Lines.Price = faturaModel.Price;
-                                        
-                                        ImpostoRetido(documentNFSE, faturaModel);
-                                    }
-
-                                    documentNFSE.Comments = string.Join(",", faturaGroup.ToList().Select(r => r.BaseEntry).ToArray());
-                                }
-
-                                erro = documentNFSE.Add();
-
-                                if (erro != 0)
-                                {
-                                    string msg = "";
-
-                                    Program.oCompanyS.GetLastError(out erro, out msg);
-
-                                    throw new Exception(erro + " - " + msg);
-                                }
-
-                                if (tipoFaturamento == "1")
-                                {
-                                    int nota = Convert.ToInt32(Program.oCompanyS.GetNewObjectKey());
-                                    
-                                    foreach (Model.FaturaModel faturaModel in faturaGroup)
-                                    {
-                                        notasTransporteTransportadora.Add(faturaModel.BaseEntry, nota);
-                                    }
                                 }
 
                                 if (faturaGroup.First().Draft)
@@ -3165,153 +3253,77 @@ namespace Chess.IT.Services.View
                                 {
                                     notasGeradas.Add(new NotaGerada() { NF = Program.oCompanyS.GetNewObjectKey(), Esboco = "0" });
                                 }
+                            }
 
-                                break;
-                            case "LOC":
-                                documentNFSE.CardCode = faturaGroup.First().CardCode;
-                                documentNFSE.DocDate = DateTime.Now;
-                                documentNFSE.TaxDate = DateTime.Now;
-                                //documentNFSE.DocDueDate = DateTime.Now.AddDays(1);
-                                documentNFSE.BPL_IDAssignedToInvoice = 3;
-                                documentNFSE.GroupNumber = Convert.ToInt32(faturaGroup.First().GroupNum);
-                                bool gerarNFSE = false;
-                                                                
+                            bool gerarFAT = false;
 
-                                foreach (Model.FaturaModel faturaModel in faturaGroup)
+                            documentFAT.CardCode = faturaGroup.First().CardCode;
+                            documentFAT.DocDate = DateTime.Now;
+                            documentFAT.TaxDate = DateTime.Now;
+                            //documentFAT.DocDueDate = DateTime.Now.AddDays(1);
+                            documentFAT.BPL_IDAssignedToInvoice = 3;
+                            documentFAT.GroupNumber = Convert.ToInt32(faturaGroup.First().GroupNum);
+
+                            foreach (Model.FaturaModel faturaModel in faturaGroup)
+                            {
+                                if (faturaModel.ItmsGrpCod == "102")
                                 {
-                                    if (faturaModel.ItmsGrpCod == "120")
+                                    gerarFAT = true;
+
+                                    if (documentFAT.Lines.ItemCode != string.Empty)
                                     {
-                                        gerarNFSE = true;
-
-                                        if (documentNFSE.Lines.ItemCode != string.Empty)
-                                        {
-                                            documentNFSE.Lines.Add();
-                                            documentNFSE.Lines.SetCurrentLine(documentNFSE.Lines.Count - 1);
-                                        }
-
-                                        documentNFSE.Lines.ItemCode = faturaModel.ItemCode;
-                                        documentNFSE.Lines.Quantity = faturaModel.Quantity;
-                                        documentNFSE.Lines.Price = faturaModel.Price;
-                                        documentNFSE.Lines.BaseEntry = faturaModel.BaseEntry;
-                                        documentNFSE.Lines.BaseType = 17;
-                                        documentNFSE.Lines.BaseLine = faturaModel.LineNum;
-                                        documentNFSE.Lines.Usage = faturaModel.Usage;
-                                        documentNFSE.Lines.TaxCode = faturaModel.TaxCode;
-                                        ImpostoRetido(documentNFSE, faturaModel);
-
-                                        if (faturaModel.ManBtchNum)
-                                        {
-                                            SAPbobsCOM.Documents oDocumentsRef = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
-                                            try
-                                            {
-                                                for (int x = 0; x < oDocumentsRef.Lines.BatchNumbers.Count; x++)
-                                                {
-                                                    if (x > 0)
-                                                        documentNFSE.Lines.BatchNumbers.Add();
-
-                                                    oDocumentsRef.Lines.BatchNumbers.SetCurrentLine(x);
-
-                                                    documentNFSE.Lines.BatchNumbers.BatchNumber = oDocumentsRef.Lines.BatchNumbers.BatchNumber;
-                                                    documentNFSE.Lines.BatchNumbers.Quantity = oDocumentsRef.Lines.BatchNumbers.Quantity;
-                                                }
-                                            }
-                                            finally
-                                            {
-                                                System.Runtime.InteropServices.Marshal.ReleaseComObject(oDocumentsRef);
-                                                GC.Collect();
-                                            }
-                                        }
+                                        documentFAT.Lines.Add();
+                                        documentFAT.Lines.SetCurrentLine(documentNFSE.Lines.Count - 1);
                                     }
+
+                                    documentFAT.Lines.ItemCode = faturaModel.ItemCode;
+                                    documentFAT.Lines.Quantity = faturaModel.Quantity;
+                                    documentFAT.Lines.Price = faturaModel.Price;
+                                    documentFAT.Lines.BaseEntry = faturaModel.BaseEntry;
+                                    documentFAT.Lines.BaseType = 17;
+                                    documentFAT.Lines.BaseLine = faturaModel.LineNum;
+                                    documentFAT.Lines.Usage = faturaModel.Usage;
+                                    documentFAT.Lines.TaxCode = faturaModel.TaxCode;
+                                    ImpostoRetido(documentFAT, faturaModel);
+                                }
+                            }
+
+                            documentFAT.SequenceCode = 28;
+
+                            if (gerarFAT)
+                            {
+                                erro = documentFAT.Add();
+
+                                if (erro != 0)
+                                {
+                                    string msg = "";
+
+                                    Program.oCompanyS.GetLastError(out erro, out msg);
+
+                                    throw new Exception(erro + " - " + msg);
                                 }
 
-                                documentNFSE.SequenceCode = 28;
-
-                                if (gerarNFSE)
+                                if (faturaGroup.First().Draft)
                                 {
-                                    erro = documentNFSE.Add();
-
-                                    if (erro != 0)
-                                    {
-                                        string msg = "";
-
-                                        Program.oCompanyS.GetLastError(out erro, out msg);
-
-                                        throw new Exception(erro + " - " + msg);
-                                    }
-
-                                    if (faturaGroup.First().Draft)
-                                    {
-                                        notasGeradas.Add(new NotaGerada() { NF = "0", Esboco = Program.oCompanyS.GetNewObjectKey() });
-                                    }
-                                    else
-                                    {
-                                        notasGeradas.Add(new NotaGerada() { NF = Program.oCompanyS.GetNewObjectKey(), Esboco = "0" });
-                                    }
+                                    notasGeradas.Add(new NotaGerada() { NF = "0", Esboco = Program.oCompanyS.GetNewObjectKey() });
                                 }
-
-                                bool gerarFAT = false;
-
-                                documentFAT.CardCode = faturaGroup.First().CardCode;
-                                documentFAT.DocDate = DateTime.Now;
-                                documentFAT.TaxDate = DateTime.Now;
-                                //documentFAT.DocDueDate = DateTime.Now.AddDays(1);
-                                documentFAT.BPL_IDAssignedToInvoice = 3;
-                                documentFAT.GroupNumber = Convert.ToInt32(faturaGroup.First().GroupNum);
-
-                                foreach (Model.FaturaModel faturaModel in faturaGroup)
+                                else
                                 {
-                                    if (faturaModel.ItmsGrpCod == "102")
-                                    {
-                                        gerarFAT = true;
-
-                                        if (documentFAT.Lines.ItemCode != string.Empty)
-                                        {
-                                            documentFAT.Lines.Add();
-                                            documentFAT.Lines.SetCurrentLine(documentNFSE.Lines.Count - 1);
-                                        }
-
-                                        documentFAT.Lines.ItemCode = faturaModel.ItemCode;
-                                        documentFAT.Lines.Quantity = faturaModel.Quantity;
-                                        documentFAT.Lines.Price = faturaModel.Price;
-                                        documentFAT.Lines.BaseEntry = faturaModel.BaseEntry;
-                                        documentFAT.Lines.BaseType = 17;
-                                        documentFAT.Lines.BaseLine = faturaModel.LineNum;
-                                        documentFAT.Lines.Usage = faturaModel.Usage;
-                                        documentFAT.Lines.TaxCode = faturaModel.TaxCode;
-                                        ImpostoRetido(documentFAT, faturaModel);
-                                    }
+                                    notasGeradas.Add(new NotaGerada() { NF = Program.oCompanyS.GetNewObjectKey(), Esboco = "0" });
                                 }
-
-                                documentFAT.SequenceCode = 28;
-
-                                if (gerarFAT)
-                                {
-                                    erro = documentFAT.Add();
-
-                                    if (erro != 0)
-                                    {
-                                        string msg = "";
-
-                                        Program.oCompanyS.GetLastError(out erro, out msg);
-
-                                        throw new Exception(erro + " - " + msg);
-                                    }
-
-                                    if (faturaGroup.First().Draft)
-                                    {
-                                        notasGeradas.Add(new NotaGerada() { NF = "0", Esboco = Program.oCompanyS.GetNewObjectKey() });
-                                    }
-                                    else
-                                    {
-                                        notasGeradas.Add(new NotaGerada() { NF = Program.oCompanyS.GetNewObjectKey(), Esboco = "0" });
-                                    }
-                                }
+                            }
 
 
-                                if (!gerarNFSE && !gerarFAT)
-                                    throw new Exception("Nenhum item na OS para gerar fatura de locação.");
-                                break;
+                            if (!gerarNFSE && !gerarFAT)
+                                throw new Exception("Nenhum item na OS para gerar fatura de locação.");
+                            break;
+
                         }
+                        else
+                        {
+                            Program.oApplicationS.StatusBar.SetText("Tipo de Operação inválida: " + faturaGroup.Key.Valor2, BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Error);
+                        }
+                       // }
                     }
                     finally
                     {
