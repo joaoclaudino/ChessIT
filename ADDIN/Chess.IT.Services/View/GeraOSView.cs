@@ -1943,7 +1943,8 @@ namespace Chess.IT.Services.View
                                                       ORDR.""DocEntry"" AS ""Nº Interno"",
                                                       ORDR.""DocNum"" AS ""Nº OS"",
                                                       'N' AS ""Esboço"",
-                                                      ORDR.""DocDate"" AS ""Dt Saída"",
+                                                      ORDR.""DocDate"" AS ""Dt Gerada"",
+                                                        ORDR.""DocDueDate"" AS ""Dt Entrega"",
                                                       ORDR.""U_RespFat"" AS ""Resp. Faturamento"",
                                                       ORDR.""CardCode"" AS ""Cód. Cliente"",
                                                       ORDR.""CardName"" AS ""Nome Cliente"",                                                      
@@ -2042,7 +2043,8 @@ namespace Chess.IT.Services.View
 
                 gridOS.Columns.Item("Nº Interno").Editable = false;
                 gridOS.Columns.Item("Nº OS").Editable = false;
-                gridOS.Columns.Item("Dt Saída").Editable = false;
+                gridOS.Columns.Item("Dt Gerada").Editable = false;
+                gridOS.Columns.Item("Dt Entrega").Editable = false;
                 gridOS.Columns.Item("Resp. Faturamento").Editable = false;
                 gridOS.Columns.Item("Cód. Cliente").Editable = false;
                 gridOS.Columns.Item("Nome Cliente").Editable = false;
@@ -2173,7 +2175,7 @@ namespace Chess.IT.Services.View
                 }
             }
             bool osGeradas = false;
-            //List<int> absIDsNotasVencidas = new List<int>();
+            List<int> absIDsNotasVencidas = new List<int>();
             List<ErroGerOS> ErroGerOSs = new List<ErroGerOS>();
             //string sTelasGeradas
             //if (!Program.oCompanyS.InTransaction)
@@ -2187,13 +2189,13 @@ namespace Chess.IT.Services.View
                     LogHelper.InfoSuccess(string.Format("Processando Contrato {0}", absID1));
                     //NotasVencidas(absID).Count();
                     
-                    //if (NotasVencidas(absID1).Count() > 0)
-                    //{
-                    //    LogHelper.InfoError(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
-                    //        string.Join(",", NotasVencidas(absID1).Select(r => r.Key).ToArray()), NotasVencidas(absID1).Select(r => r.Value).First()));
-                    //    absIDsNotasVencidas.Add(absID1);
-                    //    continue;
-                    //}
+                    if (NotasVencidas(absID1).Count() > 0)
+                    {
+                        LogHelper.InfoError(string.Format("Notas {0} do cliente {1} em aberto. Não é possível gerar OS.",
+                            string.Join(",", NotasVencidas(absID1).Select(r => r.Key).ToArray()), NotasVencidas(absID1).Select(r => r.Value).First()));
+                        absIDsNotasVencidas.Add(absID1);
+                        continue;
+                    }
 
                     //cabeçalho
                     //SAPbobsCOM.Documents documents;//= (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
@@ -2267,88 +2269,92 @@ namespace Chess.IT.Services.View
                 }
             }
 
-            //if (absIDsNotasVencidas.Count>0)
-            //{
-            //    foreach (int absID1 in absIDsNotasVencidas)
-            //    {
-            //        for (int row = 0; row < gridContratos.Rows.Count; row++)
-            //        {
-            //            int iNumber = 0;
-            //            if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
-            //            {
-            //                if (Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)) == absID1)
-            //                {
-            //                    if (Program.oApplicationS.MessageBox(
-            //                            string.Format("Notas {0} do cliente {1} em aberto. Deseja Gerar a OS?.",
-            //                            string.Join(",", NotasVencidas(absID1).Select(r => r.Key).ToArray()), NotasVencidas(absID1).Select(r => r.Value).First())
+            if (absIDsNotasVencidas.Count > 0)
+            {
+                foreach (int absID1 in absIDsNotasVencidas)
+                {
+                    for (int row = 0; row < gridContratos.Rows.Count; row++)
+                    {
+                        int iNumber = 0;
+                        if (((CheckBoxColumn)gridContratos.Columns.Item("#")).IsChecked(row))
+                        {
+                            if (Convert.ToInt32(((EditTextColumn)gridContratos.Columns.Item("Nº Interno")).GetText(row)) == absID1)
+                            {
+                                if (Program.oApplicationS.MessageBox(
+                                        string.Format("Notas {0} do cliente {1} em aberto. Deseja Gerar a OS?.",
+                                        string.Join(",", NotasVencidas(absID1).Select(r => r.Key).ToArray()), NotasVencidas(absID1).Select(r => r.Value).First())
 
-            //                        , 1, "Sim", "Não") == 1)
-            //                    {
-            //                        try
-            //                        {
+                                    , 1, "Sim", "Não") == 1)
+                                {
+                                    try
+                                    {
 
-            //                            SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
-            //                            SAPbobsCOM.Recordset recordSet = ConsultaContratoGeracao(placaOS, gridContratos, absID1, row);
-            //                            iNumber = Convert.ToInt32(recordSet.Fields.Item(11).Value.ToString());
-            //                            while (!recordSet.EoF)
-            //                            {
-            //                                MontaOS(placaOS, dataSaidaOS, horaSaidaOS, diaColeta, absID1, documents, recordSet);
-            //                                recordSet.MoveNext();
-            //                            }
-            //                            Program.LimparObjeto(recordSet);
-            //                            int result = documents.Add();
+                                        SAPbobsCOM.Documents documents = (SAPbobsCOM.Documents)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                        SAPbobsCOM.Recordset recordSet = ConsultaContratoGeracao(placaOS, gridContratos, absID1, row);
+                                        iNumber = Convert.ToInt32(recordSet.Fields.Item(11).Value.ToString());
+                                        while (!recordSet.EoF)
+                                        {
+                                            MontaOS(placaOS, dataSaidaOS, horaSaidaOS, diaColeta, absID1, documents, recordSet);
+                                            recordSet.MoveNext();
+                                        }
+                                        Program.LimparObjeto(recordSet);
+                                        int result = documents.Add();
 
-            //                            if (result != 0)
-            //                            {
-            //                                int codigoErro;
-            //                                string msgErro;
+                                        if (result != 0)
+                                        {
+                                            int codigoErro;
+                                            string msgErro;
 
-            //                                Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
+                                            Program.oCompanyS.GetLastError(out codigoErro, out msgErro);
 
-            //                                if (msgErro.Contains("RDR1.AgrNo"))
-            //                                {
-            //                                    msgErro = "Data Térmido do Contrato expirou!!!";
-            //                                    LogHelper.InfoError(msgErro);
-            //                                }
-            //                                else
-            //                                {
-            //                                    LogHelper.InfoError(msgErro);
-            //                                }
+                                            if (msgErro.Contains("RDR1.AgrNo"))
+                                            {
+                                                msgErro = "Data Térmido do Contrato expirou!!!";
+                                                LogHelper.InfoError(msgErro);
+                                            }
+                                            else
+                                            {
+                                                LogHelper.InfoError(msgErro);
+                                            }
 
-                                            
-            //                                ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = msgErro });
-            //                                //throw new Exception(msgErro);
-            //                            }
-            //                            else
-            //                            {
-            //                                osGeradas = true;
-            //                                LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", iNumber, Program.oCompanyS.GetNewObjectKey()));
 
-            //                                if (string.IsNullOrEmpty(sOSsGeradas))
-            //                                {
-            //                                    sOSsGeradas = Program.oCompanyS.GetNewObjectKey();
-            //                                }
-            //                                else
-            //                                {
-            //                                    sOSsGeradas = sOSsGeradas + "," + Program.oCompanyS.GetNewObjectKey();
-            //                                }
-            //                            }
-            //                            Program.LimparObjeto(documents);
+                                            ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = msgErro });
+                                            //throw new Exception(msgErro);
+                                        }
+                                        else
+                                        {
+                                            osGeradas = true;
+                                            LogHelper.InfoSuccess(string.Format("OS {0} Gerado {1}", iNumber, Program.oCompanyS.GetNewObjectKey()));
 
-            //                        }
-            //                        catch (Exception ex)
-            //                        {
-            //                            string msgErro = string.Format("{0} - {0}", ex.Message, ex.StackTrace);
-            //                            LogHelper.InfoError(string.Format("Erro Processando OS {0}: {1}", iNumber, msgErro));
-            //                            ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = msgErro });
-            //                        }
-            //                    }
-            //                }
-            //            }
-            //            //break;
-            //        }
-            //    }
-            //}
+                                            if (string.IsNullOrEmpty(sOSsGeradas))
+                                            {
+                                                sOSsGeradas = Program.oCompanyS.GetNewObjectKey();
+                                            }
+                                            else
+                                            {
+                                                sOSsGeradas = sOSsGeradas + "," + Program.oCompanyS.GetNewObjectKey();
+                                            }
+                                        }
+                                        Program.LimparObjeto(documents);
+
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        string msgErro = string.Format("{0} - {0}", ex.Message, ex.StackTrace);
+                                        LogHelper.InfoError(string.Format("Erro Processando OS {0}: {1}", iNumber, msgErro));
+                                        ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = msgErro });
+                                    }
+                                }
+                                else
+                                {
+                                    ErroGerOSs.Add(new ErroGerOS() { absID = iNumber, Erro = "Notas em aberto!!" });
+                                }
+                            }
+                        }
+                        //break;
+                    }
+                }
+            }
 
             //Program.oCompanyS.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
 
@@ -2625,7 +2631,7 @@ namespace Chess.IT.Services.View
         private static SAPbobsCOM.Recordset ConsultaContratoGeracao(string placaOS, Grid gridContratos, int absID, int row)
         {
             string agrLineNums = (((EditTextColumn)gridContratos.Columns.Item("AgrLineNum")).GetText(row));
-            string query = string.Format(@"select OOAT.""BpCode"",                                                                  
+            string query = string.Format(@"select distinct OOAT.""BpCode"",                                                                  
                                                                       OOAT.""U_Motorista"",
                                                                       OAT1.""ItemCode"",
                                                                       OAT1.""PlanQty"",
@@ -2861,34 +2867,34 @@ namespace Chess.IT.Services.View
             oForm.Visible = true;
         }
 
-        //private Dictionary<string, string> NotasVencidas(int absID)
-        //{
-        //    Dictionary<string, string> notasVencidas = new Dictionary<string, string>();
-        //    string queryVerificacao = string.Format(@"select ""DocNum"", ""CardName"" from OINV 
-        //                                              where ""CardCode"" = (select ""BpCode"" from OOAT where OOAT.""AbsID"" = {0})
-        //                                              and ""DocStatus"" = 'O'
-        //                                              and exists (select * from INV6 
-        //                                                          where INV6.""DocEntry"" = OINV.""DocEntry"" 
-        //                                                          and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 15)", absID);
+        private Dictionary<string, string> NotasVencidas(int absID)
+        {
+            Dictionary<string, string> notasVencidas = new Dictionary<string, string>();
+            string queryVerificacao = string.Format(@"select ""DocNum"", ""CardName"" from OINV 
+                                                      where ""CardCode"" = (select ""BpCode"" from OOAT where OOAT.""AbsID"" = {0})
+                                                      and ""DocStatus"" = 'O'
+                                                      and exists (select * from INV6 
+                                                                  where INV6.""DocEntry"" = OINV.""DocEntry"" 
+                                                                  and DAYS_BETWEEN(INV6.""DueDate"", current_date) > 15)", absID);
 
-        //    SAPbobsCOM.Recordset recordSetVerificacao = null;
-        //    try
-        //    {
-        //        recordSetVerificacao = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-        //        recordSetVerificacao.DoQuery(queryVerificacao);
-        //        while (!recordSetVerificacao.EoF)
-        //        {
-        //            notasVencidas.Add(recordSetVerificacao.Fields.Item(0).Value.ToString(), recordSetVerificacao.Fields.Item(1).Value.ToString());
+            SAPbobsCOM.Recordset recordSetVerificacao = null;
+            try
+            {
+                recordSetVerificacao = (SAPbobsCOM.Recordset)Program.oCompanyS.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                recordSetVerificacao.DoQuery(queryVerificacao);
+                while (!recordSetVerificacao.EoF)
+                {
+                    notasVencidas.Add(recordSetVerificacao.Fields.Item(0).Value.ToString(), recordSetVerificacao.Fields.Item(1).Value.ToString());
 
-        //            recordSetVerificacao.MoveNext();
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        Program.LimparObjeto(recordSetVerificacao);
-        //    }
-        //    return notasVencidas;
-        //}
+                    recordSetVerificacao.MoveNext();
+                }
+            }
+            finally
+            {
+                Program.LimparObjeto(recordSetVerificacao);
+            }
+            return notasVencidas;
+        }
 
         private void GerarFatura()
         {

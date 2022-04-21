@@ -101,28 +101,23 @@ namespace Chess.IT.Services.FormClass.userform
                 if (this.bConfiguraTela)
                 {
                     this._oForm.Freeze(true);
-                    ////_EditTextNameDe.Item.Enabled = false;
-                    ////_EditTextNameAte.Item.Enabled = false;
-                    //this._EditTextPasta.Value = this.sPasta;
 
-                    //_EditTextVencimentoDe.Value = string.Empty;
-                    //_EditTextVencimentoAte.Value = string.Empty;
-
-                    //_EditTextLancamentoDe.Value = string.Empty;
-                    //_EditTextLancamentoAte.Value = string.Empty;
-
-                    //oJBCWiseUpFinanceiroService.CarregaComboBox(this._ComboBoxFilial, oJBCWiseUpFinanceiroService.Filial(), true, "-1");
-                    //oJBCWiseUpFinanceiroService.CarregaComboBox(this._ComboBoxFormaPagamento, oJBCWiseUpFinanceiroService.FormasDePagamentoBoleto(), true, "-1");
-
-                    //this._EditTextPasta.Item.Enabled = false;
                     AddChooseFromListPN();
-                    AddChooseFromListNFS();
+                    //AddChooseFromListNFS();
                     AddChooseFromListOS();
                     //_EditTextDataDe.Value = oJBCKURICAService.PrimeiroDiaDoMes();
                     //_EditTextDataAte.Value = oJBCKURICAService.UltimoDiaDoMes();
                     ConfiguraMatrix1();
 
                     this.bConfiguraTela = false;
+                    if (oJBCKURICAService.UserCancelaCertificado())
+                    {
+                        _ButtonCancelar.Item.Enabled = true;
+                    }
+                    else
+                    {
+                        _ButtonCancelar.Item.Enabled = false;
+                    }
 
                 }
             }
@@ -246,7 +241,7 @@ namespace Chess.IT.Services.FormClass.userform
 
                 this._oMatrix1.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_LINKED_BUTTON);
                 this._oMatrix1.Columns.Item(iCountCol).DataBind.Bind("DT_01", "Carrier");
-                this._oMatrix1.Columns.Item(iCountCol).TitleObject.Caption = "Carrier";
+                this._oMatrix1.Columns.Item(iCountCol).TitleObject.Caption = "Cod. Transp.";
                 this._oMatrix1.Columns.Item(iCountCol).TitleObject.Sortable = false;
                 this._oMatrix1.Columns.Item(iCountCol).Width = 50;
                 this._oMatrix1.Columns.Item(iCountCol).Editable = false;
@@ -307,7 +302,15 @@ namespace Chess.IT.Services.FormClass.userform
 
 
                 this._oMatrix1.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_EDIT);
-                this._oMatrix1.Columns.Item(iCountCol).DataBind.Bind("DT_01", "CertificadoNFS");
+                this._oMatrix1.Columns.Item(iCountCol).DataBind.Bind("DT_01", "NNF");
+                this._oMatrix1.Columns.Item(iCountCol).TitleObject.Caption = "Nº NF";
+                this._oMatrix1.Columns.Item(iCountCol).TitleObject.Sortable = false;
+                this._oMatrix1.Columns.Item(iCountCol).Width = 100;
+                this._oMatrix1.Columns.Item(iCountCol).Editable = false;
+                iCountCol++;
+
+                this._oMatrix1.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_EDIT);
+                this._oMatrix1.Columns.Item(iCountCol).DataBind.Bind("DT_01", "CertificadoOS");
                 this._oMatrix1.Columns.Item(iCountCol).TitleObject.Caption = "Certificado";
                 this._oMatrix1.Columns.Item(iCountCol).TitleObject.Sortable = false;
                 this._oMatrix1.Columns.Item(iCountCol).Width = 100;
@@ -315,7 +318,7 @@ namespace Chess.IT.Services.FormClass.userform
                 iCountCol++;
 
                 this._oMatrix1.Columns.Add('C' + iCountCol.ToString(), BoFormItemTypes.it_EDIT);
-                this._oMatrix1.Columns.Item(iCountCol).DataBind.Bind("DT_01", "DataCertificadoNFS");
+                this._oMatrix1.Columns.Item(iCountCol).DataBind.Bind("DT_01", "DataCertificadoOS");
                 this._oMatrix1.Columns.Item(iCountCol).TitleObject.Caption = "Data Certificado";
                 this._oMatrix1.Columns.Item(iCountCol).TitleObject.Sortable = false;
                 this._oMatrix1.Columns.Item(iCountCol).Width = 100;
@@ -365,7 +368,7 @@ namespace Chess.IT.Services.FormClass.userform
                 SAPbouiCOM.ChooseFromListCreationParams oCFLCreationParams = null;
                 oCFLCreationParams = ((SAPbouiCOM.ChooseFromListCreationParams)(oApplication.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_ChooseFromListCreationParams)));
 
-                oCFLCreationParams.MultiSelection = false;
+                oCFLCreationParams.MultiSelection = true;
                 oCFLCreationParams.ObjectType = "17";
                 oCFLCreationParams.UniqueID = "CLF_OS";
                 oCFL = oCFLs.Add(oCFLCreationParams);
@@ -373,20 +376,20 @@ namespace Chess.IT.Services.FormClass.userform
                 _EditTextOSDe.ChooseFromListUID = "CLF_OS";
                 _EditTextOSDe.ChooseFromListAlias = "DocEntry";
 
-                oCFLs = _oForm.ChooseFromLists;
+               // oCFLs = _oForm.ChooseFromLists;
 
-                oCFL = null;
-                oCFLCreationParams = null;
-                oCFLCreationParams = ((SAPbouiCOM.ChooseFromListCreationParams)(oApplication.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_ChooseFromListCreationParams)));
+               // oCFL = null;
+               // oCFLCreationParams = null;
+               // oCFLCreationParams = ((SAPbouiCOM.ChooseFromListCreationParams)(oApplication.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_ChooseFromListCreationParams)));
 
 
-                oCFLCreationParams.MultiSelection = false;
-                oCFLCreationParams.ObjectType = "17";
-                oCFLCreationParams.UniqueID = "CLF_OS1";
-                oCFL = oCFLs.Add(oCFLCreationParams);
+               // oCFLCreationParams.MultiSelection = false;
+               // oCFLCreationParams.ObjectType = "17";
+               // oCFLCreationParams.UniqueID = "CLF_OS1";
+               // oCFL = oCFLs.Add(oCFLCreationParams);
 
-                //_EditTextOSAte.ChooseFromListUID = "CLF_OS1";
-               // _EditTextOSAte.ChooseFromListAlias = "DocEntry";
+               // //_EditTextOSAte.ChooseFromListUID = "CLF_OS1";
+               //// _EditTextOSAte.ChooseFromListAlias = "DocEntry";
             }
             catch (Exception ex)
             {
@@ -407,7 +410,7 @@ namespace Chess.IT.Services.FormClass.userform
                 SAPbouiCOM.ChooseFromListCreationParams oCFLCreationParams = null;
                 oCFLCreationParams = ((SAPbouiCOM.ChooseFromListCreationParams)(oApplication.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_ChooseFromListCreationParams)));
 
-                oCFLCreationParams.MultiSelection = false;
+                oCFLCreationParams.MultiSelection = true;
                 oCFLCreationParams.ObjectType = "13";
                 oCFLCreationParams.UniqueID = "CLF_NFS";
                 oCFL = oCFLs.Add(oCFLCreationParams);
@@ -415,17 +418,17 @@ namespace Chess.IT.Services.FormClass.userform
                 _EditTextNFSDe.ChooseFromListUID = "CLF_NFS";
                 _EditTextNFSDe.ChooseFromListAlias = "DocEntry";
 
-                oCFLs = _oForm.ChooseFromLists;
+                //oCFLs = _oForm.ChooseFromLists;
 
-                oCFL = null;
-                oCFLCreationParams = null;
-                oCFLCreationParams = ((SAPbouiCOM.ChooseFromListCreationParams)(oApplication.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_ChooseFromListCreationParams)));
+                //oCFL = null;
+                //oCFLCreationParams = null;
+                //oCFLCreationParams = ((SAPbouiCOM.ChooseFromListCreationParams)(oApplication.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_ChooseFromListCreationParams)));
 
 
-                oCFLCreationParams.MultiSelection = false;
-                oCFLCreationParams.ObjectType = "13";
-                oCFLCreationParams.UniqueID = "CLF_NFS1";
-                oCFL = oCFLs.Add(oCFLCreationParams);
+                //oCFLCreationParams.MultiSelection = true;
+                //oCFLCreationParams.ObjectType = "13";
+                //oCFLCreationParams.UniqueID = "CLF_NFS1";
+                //oCFL = oCFLs.Add(oCFLCreationParams);
 
                 //_EditTextNFSAte.ChooseFromListUID = "CLF_NFS1";
                 //_EditTextNFSAte.ChooseFromListAlias = "DocEntry";
@@ -657,64 +660,66 @@ namespace Chess.IT.Services.FormClass.userform
                             {
                                 if (this.dtMatrix1.GetValue("SEL", i).ToString().Equals("Y"))
                                 {
-                                    SAPbobsCOM.Documents oInvoices = (SAPbobsCOM.Documents)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
-                                    //Log.InfoFormat((this.dtMatrix1.GetValue("NFS", i).ToString()));
+                                    oJBCKURICAService.AtualizaCertificadoOS("", this.dtMatrix1.GetValue("OS", i).ToString());
+                                    //SAPbobsCOM.Documents oInvoices = (SAPbobsCOM.Documents)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
+                                    ////Log.InfoFormat((this.dtMatrix1.GetValue("NFS", i).ToString()));
 
-                                    if (oInvoices.GetByKey(Convert.ToInt32(this.dtMatrix1.GetValue("NFS", i).ToString())))
-                                    {
-                                        if (oInvoices.UserFields.Fields.Item("U_JBC_CERTI").Value.Equals(this._EditTextCertificado.Value))
-                                        {
-                                            oInvoices.UserFields.Fields.Item("U_JBC_CERTI").Value = "";
-                                            oInvoices.UserFields.Fields.Item("U_JBC_DTCERTI").Value = date;
-                                            if (oInvoices.Update() == 0)
-                                            {
-                                                Log.InfoFormat("NFS {0} atualizado Certificado com Sucesso!!!", this.dtMatrix1.GetValue("DocNumNFS", i).ToString());
-                                            }
-                                            else
-                                            {
-                                                int lErrCode;
-                                                string sErrMsg;
-                                                oCompany.GetLastError(out lErrCode, out sErrMsg);
-                                                Log.Error(string.Format("Erro Ao Salvar NFS {0} atualizando Certificado. {1}, {2}"
-                                                    , this.dtMatrix1.GetValue("DocNumNFS", i).ToString()
-                                                    , lErrCode.ToString()
-                                                    , sErrMsg
-                                                    ));
-                                            }
-                                        }
+                                    //if (oInvoices.GetByKey(Convert.ToInt32(this.dtMatrix1.GetValue("NFS", i).ToString())))
+                                    //{
+                                    //    if (oInvoices.UserFields.Fields.Item("U_JBC_CERTI").Value.Equals(this._EditTextCertificado.Value))
+                                    //    {
+                                    //        oInvoices.UserFields.Fields.Item("U_JBC_CERTI").Value = "";
+                                    //        oInvoices.UserFields.Fields.Item("U_JBC_DTCERTI").Value = date;
+                                    //        if (oInvoices.Update() == 0)
+                                    //        {
+                                    //            Log.InfoFormat("NFS {0} atualizado Certificado com Sucesso!!!", this.dtMatrix1.GetValue("DocNumNFS", i).ToString());
+                                    //        }
+                                    //        else
+                                    //        {
+                                    //            int lErrCode;
+                                    //            string sErrMsg;
+                                    //            oCompany.GetLastError(out lErrCode, out sErrMsg);
+                                    //            Log.Error(string.Format("Erro Ao Salvar NFS {0} atualizando Certificado. {1}, {2}"
+                                    //                , this.dtMatrix1.GetValue("DocNumNFS", i).ToString()
+                                    //                , lErrCode.ToString()
+                                    //                , sErrMsg
+                                    //                ));
+                                    //        }
+                                    //    }
 
-                                    }
-                                    LimparObjeto(oInvoices);
+                                    //}
+                                    //LimparObjeto(oInvoices);
 
 
-                                    SAPbobsCOM.Documents ooOrders = (SAPbobsCOM.Documents)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
-                                    if (ooOrders.GetByKey(Convert.ToInt32(this.dtMatrix1.GetValue("OS", i).ToString())))
-                                    {
-                                        if (ooOrders.UserFields.Fields.Item("U_JBC_CERTI").Value.Equals(this._EditTextCertificado.Value))
-                                        {
-                                            ooOrders.UserFields.Fields.Item("U_JBC_CERTI").Value = "";
-                                            ooOrders.UserFields.Fields.Item("U_JBC_DTCERTI").Value = date;
-                                            if (ooOrders.Update() == 0)
-                                            {
-                                                Log.InfoFormat("OS {0} atualizado Certificado com Sucesso!!!", this.dtMatrix1.GetValue("OS", i).ToString());
-                                            }
-                                            else
-                                            {
-                                                int lErrCode;
-                                                string sErrMsg;
-                                                oCompany.GetLastError(out lErrCode, out sErrMsg);
-                                                Log.Error(string.Format("Erro Ao Salvar OS {0} atualizando Certificado. {1}, {2}"
-                                                    , this.dtMatrix1.GetValue("OS", i).ToString()
-                                                    , lErrCode.ToString()
-                                                    , sErrMsg
-                                                    ));
-                                            }
-                                        }
-                                    }
-                                    LimparObjeto(ooOrders);
+                                    //SAPbobsCOM.Documents ooOrders = (SAPbobsCOM.Documents)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                    //if (ooOrders.GetByKey(Convert.ToInt32(this.dtMatrix1.GetValue("OS", i).ToString())))
+                                    //{
+                                    //    if (ooOrders.UserFields.Fields.Item("U_JBC_CERTI").Value.Equals(this._EditTextCertificado.Value))
+                                    //    {
+                                    //        ooOrders.UserFields.Fields.Item("U_JBC_CERTI").Value = "";
+                                    //        ooOrders.UserFields.Fields.Item("U_JBC_DTCERTI").Value = date;
+                                    //        if (ooOrders.Update() == 0)
+                                    //        {
+                                    //            Log.InfoFormat("OS {0} atualizado Certificado com Sucesso!!!", this.dtMatrix1.GetValue("OS", i).ToString());
+                                    //        }
+                                    //        else
+                                    //        {
+                                    //            int lErrCode;
+                                    //            string sErrMsg;
+                                    //            oCompany.GetLastError(out lErrCode, out sErrMsg);
+                                    //            Log.Error(string.Format("Erro Ao Salvar OS {0} atualizando Certificado. {1}, {2}"
+                                    //                , this.dtMatrix1.GetValue("OS", i).ToString()
+                                    //                , lErrCode.ToString()
+                                    //                , sErrMsg
+                                    //                ));
+                                    //        }
+                                    //    }
+                                    //}
+                                    //LimparObjeto(ooOrders);
                                 }
                             }
                             Log.InfoFormat("{0}, Processo Finalizado!!!  ｡◕‿◕｡", oJBCKURICAService.UserName());
+                            Consultar();
                         }
                     }
                 }
@@ -761,62 +766,64 @@ namespace Chess.IT.Services.FormClass.userform
                         {
                             if (this.dtMatrix1.GetValue("SEL", i).ToString().Equals("Y"))
                             {
-                                SAPbobsCOM.Documents oInvoices = (SAPbobsCOM.Documents)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
-                                if (oInvoices.GetByKey(Convert.ToInt32(this.dtMatrix1.GetValue("NFS", i).ToString())))
-                                {
-                                    oInvoices.UserFields.Fields.Item("U_JBC_CERTI").Value = sCertificadoNovoNumero;
-                                    oInvoices.UserFields.Fields.Item("U_JBC_DTCERTI").Value = date;
-                                    if (oInvoices.Update() == 0)
-                                    {
-                                        Log.InfoFormat("NFS {0} atualizado Certificado com Sucesso!!!", this.dtMatrix1.GetValue("DocNumNFS", i).ToString());
-                                    }
-                                    else
-                                    {
-                                        int lErrCode;
-                                        string sErrMsg;
-                                        oCompany.GetLastError(out lErrCode, out sErrMsg);
-                                        Log.Error(string.Format("Erro Ao Salvar NFS {0} atualizando Certificado. {1}, {2}"
-                                            , this.dtMatrix1.GetValue("DocNumNFS", i).ToString()
-                                            , lErrCode.ToString()
-                                            , sErrMsg
-                                            ));
-                                        //if (oCompany.InTransaction)
-                                        //{
-                                        //    oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
-                                        //}
-                                        //break;
-                                    }
-                                }
-                                LimparObjeto(oInvoices);
+                                //SAPbobsCOM.Documents oInvoices = (SAPbobsCOM.Documents)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInvoices);
+                                //if (oInvoices.GetByKey(Convert.ToInt32(this.dtMatrix1.GetValue("NFS", i).ToString())))
+                                //{
+                                //    oInvoices.UserFields.Fields.Item("U_JBC_CERTI").Value = sCertificadoNovoNumero;
+                                //    oInvoices.UserFields.Fields.Item("U_JBC_DTCERTI").Value = date;
+                                //    if (oInvoices.Update() == 0)
+                                //    {
+                                //        Log.InfoFormat("NFS {0} atualizado Certificado com Sucesso!!!", this.dtMatrix1.GetValue("DocNumNFS", i).ToString());
+                                //    }
+                                //    else
+                                //    {
+                                //        int lErrCode;
+                                //        string sErrMsg;
+                                //        oCompany.GetLastError(out lErrCode, out sErrMsg);
+                                //        Log.Error(string.Format("Erro Ao Salvar NFS {0} atualizando Certificado. {1}, {2}"
+                                //            , this.dtMatrix1.GetValue("DocNumNFS", i).ToString()
+                                //            , lErrCode.ToString()
+                                //            , sErrMsg
+                                //            ));
+                                //        //if (oCompany.InTransaction)
+                                //        //{
+                                //        //    oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
+                                //        //}
+                                //        //break;
+                                //    }
+                                //}
+                                //LimparObjeto(oInvoices);
 
 
-                                SAPbobsCOM.Documents ooOrders = (SAPbobsCOM.Documents)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
-                                if (ooOrders.GetByKey(Convert.ToInt32(this.dtMatrix1.GetValue("OS", i).ToString())))
-                                {
-                                    ooOrders.UserFields.Fields.Item("U_JBC_CERTI").Value = sCertificadoNovoNumero;
-                                    ooOrders.UserFields.Fields.Item("U_JBC_DTCERTI").Value = date;
-                                    if (ooOrders.Update() == 0)
-                                    {
-                                        Log.InfoFormat("OS {0} atualizado Certificado com Sucesso!!!", this.dtMatrix1.GetValue("OS", i).ToString());
-                                    }
-                                    else
-                                    {
-                                        int lErrCode;
-                                        string sErrMsg;
-                                        oCompany.GetLastError(out lErrCode, out sErrMsg);
-                                        Log.Error(string.Format("Erro Ao Salvar OS {0} atualizando Certificado. {1}, {2}"
-                                            , this.dtMatrix1.GetValue("OS", i).ToString()
-                                            , lErrCode.ToString()
-                                            , sErrMsg
-                                            ));
-                                        //if (oCompany.InTransaction)
-                                        //{
-                                        //    oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
-                                        //}
-                                        //break;
-                                    }
-                                }
-                                LimparObjeto(ooOrders);
+                                //SAPbobsCOM.Documents ooOrders = (SAPbobsCOM.Documents)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oOrders);
+                                //if (ooOrders.GetByKey(Convert.ToInt32(this.dtMatrix1.GetValue("OS", i).ToString())))
+                                //{
+                                //    ooOrders.UserFields.Fields.Item("U_JBC_CERTI").Value = sCertificadoNovoNumero;
+                                //    ooOrders.UserFields.Fields.Item("U_JBC_DTCERTI").Value = date;
+                                //    if (ooOrders.Update() == 0)
+                                //    {
+                                //        Log.InfoFormat("OS {0} atualizado Certificado com Sucesso!!!", this.dtMatrix1.GetValue("OS", i).ToString());
+                                //    }
+                                //    else
+                                //    {
+                                //        int lErrCode;
+                                //        string sErrMsg;
+                                //        oCompany.GetLastError(out lErrCode, out sErrMsg);
+                                //        Log.Error(string.Format("Erro Ao Salvar OS {0} atualizando Certificado. {1}, {2}"
+                                //            , this.dtMatrix1.GetValue("OS", i).ToString()
+                                //            , lErrCode.ToString()
+                                //            , sErrMsg
+                                //            ));
+                                //        //if (oCompany.InTransaction)
+                                //        //{
+                                //        //    oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
+                                //        //}
+                                //        //break;
+                                //    }
+                                //}
+                                //LimparObjeto(ooOrders);
+
+                                oJBCKURICAService.AtualizaCertificadoOS(sCertificadoNovoNumero, this.dtMatrix1.GetValue("OS", i).ToString());
                             }
                         }
                         //if (oCompany.InTransaction)
@@ -824,6 +831,7 @@ namespace Chess.IT.Services.FormClass.userform
                         //    oCompany.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
                         //}
                         Log.InfoFormat("{0}, Processo Finalizado!!!  ｡◕‿◕｡", oJBCKURICAService.UserName());
+                        Consultar();
                     }
                 }
             }
@@ -865,14 +873,14 @@ namespace Chess.IT.Services.FormClass.userform
                 oCFL.SetConditions(oCons);
 
 
-                oCFL = oCFLs.Item("CLF_OS1");
-                oCFL.SetConditions(null);
-                oCons = oCFL.GetConditions();
-                oCon = oCons.Add();
-                oCon.Alias = "CardCode";
-                oCon.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
-                oCon.CondVal = sCardCode;
-                oCFL.SetConditions(oCons);
+                //oCFL = oCFLs.Item("CLF_OS1");
+                //oCFL.SetConditions(null);
+                //oCons = oCFL.GetConditions();
+                //oCon = oCons.Add();
+                //oCon.Alias = "CardCode";
+                //oCon.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
+                //oCon.CondVal = sCardCode;
+                //oCFL.SetConditions(oCons);
 
             }
             catch (Exception ex)
@@ -905,14 +913,14 @@ namespace Chess.IT.Services.FormClass.userform
                 oCFL.SetConditions(oCons);
 
 
-                oCFL = oCFLs.Item("CLF_NFS1");
-                oCFL.SetConditions(null);
-                oCons = oCFL.GetConditions();
-                oCon = oCons.Add();
-                oCon.Alias = "CardCode";
-                oCon.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
-                oCon.CondVal = sCardCode;
-                oCFL.SetConditions(oCons);
+                //oCFL = oCFLs.Item("CLF_NFS1");
+                //oCFL.SetConditions(null);
+                //oCons = oCFL.GetConditions();
+                //oCon = oCons.Add();
+                //oCon.Alias = "CardCode";
+                //oCon.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
+                //oCon.CondVal = sCardCode;
+                //oCFL.SetConditions(oCons);
 
             }
             catch (Exception ex)
@@ -1060,7 +1068,7 @@ namespace Chess.IT.Services.FormClass.userform
                 {
                     _oForm.DataSources.UserDataSources.Item("PNini").ValueEx = sCode;
                     TratarChooseFromListOS(sCode);
-                    TratarChooseFromListSFS(sCode);
+                    //TratarChooseFromListSFS(sCode);
                     //_oForm.DataSources.UserDataSources.Item("PNiniN").ValueEx = sName;
                 }
                 catch

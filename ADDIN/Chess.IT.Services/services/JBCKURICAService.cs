@@ -76,6 +76,18 @@ namespace Chess.IT.Services.services
             string i = "'" + dt.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) + "'";
             return i;
         }
+        public bool UserCancelaCertificado()
+        {
+            var sql = string.Format(this.GetSQL("UserCancelaCertificado.sql"), this.oCompany.UserName);
+            int iResult= B1DAO.ExecuteSqlForObject<int>(sql);
+            return iResult == 1;
+        }
 
+
+        public void AtualizaCertificadoOS(string pCertificado, string pDocEntry)
+        {
+            var sql = string.Format(this.GetSQL("AtualizaCertificadoOS.sql"), pCertificado, pDocEntry);
+            B1DAO.ExecuteStatement(sql);
+        }
     }
 }

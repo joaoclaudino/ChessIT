@@ -12,8 +12,9 @@ select
 	
 	,T0."DocEntry" NFS
 	,T0."DocNum" as "DocNumNFS"
-	,T0."U_JBC_CERTI" as "CertificadoNFS"
-	,T0."U_JBC_DTCERTI" as "DataCertificadoNFS"
+	,T0."Serial" as "NNF"
+	,T3."U_JBC_CERTI" as "CertificadoOS"
+	,T3."U_JBC_DTCERTI" as "DataCertificadoOS"
 	
 	
 	,T0."DocDate" DocDateNFS
@@ -56,7 +57,7 @@ where
 	
 		and
 		(
-			(T0."DocEntry" = {2})
+			(T0."Serial" = {2})
 			or
 			({2}=0 )
 		)

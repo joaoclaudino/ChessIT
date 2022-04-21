@@ -27,17 +27,17 @@ namespace Chess.IT.Services
         , InitMethod = "CheckInit"
         )]
 
-    //[ResourceBOM("Chess.IT.Services.resources.BOM.DESLOCAMENTO.xml", ResourceType.UserField)]
-    //[ResourceBOM("Chess.IT.Services.resources.BOM.MOTORISTA.xml", ResourceType.UserField)]
-    //[ResourceBOM("Chess.IT.Services.resources.BOM.OAT1.xml", ResourceType.UserField)]
-    //[ResourceBOM("Chess.IT.Services.resources.BOM.OOAT.xml", ResourceType.UserField)]
+    [ResourceBOM("Chess.IT.Services.resources.BOM.DESLOCAMENTO.xml", ResourceType.UserField)]
+    [ResourceBOM("Chess.IT.Services.resources.BOM.MOTORISTA.xml", ResourceType.UserField)]
+    [ResourceBOM("Chess.IT.Services.resources.BOM.OAT1.xml", ResourceType.UserField)]
+    [ResourceBOM("Chess.IT.Services.resources.BOM.OOAT.xml", ResourceType.UserField)]
     [ResourceBOM("Chess.IT.Services.resources.BOM.ORDR.xml", ResourceType.UserField)]
-    //[ResourceBOM("Chess.IT.Services.resources.BOM.RDR1.xml", ResourceType.UserField)]
-    //[ResourceBOM("Chess.IT.Services.resources.BOM.ROTA.xml", ResourceType.UserField)]
-    //[ResourceBOM("Chess.IT.Services.resources.BOM.VEICULOS.xml", ResourceType.UserField)]
-    ////[ResourceBOM("Chess.IT.Services.resources.BOM.UDO.xml", ResourceType.UDO)]
-    //[ResourceBOM("Chess.IT.Services.resources.BOM.tabelas.xml", ResourceType.UserTable)]
-    //[ResourceBOM("Chess.IT.Services.resources.BOM.UDT.xml", ResourceType.UserTable)]
+    [ResourceBOM("Chess.IT.Services.resources.BOM.RDR1.xml", ResourceType.UserField)]
+    [ResourceBOM("Chess.IT.Services.resources.BOM.ROTA.xml", ResourceType.UserField)]
+    [ResourceBOM("Chess.IT.Services.resources.BOM.VEICULOS.xml", ResourceType.UserField)]
+    //[ResourceBOM("Chess.IT.Services.resources.BOM.UDO.xml", ResourceType.UDO)]
+    [ResourceBOM("Chess.IT.Services.resources.BOM.tabelas.xml", ResourceType.UserTable)]
+    [ResourceBOM("Chess.IT.Services.resources.BOM.UDT.xml", ResourceType.UserTable)]
 
     [Menu(FatherUID = "CHESSIT", UniqueID = "JBCCD", String = "Certificado de Destinação", Type = SAPbouiCOM.BoMenuType.mt_STRING, Position = 1)]
     class Program

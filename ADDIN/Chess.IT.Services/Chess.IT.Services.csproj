@@ -171,5 +171,11 @@
   <ItemGroup>
     <EmbeddedResource Include="services\hana\CertificadoNovoNumero.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="services\hana\UserCancelaCertificado.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="services\hana\AtualizaCertificadoOS.sql" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

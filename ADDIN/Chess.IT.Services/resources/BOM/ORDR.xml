@@ -6,6 +6,37 @@
 		</AdmInfo>
 		<UserFieldsMD>
 			<row>
+				<Name>JBC_CERT_C</Name>
+				<Type>db_Alpha</Type>
+				<Size>1</Size>
+				<Description>Cancela Certificado</Description>
+				<SubType>st_None</SubType>
+				<TableName>OUSR</TableName>
+				<FieldID>7</FieldID>
+				<EditSize>1</EditSize>
+				<Mandatory>tNO</Mandatory>
+			</row>
+		</UserFieldsMD>
+		<ValidValuesMD>
+			<row>
+				<Value>Y</Value>
+				<Description>SIM</Description>
+			</row>
+			<row>
+				<Value>N</Value>
+				<Description>NÃO</Description>
+			</row>
+		</ValidValuesMD>
+	</BO>
+	
+	
+	<BO>
+		<AdmInfo>
+			<Object>152</Object>
+			<Version>2</Version>
+		</AdmInfo>
+		<UserFieldsMD>
+			<row>
 				<Name>JBC_DTCERTI</Name>
 				<Type>db_Date</Type>
 				<Size>8</Size>
