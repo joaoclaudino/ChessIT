@@ -194,7 +194,7 @@ namespace Chess.IT.Services.View
                                             Form.Items.Item("etClienteN").Top = 13;
 
  
-                                            string query = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"" from dummy";
+                                            string query = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"", cast('' as varchar(254)) as ""CodTransp"" from dummy";
 
                                             Form.DataSources.DataTables.Item("dtFiltro").ExecuteQuery(query);
 
@@ -239,7 +239,7 @@ namespace Chess.IT.Services.View
                                             Form.Items.Item("etCliente").Top = 13;
                                             Form.Items.Item("etClienteN").Top = 13;
 
-                                            string query = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"" from dummy";
+                                            string query = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"", cast('' as varchar(254)) as ""CodTransp"" from dummy";
 
                                             Form.DataSources.DataTables.Item("dtFiltro").ExecuteQuery(query);
 
@@ -1065,6 +1065,10 @@ namespace Chess.IT.Services.View
                                                 // throw;
                                             }
 
+                                        }
+                                        if (pVal.ItemUID.Equals("edTransp"))
+                                        {
+                                            Form.DataSources.DataTables.Item("dtFiltro").SetValue("CodTransp", 0, chooseFromListEvent.SelectedObjects.GetValue("CardCode", 0).ToString());
                                         }
                                     }
                                     else
@@ -1934,6 +1938,8 @@ namespace Chess.IT.Services.View
 
             string agrupamento = ((ComboBox)Form.Items.Item("cbAgrOS").Specific).Selected.Value;
 
+            string transportadora = ((EditText)Form.Items.Item("edTransp").Specific).String;
+
             ComboBox cbEndereco = ((ComboBox)Form.Items.Item("Item_8").Specific);
             string endereco = cbEndereco.Selected == null ? "0" : cbEndereco.Selected.Value;
 
@@ -1990,7 +1996,7 @@ namespace Chess.IT.Services.View
                                             and ('{14}' = '[Selecionar]' or '{14}' = ORDR.""U_RespFat"")
                                             and ('{15}'='0' or ""ShipToCode""='{15}')
                                             and ('{16}'='[Selecionar]' or ORDR.""U_Status""='{16}')
-
+                                            and ('{17}' = '' or '{17}' = ORDR.""U_CodTransp"")
 ",                                            
                                             selecionar, 
                                             cliente,
@@ -2008,7 +2014,8 @@ namespace Chess.IT.Services.View
                                             tipoOperacao,
                                             respFat,
                                             endereco,
-                                            statusOS
+                                            statusOS,
+                                            transportadora
                                             );
 
             //and ORDR.""U_Situacao"" IN(4, 10)
@@ -2947,7 +2954,7 @@ namespace Chess.IT.Services.View
                                                             inner join OITM on OITM.""ItemCode"" = RDR1.""ItemCode""    
                                                             left JOIN OOAT T2 ON RDR1.""AgrNo"" = T2.""AbsID""
                                                             where ORDR.""DocEntry"" = {0}
-                                                            and OITM.""ItmsGrpCod""=120
+                                                            and OITM.""ItmsGrpCod""in (120,102)
                                                             
                                                             ", docEntry, tipoFaturamento);
 
@@ -3371,7 +3378,7 @@ namespace Chess.IT.Services.View
 
                 ((Grid)Form.Items.Item("gridOS").Specific).DataTable.Clear();
 
-                string queryFiltro = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"" from dummy";
+                string queryFiltro = @"select cast('' as varchar(254)) as ""CodCliente"", cast('' as varchar(254)) as ""NomeCliente"", cast(null as date) as ""DataCtrIni"", cast(null as date) as ""DataCtrFim"", cast('' as varchar(254)) as ""NrContrato"", cast('' as varchar(254)) as ""ModeloCtr"", cast('' as varchar(254)) as ""CentroCusto"", cast('' as varchar(254)) as ""NrRota"", 0 as ""DiaColeta"", cast('' as varchar(254)) as ""Motorista"", cast('' as varchar(254)) as ""NomeMotorista"", cast('' as varchar(254)) as ""NrPlaca"", cast(null as date) as ""DataOSIni"", cast(null as date) as ""DataOSFim"", cast('' as varchar(254)) as ""NrOS"", cast('' as varchar(254)) as ""TpOper"", 0 as ""RespFatura"", cast('' as varchar(254)) as ""SitOS"", cast('' as varchar(254)) as ""StaOS"", cast('' as varchar(254)) as ""UsuResp"", cast('' as varchar(254)) as ""CodTransp"" from dummy";
 
                 Form.DataSources.DataTables.Item("dtFiltro").ExecuteQuery(queryFiltro);
             }
